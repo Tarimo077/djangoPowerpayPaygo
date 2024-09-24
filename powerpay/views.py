@@ -165,8 +165,8 @@ def linkAllDataAndKwh(request, devData, kwhData):
         
         for device in kwhData:
             if device['deviceID'] == serial_number:
-                matched_kwh = device['kwh']
-                break
+                matched_kwh += device['kwh']
+                
 
         sale['meals_cooked'] = meals_cooked
         sale['last_txtime'] = last_txtime
