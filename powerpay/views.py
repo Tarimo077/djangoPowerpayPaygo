@@ -449,58 +449,71 @@ def create_line_chart(df, x_column, y_column, title):
 def transactions_page(request):
     usr = request.user.username
     range_value = request.GET.get('range', 9999999)
+
+    # Fetch data based on user
     if usr == 'John-Maina':
         data = fetch_data_index("mpesarecordsscode", range_value)
     else:
         data = fetch_data_index("mpesarecords", range_value)
-    data = pd.DataFrame(data)
-    # Convert 'transtime' to datetime format
-    data['transtime'] = pd.to_datetime(data['transtime'], format='%Y%m%d%H%M%S')
 
-    # Sort the data by 'transtime' in descending order
-    data = data.sort_values(by='transtime', ascending=False)
+    # Convert data to a DataFrame
+    if data:  # Check if data is not empty
+        data = pd.DataFrame(data)
+        # Convert 'transtime' to datetime format
+        data['transtime'] = pd.to_datetime(data['transtime'], format='%Y%m%d%H%M%S')
+
+        # Sort the data by 'transtime' in descending order
+        data = data.sort_values(by='transtime', ascending=False)
+    else:
+        data = pd.DataFrame(columns=['name', 'ref', 'id', 'transtime', 'amount'])  # Empty DataFrame with expected columns
 
     # Handle search query
     query = request.GET.get('q')
-    if query:
+    if query and not data.empty:
         data = data[data.apply(lambda row: query.lower() in row['name'].lower() or
-                                            query.lower() in row['ref'].lower() or
-                                            query.lower() in row['id'].lower(), axis=1)]
-
+                                             query.lower() in row['ref'].lower() or
+                                             query.lower() in row['id'].lower(), axis=1)]
+    
     # Convert the DataFrame to a list of dictionaries
     transactions_list = data.to_dict(orient='records')
+
     # Implement pagination with 10 items per page
     paginator = Paginator(transactions_list, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # Line chart data
-    line_chart_data = data[['transtime', 'amount']].sort_values(by='transtime')
+    # Line chart data (only if there's data to plot)
+    line_chart = ''
+    if not data.empty:
+        line_chart_data = data[['transtime', 'amount']].sort_values(by='transtime')
 
-    # Plotting the line chart
-    fig_line = px.line(line_chart_data, x='transtime', y='amount', title='Amount Over Time', labels={'transtime': 'Transaction Time', 'amount': 'Amount'}, line_shape='spline')
-    fig_line.update_traces(line=dict(color="#0ead00"), hovertemplate='%{x}<br>Amount: %{y}', mode='lines+markers')
-    fig_line.update_traces(text=data['id'])  # Pass the transaction ID as text for hover template
-    fig_line.update_layout(
-        xaxis_title='Transaction Time',
-        yaxis_title='Amount',
-        showlegend=False,
-        autosize=True,
-        title_x = 0.5,
-        height=400,
-        #width=0.7 * 800,  # Assuming an 800px base width
-        margin=dict(l=20, r=20, t=40, b=20)
-    )
-    line_chart = pio.to_html(fig_line, full_html=False)
+        # Plotting the line chart
+        fig_line = px.line(line_chart_data, x='transtime', y='amount', title='Amount Over Time',
+                           labels={'transtime': 'Transaction Time', 'amount': 'Amount'}, line_shape='spline')
+        fig_line.update_traces(line=dict(color="#0ead00"), hovertemplate='%{x}<br>Amount: %{y}', mode='lines+markers')
+        fig_line.update_traces(text=data['id'])  # Pass the transaction ID as text for hover template
+        fig_line.update_layout(
+            xaxis_title='Transaction Time',
+            yaxis_title='Amount',
+            showlegend=False,
+            autosize=True,
+            title_x=0.5,
+            height=400,
+            margin=dict(l=20, r=20, t=40, b=20)
+        )
+        line_chart = pio.to_html(fig_line, full_html=False)
 
+    # Prepare the context with the relevant data
     context = {
         'transactions_table': page_obj,  # Pass the page object to the template
         'query': query,  # Pass the query to the template to preserve it in the search box
-        'line_chart': line_chart,  # Pass the line chart HTML to the template
-        'selected_range': str(range_value)
+        'line_chart': line_chart,  # Pass the line chart HTML to the template (could be empty)
+        'selected_range': str(range_value),
+        'is_data_empty': data.empty  # Pass whether data is empty to the template
     }
 
     return render(request, 'transactions.html', context)
+
 
 def fetch_data_with_params(endpoint, dev, range_value):
     response = requests.get(BASE_URL + endpoint +"?device="+dev+"&range=" + str(range_value), auth=AUTH)
