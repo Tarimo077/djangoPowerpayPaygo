@@ -448,10 +448,11 @@ def create_line_chart(df, x_column, y_column, title):
 @login_required
 def transactions_page(request):
     usr = request.user.username
+    range_value = request.GET.get('range', 9999999)
     if usr == 'John-Maina':
-        data = fetch_data("mpesarecordsscode")
+        data = fetch_data_index("mpesarecordsscode", range_value)
     else:
-        data = fetch_data("mpesarecords")
+        data = fetch_data_index("mpesarecords", range_value)
     data = pd.DataFrame(data)
     # Convert 'transtime' to datetime format
     data['transtime'] = pd.to_datetime(data['transtime'], format='%Y%m%d%H%M%S')
@@ -496,6 +497,7 @@ def transactions_page(request):
         'transactions_table': page_obj,  # Pass the page object to the template
         'query': query,  # Pass the query to the template to preserve it in the search box
         'line_chart': line_chart,  # Pass the line chart HTML to the template
+        'selected_range': str(range_value)
     }
 
     return render(request, 'transactions.html', context)
@@ -646,7 +648,6 @@ def payment_waiting(request, ref):
 @login_required
 def device_data_page(request, device_id):
     range_value = request.GET.get('range', 9999999)
-    
     # Fetch data based on device_id and range_value
     data = fetch_data_with_params("deviceDataDjangoo", device_id, range_value)
     runtime = data['runtime']
@@ -779,13 +780,13 @@ def add_device(request):
     return render(request, 'add_device.html')
 
 #################################DOWNLOAD TRANSACTIONS EXCEL##############################################
-def export_transactions_excel(request):
+def export_transactions_excel(request, range):
     # Fetch data based on the user
     usr = request.user.username
     if usr == 'John-Maina':
-        data = fetch_data("mpesarecordsscode")
+        data = fetch_data_index("mpesarecordsscode", range)
     else:
-        data = fetch_data("mpesarecords")
+        data = fetch_data_index("mpesarecords", range)
 
     # Convert the data to a DataFrame
     df = pd.DataFrame(data)
@@ -811,11 +812,9 @@ def export_transactions_excel(request):
     return response
 
 ###############################DOWNLOAD DEVICE DATA#######################################################
-def export_device_data(request, device_id):
-    range_value = request.GET.get('range', 9999999)
-    
+def export_device_data(request, device_id, range):
     # Fetch data based on device_id and range_value
-    data = fetch_data_with_params("deviceDataDjangoo", device_id, range_value)
+    data = fetch_data_with_params("deviceDataDjangoo", device_id, range)
     meals_with_durations = data['mealsWithDurations'][::-1]
     for x in meals_with_durations:
         x['mealDuration'] = round(x['mealDuration']/60)
@@ -842,8 +841,6 @@ def export_device_data(request, device_id):
     df.to_excel(response, index=False, engine='openpyxl')
 
     return response
-
-
 
 #######################AI MIGAA METER DOWNLOAD####################################################
 def export_meter_data(request):
