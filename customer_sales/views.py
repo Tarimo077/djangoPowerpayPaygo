@@ -299,7 +299,8 @@ def sale_detail_paygo(request, id):
     # Convert transtime and apply mappings
     for transaction in sale_data['sale']['transactions']:
         transaction['transtime'] = datetime.strptime(str(transaction['transtime']), "%Y%m%d%H%M%S")
-
+        
+    sale_data['sale']['transactions'].sort(key=lambda x: x['transtime'], reverse=True)
     # Map product type, purchase mode, and type of use to readable values
     sale_data['sale']['product_type'] = PRODUCT_TYPE_MAP.get(sale_data['sale']['product_type'], 'Unknown')
     sale_data['sale']['purchase_mode'] = PURCHASE_MODE_MAP.get(sale_data['sale']['purchase_mode'], 'Unknown')
