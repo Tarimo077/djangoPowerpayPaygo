@@ -14,6 +14,7 @@ urlpatterns = [
     path('sales/<int:pk>/edit/', views.sale_edit, name='sale_edit'),
     path('sales/<int:pk>/delete/', views.sale_delete, name='sale_delete'),
     path('paygo_sales/', views.paygo_sales, name='paygo_sales'),
+    path('paygo_sales/detail/<str:id>/', views.sale_detail_paygo, name='paygo_sale_detail'),
     path('paygo_sales_non_metered/', views.paygo_sales_non_metered, name='paygo_sales_non_metered'),
     path('export/customers/', views.export_customer_data, name='export_customers'),
     path('export/sales/', views.export_sales_data, name='export_sales'),

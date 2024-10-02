@@ -8,10 +8,30 @@ import requests
 from requests.auth import HTTPBasicAuth
 import pandas as pd
 from django.http import HttpResponse
+from datetime import datetime
 
 # Constants
 BASE_URL = "https://appliapay.com/"
 AUTH = HTTPBasicAuth('admin', '123Give!@#')
+
+PRODUCT_TYPE_MAP = {
+    'EPC': 'Electric pressure cooker',
+    'IC': 'Induction cooker',
+    'O': 'Other',
+}
+
+PURCHASE_MODE_MAP = {
+    'C': 'Cash',
+    'DA': 'Deposit Account',
+    'P': 'PAYGO',
+}
+
+TYPE_OF_USE_MAP = {
+    'Domestic': 'Domestic',
+    'Business': 'Business',
+    'Other': 'Other',
+}
+
 
 
 # Existing customer views...
@@ -214,6 +234,11 @@ def fetch_data(endpoint):
     response = requests.get(BASE_URL + endpoint, auth=AUTH)
     response.raise_for_status()
     return response.json()
+
+def fetch_data_index(endpoint, id):
+    response = requests.get(BASE_URL + endpoint+"?id="+str(id), auth=AUTH)
+    response.raise_for_status()
+    return response.json()
 #######PAYGO
 def paygo_sales(request):
     sort_field = request.GET.get('sort', 'product_serial_number')
@@ -266,6 +291,25 @@ def paygo_sales(request):
         'query': query,
     }
     return render(request, 'customer_sales/paygo_sales.html', context)
+
+def sale_detail_paygo(request, id):
+    sale_data = fetch_data_index('paygoSaleDetail', id)
+    sale_data['sale']['release_date'] = datetime.strptime(sale_data['sale']['release_date'], "%Y-%m-%dT%H:%M:%S.%fZ")
+    sale_data['sale']['registration_date'] = datetime.strptime(sale_data['sale']['registration_date'], "%Y-%m-%dT%H:%M:%S.%fZ")
+    # Convert transtime and apply mappings
+    for transaction in sale_data['sale']['transactions']:
+        transaction['transtime'] = datetime.strptime(str(transaction['transtime']), "%Y%m%d%H%M%S")
+
+    # Map product type, purchase mode, and type of use to readable values
+    sale_data['sale']['product_type'] = PRODUCT_TYPE_MAP.get(sale_data['sale']['product_type'], 'Unknown')
+    sale_data['sale']['purchase_mode'] = PURCHASE_MODE_MAP.get(sale_data['sale']['purchase_mode'], 'Unknown')
+    sale_data['sale']['type_of_use'] = TYPE_OF_USE_MAP.get(sale_data['sale']['type_of_use'], 'Unknown')
+
+    return render(request, 'customer_sales/sale_detail_paygo.html', {
+        'sale': sale_data['sale'],
+        'paymentStatus': sale_data['paymentStatus'],
+    })
+
 
 def paygo_sales_non_metered(request):
     sort_field = request.GET.get('sort', 'product_serial_number')

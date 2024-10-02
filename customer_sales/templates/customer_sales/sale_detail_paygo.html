@@ -1,0 +1,82 @@
+{% extends 'layout.html' %}
+
+{% block title %}Powerpay Africa: Paygo-Sale Details{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Paygo Sale Details</h2>
+    <p><strong>Product Name:</strong> {{ sale.product_name }}</p>
+    <p><strong>Product Model:</strong> {{ sale.product_model }}</p>
+    <p><strong>Product Serial Number:</strong> {{ sale.product_serial_number }} <form method="get" action="{% url 'device_data_page' device_id=sale.product_serial_number %}">
+        <button type="submit" class="device_data_btn"> {{ sale.product_serial_number }} data</button>
+    </form></p>
+    <p><strong>Registration Date:</strong> {{ sale.registration_date|date:"d M Y " }}</p>
+    <p><strong>Release Date:</strong> {{ sale.release_date|date:"d M Y " }}</p>
+    <p><strong>Product Type:</strong> {{ sale.product_type }}</p>
+    <p><strong>Purchase Mode:</strong> {{ sale.purchase_mode }}</p>
+    <p><form method="get" action="{% url 'customer_detail' pk=sale.customer_id %}">
+        <button type="submit" class="device_data_btn"> See Customer data</button>
+    </form></p>
+    <p><strong>Sales Rep:</strong> {{ sale.sales_rep }}</p>
+    <p><strong>Metered:</strong> {% if sale.metered %}Yes{% else %}No{% endif %}</p>
+    <p><strong>Type of Use:</strong> {{ sale.type_of_use }}</p>
+    <p><strong>Specific Economic Activity:</strong> {{ sale.specific_economic_activity }}</p>
+    <p><strong>Location of Use:</strong> {{ sale.location_of_use }}</p>
+    <p><strong>Paygo Status:</strong> <span class="dot" style="background-color: 
+        {% if paymentStatus.payment_status == 'fully-paid' %}
+            blue
+        {% elif paymentStatus.payment_status == 'on-time' and paymentStatus.days > 7 %}
+            green
+        {% elif paymentStatus.payment_status == 'on-time' and paymentStatus.days <= 7 %}
+            orange
+        {% elif paymentStatus.payment_status == 'overdue' %}
+            red
+        {% endif %}
+    "></span> {{paymentStatus.payment_status}}</p>
+    <p><strong>Total Paid:</strong> {{paymentStatus.totalPaid}}</p>
+    <p><strong>Balance:</strong> {{paymentStatus.balance}}</p>
+    <p><strong>Paygo Balance:</strong> {{paymentStatus.paygoBalance}}</p>
+    <p><strong>Schedule:</strong> {% if paymentStatus.payment_status == 'overdue' %}
+        {{ paymentStatus.days }} {% if paymentStatus.days == 1 %}day{% else %}days{% endif %} behind payment
+    {% elif paymentStatus.payment_status == 'on-time' %}
+        {{ paymentStatus.days }} {% if paymentStatus.days == 1 %}day{% else %}days{% endif %} to next payment
+    {% else %}
+        N/A
+    {% endif %} </p>
+</div>
+<h2 style="text-align:center;">Payments for {{sale.product_serial_number}}</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th class="table_headers">Transactor Name</th>
+            <th class="table_headers">Account Reference</th>
+            <th class="table_headers">Transaction ID</th>
+            <th class="table_headers">Amount</th>
+            <th class="table_headers">Transaction Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in sale.transactions %}
+        <tr>
+            <td class="table_content">{{ row.name }}</td>
+            <td class="table_content">{{ row.ref }}</td>
+            <td class="table_content">{{ row.id }}</td>
+            <td class="table_content">{{ row.amount }}</td>
+            <td class="table_content">{{ row.transtime|date:"j M Y h:i:s A" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p><form method="get" action="{% url 'paygo_sales' %}">
+    <button type="submit" class="device_data_btn">⬅ Back to Paygo List</button>
+</form></p>
+<style>
+    .dot {
+        height: 20px;
+        width: 20px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 4px;
+    }
+</style>
+{% endblock %}
