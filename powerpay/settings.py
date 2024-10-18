@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-mt66+yy2=f5_vrb-k$t!+%79ij(86dbqb^6du&5z73ck0++-*e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['appliatrix.com']
 
 
 # Application definition
@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'customer_sales'
+    'customer_sales',
+    'channels'
 ]
 
 MIDDLEWARE = [
@@ -69,6 +70,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'powerpay.wsgi.application'
+ASGI_APPLICATION = 'powerpay.asgi.application'
+
 
 
 # Database
@@ -152,6 +155,19 @@ SESSION_COOKIE_SECURE = False  # Ensure this is False for local development
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_AGE = 1209600  # 2 weeks
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# settings.py
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
+
+
 
 
 

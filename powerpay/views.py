@@ -53,6 +53,9 @@ def login_page(request):
             messages.error(request, 'Invalid username or password.')
     return render(request, 'login.html')
 
+def live_page(request):
+    return render(request, 'live.html')
+
 def logout_page(request):
     logout(request)
     return redirect('login')
