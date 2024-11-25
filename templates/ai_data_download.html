@@ -1,0 +1,26 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Powerpay Africa: Dataset Downloads
+{% endblock %}
+
+{% block content %}
+    <h2>Download ML Dataset</h2>
+    <div style="margin-left:30%;">
+        <label><strong>Choose Dataset: </strong></label> <select name="range" id="rangeDropdown" class="dropdown" style="margin-left:10px;">
+            {% for set in dataset %}
+                <option value={{ set.name }}> {{set.name}} </option>
+            {% endfor %}
+        </select>
+        <div style="margin-top:40px; margin-left:100px;">
+            <a class="add-device-btn" id='btn_download'>Download Dataset</a>
+        </div>
+    </div>
+    <script>
+        document.getElementById('btn_download').addEventListener('click', function() {
+            var selectedMeasurement = document.getElementById('rangeDropdown').value;
+            window.location.href = '/export/' + selectedMeasurement;
+        });
+    </script>
+
+{% endblock %}

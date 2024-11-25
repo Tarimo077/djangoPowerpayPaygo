@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% block title %}
+            Powerpay Africa
+        {% endblock %}
+    </title>
+    <!-- Include jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- Include jQuery UI (Datepicker) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <!-- Optional: Customize Datepicker theme -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/base/jquery-ui.min.css">
+    <link rel="icon" href="{% static 'css/favicon.ico' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3); /* Light border */
+            border-top: 4px solid #0ead00; /* Primary color */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none; /* Initially hidden */
+            z-index: 9999; /* Ensure it is on top of other elements */
+        }
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        .greeting-bar {
+            background-color: #0ead00;
+            color: white;
+            padding: 5px;
+            text-align: right;
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            z-index: 1000;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .sidebar {
+            /* Sidebar styles here */
+        }
+        .justbody {
+            /* Body styles here */
+        }
+
+        /* New dropdown class */
+        .sales-dropdown {
+            position: relative;
+            display: inline-block;
+            align-items: center;
+            margin-left: 15px;
+        }
+
+        .sales-dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .sales-dropdown:hover .sales-dropdown-content {
+            display: block;
+        }
+
+        .sales-dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .sales-dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <div class="greeting-bar" id="greeting-bar"></div>
+    <div class="sidebar">
+        <h1>PowerPay Africa</h1>
+        <a href="{% url 'home_page' %}"><i class="fa fa-home" aria-hidden="true" style="margin-right:5px;"></i> Home</a>
+        <a href="{% url 'devices_page' %}"><i class="fa fa-cogs" aria-hidden="true" style="margin-right:5px;"></i> Devices</a>
+        {% if user.first_name != 'Jimmy'%}
+        <a href="{% url 'customers_list' %}"><i class="fa fa-users" aria-hidden="true" style="margin-right:5px;"></i> Customers</a>
+        <div class="sales-dropdown">
+            <a href="{% url 'sales_list' %}"><i class="fa fa-shopping-cart" aria-hidden="true" style="margin-right:5px;"></i> Sales</a>
+            <div class="sales-dropdown-content">
+                <a href="{% url 'sales_list' %}">All Sales</a>
+                {% if user.first_name != 'Welight'%}
+                <a href="{% url 'paygo_sales' %}">PayGo Sales(Metered)</a>
+                <a href="{% url 'paygo_sales_non_metered' %}">PayGo Sales(Non-Metered)</a>
+                {% endif %}
+            </div>
+        </div>
+        {% if user.first_name != 'Welight' or user.first_name != 'Jimmy' %}
+        <a href="{% url 'transactions_page' %}"><i class="fa fa-exchange" aria-hidden="true" style="margin-right:5px;"></i> Transactions</a>
+        {% endif %}
+        {% endif %}
+        <a href="https://powerpayafrica.com/new-ticket/" target="_blank" rel="noopener noreferrer"><i class="fa fa-ticket" aria-hidden="true" style="margin-right:5px;"></i> Support</a>
+        {% if user.first_name == 'Sophia' or user.first_name == 'Jeff'%}
+            <a href="{% url 'export_meter_data' %}"><i class="fa fa-download" aria-hidden="true" style="margin-right:5px;"></i> Migaa Meter Data </a>
+            <a href="{% url 'export_ml_data' %}"><i class="fa fa-download" aria-hidden="true" style="margin-right:5px;"></i> ML Dataset Downloads</a>
+        {% endif %}
+        {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}"><i class="fa fa-sign-out" aria-hidden="true" style="margin-right:5px;"></i> Logout</a>
+        {% else %}
+            <a href="{% url 'login' %}"><i class="fa fa-sign-in" aria-hidden="true" style="margin-right:5px;"></i> Login</a>
+        {% endif %}
+        <h5 class="sticky"><i class="fa fa-copyright" aria-hidden="true" style="margin-right:5px;"></i> 2023 Powerpay Africa. All Rights Reserved </h5>
+    </div>
+    <main class="justbody">
+        {% block content %}
+        {% endblock %}
+    </main>
+    <div class="spinner" id="spinner"></div> <!-- Spinner element -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const spinner = document.getElementById('spinner');
+            spinner.style.display = 'none'; // Hide spinner initially
+
+            // Function to show the spinner
+            function showSpinner() {
+                spinner.style.display = 'block';
+            }
+
+            // Function to hide the spinner
+            function hideSpinner() {
+                spinner.style.display = 'none';
+            }
+
+            // Show spinner on form submissions
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', () => {
+                    showSpinner();
+                });
+            });
+
+            // Hide spinner after page load
+            window.addEventListener('load', hideSpinner);
+
+            // Function to format the time
+            function formatTime(date) {
+                let hours = date.getHours();
+                //console.log("Original hours:", hours);
+                let minutes = date.getMinutes();
+                let seconds = date.getSeconds();
+                let ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours===0 ? 12 : hours; // the hour '0' should be '12'
+                minutes = minutes < 10 ? '0' + minutes : minutes;
+                seconds = seconds < 10 ? '0' + seconds : seconds;
+                let strTime = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
+                return strTime;
+            }
+
+            // Function to update the greeting message
+            function updateGreeting() {
+                const now = new Date();
+                const hours = now.getHours();
+                let greeting;
+
+                if (hours < 12) {
+                    greeting = "👋 Good Morning";
+                } else if (hours < 18) {
+                    greeting = "👋 Good Afternoon";
+                } else {
+                    greeting = "👋 Good Evening";
+                }
+
+                // Assuming you have a variable `username` in your template context
+                const username = "{{ user.first_name }}";
+                const time = formatTime(now);
+                document.getElementById('greeting-bar').innerText = `⌚ ${time} | ${greeting}, ${username}`;
+            }
+
+            // Call the updateGreeting function initially
+            updateGreeting();
+            
+            // Update the greeting every second
+            setInterval(updateGreeting, 1000);
+        });
+    </script>
+</body>
+</html>

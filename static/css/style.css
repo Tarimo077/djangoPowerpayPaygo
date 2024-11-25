@@ -1,0 +1,337 @@
+@import url('https://fonts.googleapis.com/css?family=Rubik&display=swap');
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Rubik', sans-serif;
+}
+
+body {
+    display: flex;
+    height: 100vh;
+    overflow: hidden; /* Prevent body from having a scrollbar */
+}
+
+.sidebar {
+    width: 20%;
+    background: #0ead00;
+    padding-top: 10px;
+    max-width: 250px;
+    min-width: 165px;
+    height: 100vh; /* Full height */
+    overflow: hidden; /* Prevent sidebar overflow */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Align children to take full height */
+    margin-top: 10px;
+}
+
+.sidebar h1 {
+    color: #fff;
+    text-align: center;
+    padding-bottom: 0px;
+    font-size: 32px;
+}
+
+.sidebar a {
+    display: block;
+    padding: 10px 20px;
+    color: #fff;
+    text-decoration: none;
+    text-align: center;
+    position: relative; /* Add relative positioning */
+    margin-bottom: 10px; /* Add margin between links */
+}
+
+.sidebar a:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 0;
+    height: 2px; /* Add height for the border */
+    background-color: #fff; /* Set border color */
+}
+
+.sidebar a:hover {
+    color: #ff9500;
+    margin-left: 25px;
+    transition: 0.5s;
+}
+
+.sidebar h5 {
+    background-color: #0ead00;
+    text-align: center;
+    color: #fff;
+    font-size: 10px;
+    padding: 5px; /* Ensure padding for sticky footer */
+}
+
+.justbody {
+    width: calc(100% - 40px); /* Full width minus padding */
+    padding: 20px 10px; /* Consistent padding on sides */
+    overflow-y: auto; /* Enable vertical scrolling */
+    height: 100vh; /* Full viewport height */
+    box-sizing: border-box; /* Include padding in width */
+    padding-top: 30px;
+    overflow-x: auto; /* Prevent horizontal overflow */
+}
+
+.pie {
+    margin-top: 5%;
+    display: flex;
+    justify-content: space-between; /* Evenly space charts */
+    width: 100%;
+    padding: 0;
+}
+
+.pie-chart, .meals-pie {
+    flex: 1; /* Equal width for both charts */
+    margin: 0 0px; /* Equal spacing on sides */
+    min-width: 0; /* Prevent overflow */
+    box-sizing: border-box;
+    position: relative;
+    height: 400px; /* Fixed height to ensure consistency */
+}
+
+.charts {
+    margin-top: 3%;
+    width: 100%;
+    align-items: center;
+}
+
+
+
+.table {
+    width: 100%;
+    margin-bottom: 20px;
+    border-collapse: collapse;
+    border-radius: 15px;
+}
+
+.table_headers {
+    background-color: #0ead00;
+    text-align: center;
+    color: #fff;
+    border: 2px solid #000;
+    padding: 20px;
+}
+
+.table_content {
+    text-align: center;
+    border: 2px solid #000;
+    padding: 15px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+}
+
+.step-links {
+    display: flex;
+    gap: 10px;
+}
+
+.step-links a {
+    text-decoration: none;
+    color: #0ead00;
+    font-weight: bold;
+}
+
+.step-links span.current {
+    font-weight: bold;
+}
+
+.container {
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+form {
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+form input[type="text"] {
+    padding: 5px;
+    font-size: 14px;
+}
+
+form button {
+    padding: 5px 10px;
+    font-size: 14px;
+    background-color: #0ead00;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #0c9c00;
+}
+
+/* Add this to your existing style.css */
+
+.search-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+.search-container form {
+    display: flex;
+    align-items: center;
+}
+
+.search-container input[type="text"] {
+    margin-right: 10px;
+}
+
+.clear-search {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #ff9500;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    margin-left: 10px;
+}
+
+.clear-search:hover {
+    background-color: #e68a00;
+}
+
+.sticky {
+    background-color: #ff9500;
+    text-align: center;
+    color: #fff;
+    width: 100%;
+    font-size: 11px;
+    padding: 5px 0;
+}
+
+.activate_btn {
+    padding: 10px;
+    font-size: 14px;
+    background-color: #0ead00;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+}
+
+.deactivate_btn {
+    padding: 10px;
+    font-size: 14px;
+    background-color: #ff9500;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+}
+
+.activate_btn:hover {
+    background-color: #0c9c00;
+}
+
+.deactivate_btn:hover {
+    background-color: #e68a00;
+}
+
+.device_data_btn {
+    background-color: #0ead00;
+    color: #fff;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+}
+
+.device_data_btn:hover {
+    background-color: #ff9500;
+}
+
+/* Tabs styles */
+.tabs {
+   display: flex;
+   justify-content: center;
+   margin-bottom: 20px;
+   margin-top: 10px;
+   width: 100%;
+}
+
+.tablinks {
+   background-color: #0ead00;
+   color: white;
+   padding: 10px 20px;
+   border: none;
+   cursor: pointer;
+   font-size: 16px;
+   transition: background-color 0.3s;
+   margin: 0 5px;
+   width: 100%;
+}
+
+.tablinks:hover {
+   background-color: #0c9c00;
+}
+
+.tablinks.active {
+   background-color: #ff9500;
+}
+
+.tabcontent {
+   display: none;
+   animation: fadeEffect 1s; /* Animation to fade in tab content */
+   width: 100%;
+   overflow-x: hidden;
+}
+
+.data-labels {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 20px; /* Add some space below the labels */
+    border: 2px #ff9500;
+    border-radius: 10px;
+}
+
+.labelArea {
+    background-color: #0ead00;
+    color: #fff;
+    border-radius: 10px;
+    padding: 10px 20px; /* Add padding for better spacing inside the labels */
+    text-align: center;
+    flex: 1; /* Make each label take an equal amount of space */
+    margin: 0 10px; /* Add space between the labels */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+.add-device-btn {
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #0ead00;
+    color: #fff;
+    text-align: center;
+}
+.add-device-btn:hover {
+    background-color: #e68a00; 
+}
+
+.dropdown {
+    border-radius:8px;
+    border:3px solid #0ead00;
+}
+
+
+@keyframes fadeEffect {
+   from {opacity: 0;}
+   to {opacity: 1;}
+}

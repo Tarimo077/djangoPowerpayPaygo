@@ -1,0 +1,359 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Powerpay Africa: Home
+{% endblock %}
+
+{% block content %}
+    <!-- Modal structure -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p id="modalMessage"></p>
+        </div>
+    </div>
+
+    <!-- Django Messages Modal -->
+    {% if messages %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var modal = document.getElementById("messageModal");
+                var span = document.getElementsByClassName("close")[0];
+                var message = "";
+
+                {% for message in messages %}
+                    message += "{{ message }}<br>";
+                {% endfor %}
+
+                document.getElementById("modalMessage").innerHTML = message;
+                modal.style.display = "block";
+
+                span.onclick = function() {
+                    modal.style.display = "none";
+                }
+
+                window.onclick = function(event) {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                    }
+                }
+            });
+        </script>
+    {% endif %}
+
+    <div class="tabs">
+        <button class="tablinks" onclick="openTab(event, 'energy-summary')" id="defaultOpen">Energy Summary <i class="fa fa-bolt" aria-hidden="true" style="margin-left:5px;"></i></button>
+        <button class="tablinks" onclick="openTab(event, 'cooking-summary')">Cooking Summary <i class="fa fa-cutlery" aria-hidden="true" style="margin-left:5px;"></i></button>
+        <button class="tablinks" onclick="openTab(event, 'emissions-summary')">Emissions Summary <i class="fa fa-industry" aria-hidden="true" style="margin-left:5px;"></i></button>
+        {% if user.first_name != 'Jimmy' %}
+        <button class="tablinks" onclick="openTab(event, 'customer-summary')">Customer Summary <i class="fa fa-users" aria-hidden="true" style="margin-left:5px;"></i></button>
+        {% endif %}
+    </div>
+
+    <div id="energy-summary" class="tabcontent">
+        <h1 style="text-align:center">Energy Dashboard</h1>
+        <div style="padding: 10px; margin-bottom:10px">
+            <label>Choose time range: </label>
+            <select name="range" id="rangeDropdown" class="dropdown">
+                <option value="9999999" {% if selected_range == '9999999' %}selected{% endif %}>All Time</option>
+                <option value="5" {% if selected_range == '5' %}selected{% endif %}>5 min</option>
+                <option value="30" {% if selected_range == '30' %}selected{% endif %}>30 min</option>
+                <option value="60" {% if selected_range == '60' %}selected{% endif %}>1 hr</option>
+                <option value="180" {% if selected_range == '180' %}selected{% endif %}>3 hrs</option>
+                <option value="720" {% if selected_range == '720' %}selected{% endif %}>12 hrs</option>
+                <option value="1440" {% if selected_range == '1440' %}selected{% endif %}>24 hrs</option>
+                <option value="4320" {% if selected_range == '4320' %}selected{% endif %}>3 days</option>
+                <option value="10080" {% if selected_range == '10080' %}selected{% endif %}>7 days</option>
+                <option value="20160" {% if selected_range == '20160' %}selected{% endif %}>2 weeks</option>
+                <option value="43200" {% if selected_range == '43200' %}selected{% endif %}>1 month</option>
+                <option value="129600" {% if selected_range == '129600' %}selected{% endif %}>3 months</option>
+                <option value="259200" {% if selected_range == '259200' %}selected{% endif %}>6 months</option>
+                <option value="525600" {% if selected_range == '525600' %}selected{% endif %}>1 year</option>
+                <option value="1576800" {% if selected_range == '1576800' %}selected{% endif %}>3 years</option>
+            </select>
+            </div>
+        <div class="data-labels">
+            <label class="labelArea"><i class="fa fa-bolt" aria-hidden="true" style="margin-right:5px;"></i><br>Total Energy:<br>{{ sumKwh|floatformat:2 }} kWh</label>
+            <label class="labelArea"><i class="fa fa-usd" aria-hidden="true" style="margin-right:5px;"></i><br>Total Energy Cost:<br>KSHS. {{ sumEnergyCost|floatformat:1 }}</label>
+        </div>
+        <div class="pie">
+            <div class="meals-pie">{{ pie_chart|safe }}</div>
+            <div class="pie-chart">{{ meals_kwh_html |safe }}</div>
+        </div>
+        <div> <p> {{runtime}}</p>
+        </div>
+        <div class="charts">
+            <div class="line-chart">{{ scatter_chart|safe }}</div>
+        </div> 
+    </div>
+
+    <div id="cooking-summary" class="tabcontent">
+        <h1 style="text-align:center">Cooking Dashboard</h1>
+        <div style="padding: 10px; margin-bottom:10px">
+            <label>Choose time range: </label>
+            <select name="range1" id="rangeDropdown1" class="dropdown">
+                <option value="9999999" {% if selected_range == '9999999' %}selected{% endif %}>All Time</option>
+                <option value="5" {% if selected_range == '5' %}selected{% endif %}>5 min</option>
+                <option value="30" {% if selected_range == '30' %}selected{% endif %}>30 min</option>
+                <option value="60" {% if selected_range == '60' %}selected{% endif %}>1 hr</option>
+                <option value="180" {% if selected_range == '180' %}selected{% endif %}>3 hrs</option>
+                <option value="720" {% if selected_range == '720' %}selected{% endif %}>12 hrs</option>
+                <option value="1440" {% if selected_range == '1440' %}selected{% endif %}>24 hrs</option>
+                <option value="4320" {% if selected_range == '4320' %}selected{% endif %}>3 days</option>
+                <option value="10080" {% if selected_range == '10080' %}selected{% endif %}>7 days</option>
+                <option value="20160" {% if selected_range == '20160' %}selected{% endif %}>2 weeks</option>
+                <option value="43200" {% if selected_range == '43200' %}selected{% endif %}>1 month</option>
+                <option value="129600" {% if selected_range == '129600' %}selected{% endif %}>3 months</option>
+                <option value="259200" {% if selected_range == '259200' %}selected{% endif %}>6 months</option>
+                <option value="525600" {% if selected_range == '525600' %}selected{% endif %}>1 year</option>
+                <option value="1576800" {% if selected_range == '1576800' %}selected{% endif %}>3 years</option>
+            </select>
+            </div>
+        <div class="data-labels">
+            <label class="labelArea">🍳 <br>Total Cooking Time:<br>{{ sumRuntime|floatformat:1 }} hours</label>
+            <label class="labelArea"><i class="fa fa-cutlery" aria-hidden="true" style="margin-right:5px;"></i> <br>Total Meals:<br>{{ sumMeals }} Meals</label>
+        </div>
+        <div class="pie">
+            <div class="meals-pie">{{ meals_pie_html|safe }}</div>
+            <div class="pie-chart">{{ cooking_time_pie_html|safe }}</div>
+        </div>
+        <div class="charts">
+            <div class="line-chart">{{ cooking_line_chart|safe }}</div>
+        </div>
+    </div>
+
+    <div id="emissions-summary" class="tabcontent">
+        <h1 style="text-align:center">Emissions Dashboard</h1>
+        <div style="padding: 10px; margin-bottom:10px">
+            <label>Choose time range: </label>
+            <select name="range2" id="rangeDropdown2" class="dropdown">
+                <option value="9999999" {% if selected_range == '9999999' %}selected{% endif %}>All Time</option>
+                <option value="5" {% if selected_range == '5' %}selected{% endif %}>5 min</option>
+                <option value="30" {% if selected_range == '30' %}selected{% endif %}>30 min</option>
+                <option value="60" {% if selected_range == '60' %}selected{% endif %}>1 hr</option>
+                <option value="180" {% if selected_range == '180' %}selected{% endif %}>3 hrs</option>
+                <option value="720" {% if selected_range == '720' %}selected{% endif %}>12 hrs</option>
+                <option value="1440" {% if selected_range == '1440' %}selected{% endif %}>24 hrs</option>
+                <option value="4320" {% if selected_range == '4320' %}selected{% endif %}>3 days</option>
+                <option value="10080" {% if selected_range == '10080' %}selected{% endif %}>7 days</option>
+                <option value="20160" {% if selected_range == '20160' %}selected{% endif %}>2 weeks</option>
+                <option value="43200" {% if selected_range == '43200' %}selected{% endif %}>1 month</option>
+                <option value="129600" {% if selected_range == '129600' %}selected{% endif %}>3 months</option>
+                <option value="259200" {% if selected_range == '259200' %}selected{% endif %}>6 months</option>
+                <option value="525600" {% if selected_range == '525600' %}selected{% endif %}>1 year</option>
+                <option value="1576800" {% if selected_range == '1576800' %}selected{% endif %}>3 years</option>
+            </select>
+            </div>
+        <div class="data-labels">
+            <label class="labelArea"><i class="fa fa-industry" aria-hidden="true" style="margin-right:5px;"></i><br>Total Emissions:<br>{{ sumEmissions|floatformat:2 }} kg CO2</label>
+        </div>
+        <div class="pie">
+            <div class="meals-pie">{{ pie_chart_emissions |safe }}</div>
+            <div class="pie-chart">{{ meals_emissions_html|safe }}</div>
+        </div>
+    </div>
+
+    <div id="customer-summary" class="tabcontent">
+            <h1 style="text-align:center">Customer Dashboard</h1>
+            <div style="padding: 10px; margin-bottom:10px">
+                <label>Choose time range: </label>
+                <select name="range3" id="rangeDropdown3" class="dropdown">
+                    <option value="9999999" {% if selected_range == '9999999' %}selected{% endif %}>All Time</option>
+                    <option value="5" {% if selected_range == '5' %}selected{% endif %}>5 min</option>
+                    <option value="30" {% if selected_range == '30' %}selected{% endif %}>30 min</option>
+                    <option value="60" {% if selected_range == '60' %}selected{% endif %}>1 hr</option>
+                    <option value="180" {% if selected_range == '180' %}selected{% endif %}>3 hrs</option>
+                    <option value="720" {% if selected_range == '720' %}selected{% endif %}>12 hrs</option>
+                    <option value="1440" {% if selected_range == '1440' %}selected{% endif %}>24 hrs</option>
+                    <option value="4320" {% if selected_range == '4320' %}selected{% endif %}>3 days</option>
+                    <option value="10080" {% if selected_range == '10080' %}selected{% endif %}>7 days</option>
+                    <option value="20160" {% if selected_range == '20160' %}selected{% endif %}>2 weeks</option>
+                    <option value="43200" {% if selected_range == '43200' %}selected{% endif %}>1 month</option>
+                    <option value="129600" {% if selected_range == '129600' %}selected{% endif %}>3 months</option>
+                    <option value="259200" {% if selected_range == '259200' %}selected{% endif %}>6 months</option>
+                    <option value="525600" {% if selected_range == '525600' %}selected{% endif %}>1 year</option>
+                    <option value="1576800" {% if selected_range == '1576800' %}selected{% endif %}>3 years</option>
+                </select>
+                </div>
+            <!-- Add two sub-tabs under the customer summary -->
+    <div class="sub-tabs">
+        <button class="sub-tablinks" onclick="openSubTab(event, 'cooking-info')" id="defaultSubOpen">Advanced Cooking Stats</button>
+        <button class="sub-tablinks" onclick="openSubTab(event, 'energy-info')">Advanced Energy Stats</button>
+    </div>
+
+    <div id="cooking-info" class="sub-tabcontent">
+            <div class="pie" style="padding:10px; overflow:hidden;">
+                <div class="meals-pie">{{ countries_graph|safe}}</div>
+                <div class="pie-chart">{{ location_graph|safe}}</div>
+            </div>
+            <div class="pie" style="padding:10px; overflow:hidden;">
+                <div class="meals-pie">{{ household_size_graph|safe}}</div>
+                <div class="pie-chart">{{ household_type_graph|safe}}</div>
+            </div>
+            <div class="pie" style="padding:10px; overflow:hidden;">
+                <div class="meals-pie">{{ genders_graph|safe}}</div>
+                <div class="pie-chart">{{ sales_reps_graph|safe}}</div>
+            </div>
+    </div>
+
+    <div id="energy-info" class="sub-tabcontent">
+        <div class="pie" style="padding:10px; overflow:hidden;">
+            <div class="meals-pie">{{ countries_graph_kwh|safe}}</div>
+            <div class="pie-chart">{{ location_graph_kwh|safe}}</div>
+        </div>
+        <div class="pie" style="padding:10px; overflow:hidden;">
+            <div class="meals-pie">{{ household_size_graph_kwh|safe}}</div>
+            <div class="pie-chart">{{ household_type_graph_kwh|safe}}</div>
+        </div>
+        <div class="pie" style="padding:10px; overflow:hidden;">
+            <div class="meals-pie">{{ genders_graph_kwh|safe}}</div>
+            <div class="pie-chart">{{ sales_reps_graph_kwh|safe}}</div>
+        </div>
+</div>
+
+<script>
+    // Open first sub-tab on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById("defaultSubOpen").click();
+    });
+
+    function openSubTab(evt, subTabName) {
+        var i, subTabcontent, subTablinks;
+        
+        // Hide all sub-tab content
+        subTabcontent = document.getElementsByClassName("sub-tabcontent");
+        for (i = 0; i < subTabcontent.length; i++) {
+            subTabcontent[i].style.display = "none";
+        }
+        
+        // Remove active class from all sub-tab links
+        subTablinks = document.getElementsByClassName("sub-tablinks");
+        for (i = 0; i < subTablinks.length; i++) {
+            subTablinks[i].className = subTablinks[i].className.replace(" active", "");
+        }
+        
+        // Show the current sub-tab and add an active class to the link
+        document.getElementById(subTabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+</script>
+
+<style>
+    /* Style for the sub-tabs */
+    .sub-tabs {
+        margin-top: 20px;
+        text-align: center;
+        
+    }
+    
+    .sub-tablinks {
+        background-color: #0ead00;
+        border: none;
+        outline: none;
+        padding: 10px;
+        cursor: pointer;
+        font-size: 16px;
+        color: #fff;
+        margin: 10px;
+    }
+    
+    .sub-tablinks.active {
+        background-color: #e68a00;
+        color: #fff;
+    }
+    
+    .sub-tabcontent {
+        display: none;
+        padding: 20px;
+        border: none;
+        margin-top: 10px;
+    }
+    
+    .sub-tabcontent h2 {
+        text-align: center;
+    }
+</style>
+            
+        </div>
+        
+
+    <script>
+        // JavaScript for tab functionality
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        // Set default tab open
+        document.getElementById("defaultOpen").click();
+
+        // JavaScript for handling range selection change
+        document.getElementById("rangeDropdown").addEventListener("change", function() {
+            var selectedRange = this.value;
+            window.location.href = '?range=' + selectedRange;
+        });
+
+        document.getElementById("rangeDropdown1").addEventListener("change", function() {
+            var selectedRange = this.value;
+            window.location.href = '?range=' + selectedRange;
+        });
+
+        document.getElementById("rangeDropdown2").addEventListener("change", function() {
+            var selectedRange = this.value;
+            window.location.href = '?range=' + selectedRange;
+        });
+        document.getElementById("rangeDropdown3").addEventListener("change", function() {
+            var selectedRange = this.value;
+            window.location.href = '?range=' + selectedRange;
+        });
+    </script>
+
+    <style>
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            padding-top: 100px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+
+{% endblock %}
