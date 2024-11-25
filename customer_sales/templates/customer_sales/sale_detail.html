@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+
+{% block title %}Powerpay Africa: Sale Details{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Sale Details</h2>
+    <p><strong>Product Name:</strong> {{ sale.product_name }}</p>
+    <p><strong>Product Model:</strong> {{ sale.product_model }}</p>
+    <p><strong>Product Serial Number:</strong> {{ sale.product_serial_number }} <form method="get" action="{% url 'device_data_page' device_id=sale.product_serial_number %}">
+        <button type="submit" class="device_data_btn"> {{ sale.product_serial_number }} data</button>
+    </form></p>
+    <p><strong>Registration Date:</strong> {{ sale.registration_date|date:"d M Y " }}</p>
+    <p><strong>Release Date:</strong> {{ sale.release_date|date:"d M Y " }}</p>
+    <p><strong>Product Type:</strong> {{ sale.get_product_type_display }}</p>
+    <p><strong>Purchase Mode:</strong> {{ sale.get_purchase_mode_display }}</p>
+    <p><strong>Customer:</strong> {{ sale.customer.name }} <form method="get" action="{% url 'customer_detail' pk=sale.customer.pk %}">
+        <button type="submit" class="device_data_btn"> See Customer data</button>
+    </form></p>
+    <p><strong>Referred By:</strong> {{ sale.referred_by.name }}</p>
+    <p><strong>Sales Rep:</strong> {{ sale.sales_rep }}</p>
+    <p><strong>Metered:</strong> {% if sale.metered %}Yes{% else %}No{% endif %}</p>
+    <p><strong>Type of Use:</strong> {{ sale.get_type_of_use_display }}</p>
+    <p><strong>Specific Economic Activity:</strong> {{ sale.specific_economic_activity }}</p>
+    <p><strong>Location of Use:</strong> {{ sale.location_of_use }}</p>
+</div>
+{% endblock %}

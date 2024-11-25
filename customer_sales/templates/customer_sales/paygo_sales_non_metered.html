@@ -1,0 +1,155 @@
+{% extends 'layout.html' %}
+
+{% block title %}Powerpay Africa: PayGo Sales(Non-Metered){% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>PayGo Sales(Non-Metered)</h2>
+    <div class="search-container">
+        <form method="get" action="{% url 'paygo_sales_non_metered' %}">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search Sale by product name">
+            <button type="submit">Search</button>
+            <a href="{% url 'paygo_sales' %}" class="clear-search">Clear</a>
+        </form>
+    </div>
+    <div style="margin-bottom:20px">
+        <form method="get" action="{% url 'sales_add' %}">
+            <button type="submit" class="device_data_btn">Add New Sale</button>
+        </form>
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th class="table_headers" style=>
+                    Product Serial Number
+                    <a href="?sort=product_serial_number&direction={% if sort_field == 'product_serial_number' and sort_direction == 'asc' %}desc{% else %}asc{% endif %}&q={{ query }}"
+                       class="{% if sort_field == 'product_serial_number' %}sort-{{ sort_direction }}{% else %}sort-asc{% endif %}"></a>
+                </th>
+                <th class="table_headers">
+                    Payment Status
+                    <a href="?sort=payment_status&direction={% if sort_field == 'payment_status' and sort_direction == 'asc' %}desc{% else %}asc{% endif %}&q={{ query }}"
+                       class="{% if sort_field == 'payment_status' %}sort-{{ sort_direction }}{% else %}sort-asc{% endif %}"></a>
+                </th>
+                <th class="table_headers">
+                    Amount Paid
+                    <a href="?sort=totalPaid&direction={% if sort_field == 'totalPaid' and sort_direction == 'asc' %}desc{% else %}asc{% endif %}&q={{ query }}"
+                       class="{% if sort_field == 'totalPaid' %}sort-{{ sort_direction }}{% else %}sort-asc{% endif %}"></a>
+                </th>
+                <th class="table_headers">
+                    PayGo Balance
+                    <a href="?sort=paygoBalance&direction={% if sort_field == 'paygoBalance' and sort_direction == 'asc' %}desc{% else %}asc{% endif %}&q={{ query }}"
+                       class="{% if sort_field == 'paygoBalance' %}sort-{{ sort_direction }}{% else %}sort-asc{% endif %}"></a>
+                </th>
+                <th class="table_headers">
+                    Schedule
+                    <a href="?sort=days&direction={% if sort_field == 'days' and sort_direction == 'asc' %}desc{% else %}asc{% endif %}&q={{ query }}"
+                       class="{% if sort_field == 'days' %}sort-{{ sort_direction }}{% else %}sort-asc{% endif %}"></a>
+                </th>
+                <th class="table_headers">
+                    Total Balance
+                    <a href="?sort=balance&direction={% if sort_field == 'balance' and sort_direction == 'asc' %}desc{% else %}asc{% endif %}&q={{ query }}"
+                       class="{% if sort_field == 'balance' %}sort-{{ sort_direction }}{% else %}sort-asc{% endif %}"></a>
+                </th>
+                <th class="table_headers">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sale in sales %}
+            <tr>
+                <td class="table_content">{{ sale.product_serial_number }}</td>
+                <td class="table_content">
+                    <span class="dot" style="background-color: 
+                        {% if sale.paymentData.payment_status == 'fully-paid' %}
+                            blue
+                        {% elif sale.paymentData.payment_status == 'on-time' and sale.paymentData.days > 7 %}
+                            green
+                        {% elif sale.paymentData.payment_status == 'on-time' and sale.paymentData.days <= 7 %}
+                            orange
+                        {% elif sale.paymentData.payment_status == 'overdue' %}
+                            red
+                        {% endif %}
+                    "></span> {{ sale.paymentData.payment_status }}
+                </td>
+                <td class="table_content">{{ sale.paymentData.totalPaid }}</td>
+                <td class="table_content">{{ sale.paymentData.paygoBalance }}</td>
+                <td class="table_content">
+                    {% if sale.paymentData.payment_status == 'overdue' %}
+                        {{ sale.paymentData.days }} {% if sale.paymentData.days == 1 %}day{% else %}days{% endif %} behind payment
+                    {% elif sale.paymentData.payment_status == 'on-time' %}
+                        {{ sale.paymentData.days }} {% if sale.paymentData.days == 1 %}day{% else %}days{% endif %} to next payment
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td class="table_content">{{ sale.paymentData.balance }}</td>
+                <td class="table_content">
+                    <a href="{% url 'sale_detail' sale.id %}">🕵️‍♀️ Details</a> |
+                    <a href="{% url 'customer_detail' sale.customer_id %}">👤 Customer</a> |
+                    {% if sale.paymentData.payment_status == 'overdue' %}
+                    <form method="get" action="{% url 'payment_prompt' %}" style="display:inline;">
+                        <input type="hidden" name="ref" value="{{ sale.product_serial_number }}">
+                        <input type="hidden" name="amount" value="{{ sale.paymentData.paygoBalance }}">
+                        <button type="submit" class="prompt-payment-btn">Prompt Payment</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="pagination">
+        <span class="step-links">
+            {% if sales.has_previous %}
+                <a href="?page=1{% if query %}&q={{ query }}{% endif %}">&laquo; first</a>
+                <a href="?page={{ sales.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ sales.number }} of {{ sales.paginator.num_pages }}.
+            </span>
+
+            {% if sales.has_next %}
+                <a href="?page={{ sales.next_page_number }}{% if query %}&q={{ query }}{% endif %}">next</a>
+                <a href="?page={{ sales.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+</div>
+
+<style>
+    .dot {
+        height: 20px;
+        width: 20px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+    }
+
+    .prompt-payment-btn {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .prompt-payment-btn:hover {
+        background-color: #c82333;
+    }
+
+    .table_headers a {
+        text-decoration: none;
+        color: inherit;
+        display: inline-block;
+        margin-left: 5px;
+    }
+
+    .sort-desc::after {
+        content: ' ▲';
+    }
+    
+    .sort-asc::after {
+        content: ' ▼';
+    }
+</style>
+{% endblock %}
