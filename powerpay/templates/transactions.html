@@ -1,0 +1,110 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Powerpay Africa: Transactions
+{% endblock %}
+
+{% block content %}
+    <h2>Transactions</h2>
+    <div class="container">
+        <div class="search-container">
+            <!-- Search form -->
+            <form method="get" action="{% url 'transactions_page' %}">
+                <input type="text" name="q" value="{{ query }}" placeholder="Search by name, reference, or ID">
+                <button type="submit">Search</button>
+                <a href="{% url 'transactions_page' %}" class="clear-search">Clear</a>
+            </form>
+        </div>
+        <div style="padding: 10px; margin-bottom:10px">
+            <label>Choose time range: </label>
+            <select name="range" id="rangeDropdown" class="dropdown">
+                <option value="9999999" {% if selected_range == '9999999' %}selected{% endif %}>All Time</option>
+                <option value="5" {% if selected_range == '5' %}selected{% endif %}>5 min</option>
+                <option value="30" {% if selected_range == '30' %}selected{% endif %}>30 min</option>
+                <option value="60" {% if selected_range == '60' %}selected{% endif %}>1 hr</option>
+                <option value="180" {% if selected_range == '180' %}selected{% endif %}>3 hrs</option>
+                <option value="720" {% if selected_range == '720' %}selected{% endif %}>12 hrs</option>
+                <option value="1440" {% if selected_range == '1440' %}selected{% endif %}>24 hrs</option>
+                <option value="4320" {% if selected_range == '4320' %}selected{% endif %}>3 days</option>
+                <option value="10080" {% if selected_range == '10080' %}selected{% endif %}>7 days</option>
+                <option value="20160" {% if selected_range == '20160' %}selected{% endif %}>2 weeks</option>
+                <option value="40320" {% if selected_range == '40320' %}selected{% endif %}>1 month</option>
+                <option value="120960" {% if selected_range == '120960' %}selected{% endif %}>3 months</option>
+                <option value="241920" {% if selected_range == '241920' %}selected{% endif %}>6 months</option>
+                <option value="483840" {% if selected_range == '483840' %}selected{% endif %}>1 year</option>
+                <option value="1451520" {% if selected_range == '1451520' %}selected{% endif %}>3 years</option>
+            </select>
+        </div>
+        <div style="margin-bottom:20px; float:left;">
+            <a href="{% url 'payment_prompt' %}" class="add-device-btn">Prompt Payment</a>
+        </div>
+        <div style="margin-bottom:20px; float:right;">
+            <a href="{% url 'export_transactions' range=selected_range %}" class="add-device-btn">Export Transactions</a>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="table_headers">Transactor Name</th>
+                    <th class="table_headers">Account Reference</th>
+                    <th class="table_headers">Transaction ID</th>
+                    <th class="table_headers">Amount</th>
+                    <th class="table_headers">Transaction Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in transactions_table %}
+                <tr>
+                    <td class="table_content">{{ row.name }}</td>
+                    <td class="table_content">{{ row.ref }}</td>
+                    <td class="table_content">{{ row.id }}</td>
+                    <td class="table_content">{{ row.amount }}</td>
+                    <td class="table_content">{{ row.transtime|date:"j M Y h:i:s A" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pagination controls -->
+        <div class="pagination">
+            <span class="step-links">
+                {% if transactions_table.has_previous %}
+                    <a href="?page=1{% if query %}&q={{ query }}{% endif %}">&laquo; first</a>
+                    <a href="?page={{ transactions_table.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">previous</a>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ transactions_table.number }} of {{ transactions_table.paginator.num_pages }}.
+                </span>
+
+                {% if transactions_table.has_next %}
+                    <a href="?page={{ transactions_table.next_page_number }}{% if query %}&q={{ query }}{% endif %}">next</a>
+                    <a href="?page={{ transactions_table.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}">last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+    </div>
+    <!-- Line chart -->
+    <div class="charts">
+        <div class="line-chart">{{ line_chart|safe }}</div>
+    </div>
+    <style>
+        .add-device-btn {
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 10px;
+            background-color: #0ead00;
+            color: #fff;
+            text-align: center;
+        }
+        .add-device-btn:hover {
+            background-color: #e68a00; 
+        }
+    </style>
+    <script>
+        document.getElementById('rangeDropdown').addEventListener('change', function() {
+            var selectedRange = this.value;
+            window.location.href = '/transactions/?range=' + selectedRange;
+        });
+
+    </script>
+{% endblock %}

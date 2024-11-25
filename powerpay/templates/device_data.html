@@ -1,0 +1,229 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Powerpay Africa: {{ device_id }} data
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>Device Data for {{ device_id }}</h2> 
+        <div style="padding: 10px; margin-bottom:10px"> 
+            <label>Choose another device: </label>
+            <select name="device" id="deviceDropdown" class="dropdown">
+            {% for dev in dev_List %}
+                <option value="{{ dev }}" {% if dev == device_id %}selected{% endif %}><strong>{{ dev }}</strong></option>
+            {% endfor %}
+            </select>
+            <div style="padding: 10px; margin-bottom:10px">
+            <label>Choose time range: </label>
+            <select name="range" id="rangeDropdown" class="dropdown">
+                <option value="9999999" {% if selected_range == '9999999' %}selected{% endif %}>All Time</option>
+                <option value="5" {% if selected_range == '5' %}selected{% endif %}>5 min</option>
+                <option value="30" {% if selected_range == '30' %}selected{% endif %}>30 min</option>
+                <option value="60" {% if selected_range == '60' %}selected{% endif %}>1 hr</option>
+                <option value="180" {% if selected_range == '180' %}selected{% endif %}>3 hrs</option>
+                <option value="720" {% if selected_range == '720' %}selected{% endif %}>12 hrs</option>
+                <option value="1440" {% if selected_range == '1440' %}selected{% endif %}>24 hrs</option>
+                <option value="4320" {% if selected_range == '4320' %}selected{% endif %}>3 days</option>
+                <option value="10080" {% if selected_range == '10080' %}selected{% endif %}>7 days</option>
+                <option value="20160" {% if selected_range == '20160' %}selected{% endif %}>2 weeks</option>
+                <option value="40320" {% if selected_range == '40320' %}selected{% endif %}>1 month</option>
+                <option value="120960" {% if selected_range == '120960' %}selected{% endif %}>3 months</option>
+                <option value="241920" {% if selected_range == '241920' %}selected{% endif %}>6 months</option>
+                <option value="483840" {% if selected_range == '483840' %}selected{% endif %}>1 year</option>
+                <option value="1451520" {% if selected_range == '1451520' %}selected{% endif %}>3 years</option>
+            </select>
+            </div>
+            <div class="switch-container">
+                <label class="switch-label">{% if status %}Turn Off {{device_id}}: {% else %} Turn On {{device_id}}: {% endif %} </label>
+                <label class="switch">
+                    <input type="checkbox" id="statusSwitch" {% if status %}checked{% endif %}>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
+
+        <script>
+            document.getElementById('deviceDropdown').addEventListener('change', function() {
+                var selectedDevice = this.value;
+                var selectedRange = document.getElementById('rangeDropdown').value;
+                window.location.href = '/device/' + selectedDevice + '/?range=' + selectedRange;
+            });
+
+            document.getElementById('rangeDropdown').addEventListener('change', function() {
+                var selectedRange = this.value;
+                var selectedDevice = document.getElementById('deviceDropdown').value;
+                window.location.href = '/device/' + selectedDevice + '/?range=' + selectedRange;
+            });
+
+            document.getElementById('statusSwitch').addEventListener('change', function() {
+                var isChecked = this.checked;
+                var confirmMessage = isChecked ? 
+                    'Are you sure you want to turn on {{ device_id }}?' : 
+                    'Are you sure you want to turn off {{ device_id }}?';
+
+                if (confirm(confirmMessage)) {
+                    var csrfToken = '{{ csrf_token }}';
+                    var username = 'admin';  // Replace with your actual username
+                    var password = '123Give!@#';  // Replace with your actual password
+                    var credentials = btoa(username + ':' + password);  // Base64 encode the credentials
+
+                    fetch('https://appliapay.com/changeStatus', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Basic ' + credentials,
+                            'X-CSRFToken': csrfToken  // Include the CSRF token if needed
+                        },
+                        body: JSON.stringify({ selectedDev: '{{ device_id }}', status: !isChecked })
+                    }).then(response => {
+                        if (!response.ok) {
+                            alert('Failed to update status');
+                            this.checked = !isChecked;  // Revert the toggle state on failure
+                        }
+                    }).catch(error => {
+                        alert('Error: ' + error);
+                        this.checked = !isChecked;  // Revert the toggle state on error
+                    });
+                } else {
+                    this.checked = !isChecked;  // Revert the toggle state if not confirmed
+                }
+            });
+        </script>
+
+        <style>
+            .switch-container {
+                display: flex;
+                align-items: center;
+                float: right;
+            }
+
+            .switch-label {
+                margin-right: 10px;
+            }
+            
+            .switch {
+                position: relative;
+                display: inline-block;
+                width: 60px;
+                height: 34px;
+                float: right;
+                margin-bottom: 10px;
+            }
+
+            .switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+            .slider {
+                position: absolute;
+                cursor: pointer;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: #ccc;
+                transition: .4s;
+                border-radius: 34px;
+            }
+
+            .slider:before {
+                position: absolute;
+                content: "";
+                height: 26px;
+                width: 26px;
+                left: 4px;
+                bottom: 4px;
+                background-color: white;
+                transition: .4s;
+                border-radius: 50%;
+            }
+
+            input:checked + .slider {
+                background-color: #0ead00;
+            }
+
+            input:checked + .slider:before {
+                transform: translateX(26px);
+            }
+            .add-device-btn {
+                text-decoration: none;
+                padding: 10px;
+                border-radius: 10px;
+                background-color: #0ead00;
+                color: #fff;
+                text-align: center;
+            }
+            .add-device-btn:hover {
+                background-color: #e68a00; 
+            }
+        </style>
+        {% if device_id == "device14"%}
+        <div style="margin-bottom:20px;margin-left:10px;float:left;">
+            <a href="{% url 'live_page' %}" class="add-device-btn">Live Window</a>
+        </div>
+        {% endif %}
+
+        <div class="data-labels">
+            <label class="labelArea">🍳 <br>Cooking Time:<br>{{ runtime|floatformat:1 }} hours</label>
+            <label class="labelArea">⚡ <br>Total Energy:<br>{{ sum_kwh|floatformat:2 }} kWh</label>
+            <label class="labelArea">🤑 <br>Total Energy Cost:<br>KSHS. {{ energy_cost|floatformat:1 }}</label>
+            <label class="labelArea">🏭 <br>Emissions:<br>{{ emissions|floatformat:2 }} kg CO₂</label>
+        </div>
+        <h3 style="text-align:center">Cooking Events</h3>
+        <div style="margin-bottom:20px; float:right;">
+            <a href="{% url 'export_device_data' device_id=device_id range=selected_range %}" class="add-device-btn">Export Cooking Data</a>
+        </div>
+        <div class="container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th class="table_headers">Start Time</th>
+                        <th class="table_headers">Meal Duration (minutes)</th>
+                        <th class="table_headers">End Time</th>
+                        <th class="table_headers">Energy Usage</th>
+                        <th class="table_headers">Emissions</th>
+                        <th class="table_headers">Energy Cost</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for meal in meals_with_durations %}
+                    <tr>
+                        <td class="table_content">{{ meal.startTime }}</td>
+                        <td class="table_content">{{ meal.mealDuration|floatformat:0 }}</td>
+                        <td class="table_content">{{ meal.endTime }}</td>
+                        <td class="table_content">{{ meal.totalKwh|floatformat:3 }} kWh</td>
+                        <td class="table_content">{{ meal.emissions|floatformat:3 }} kg CO₂</td>
+                        <td class="table_content">KSHS. {{ meal.energy_cost|floatformat:1 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination controls -->
+        <div class="pagination">
+            <span class="step-links">
+                {% if meals_with_durations.has_previous %}
+                    <a href="?page=1{% if query %}&q={{ query }}{% endif %}">&laquo; first</a>
+                    <a href="?page={{ meals_with_durations.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">previous</a>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ meals_with_durations.number }} of {{ meals_with_durations.paginator.num_pages }}.
+                </span>
+
+                {% if meals_with_durations.has_next %}
+                    <a href="?page={{ meals_with_durations.next_page_number }}{% if query %}&q={{ query }}{% endif %}">next</a>
+                    <a href="?page={{ meals_with_durations.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}">last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+        <h3 style="text-align: center">Combined Device Metrics</h3>
+        <div id="mealsPerDayChart">
+            {{ metrics_chart|safe }}
+        </div>
+    </div>
+{% endblock %}

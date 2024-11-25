@@ -1,0 +1,150 @@
+{% extends "layout.html" %} {% block title %} Powerpay Africa: Live Window
+{%endblock %} {% block content %}
+<h1>Live Data Stream</h1>
+<div class="data-labels">
+  <label class="labelArea"
+    >➕ Data Count:<br /><span id="message-count">0</span></label
+  >
+  <label class="labelArea"
+    >🍳 Cooking Time:<br /><span id="cooking-time">0 seconds</span></label
+  >
+  <label class="labelArea"
+    >⚡ Total Energy:<br /><span id="total-kwh">0 kWh</span></label
+  >
+  <label class="labelArea"
+    >🤑 Energy Cost:<br /><span id="total-cost"
+      >KSH. 0.00</span
+    ></label
+  >
+  <label class="labelArea"
+    >🏭 Emissions:<br /><span id="total-co2">0.00 kg CO₂</span></label
+  >
+</div>
+<div id="messages" style="border-radius: 10px;"></div>
+
+<script>
+  let count = 0; // Initialize message count to 0
+  let totalKwh = 0; // Initialize total kWh to 0
+  const COST_PER_KWH = 33.0; // Cost per kWh
+  const CO2_PER_KWH = 0.4999 * 0.28; // CO2 per kWh
+  let firstMessageTime = null; // To track the first message time
+  const messagesDiv = document.getElementById("messages");
+  const messageCountLabel = document.getElementById("message-count");
+  const totalKwhLabel = document.getElementById("total-kwh");
+  const totalCostLabel = document.getElementById("total-cost");
+  const totalCo2Label = document.getElementById("total-co2");
+  const cookingTimeLabel = document.getElementById("cooking-time");
+
+  // Set to keep track of processed timestamps
+  const processedMessages = new Set();
+
+  const socket = new WebSocket("wss://appliatrix.com/ws/mqtt/");
+
+  socket.onopen = function (event) {
+    console.log("Connected to WebSocket!");
+  };
+
+  socket.onmessage = function (event) {
+    try {
+      const data = JSON.parse(event.data);
+      //console.log("Received message:", data); // Log the received message for troubleshooting
+
+      // Parse the inner message JSON
+      const innerMessage = JSON.parse(data.message);
+      const kWh = parseFloat(innerMessage.kwh) || 0; // Now correctly extracting kWh
+      //console.log("Extracted kWh:", kWh); // Log extracted kWh value
+
+      // Create a unique identifier for the message
+      const uniqueId = `${innerMessage.txtime}-${innerMessage.deviceID}`;
+
+      // Check for duplicate messages based on timestamp and device ID
+      if (!processedMessages.has(uniqueId)) {
+        processedMessages.add(uniqueId); // Add the unique ID to the processed messages set
+
+        // Create a new message container
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "message"; // Assign class for styling
+        messageDiv.textContent = data.message; // Display the original message
+
+        // Append the new message to the messagesDiv
+        messagesDiv.appendChild(messageDiv);
+
+        // Update counts
+        count += 1; // Increment the message count
+        messageCountLabel.textContent = count; // Update the displayed count
+
+        // Update total kWh
+        totalKwh += kWh;
+        totalKwhLabel.textContent = `${totalKwh.toFixed(2)} kWh`; // Update displayed kWh
+
+        // Update total cost
+        const totalCost = totalKwh * COST_PER_KWH;
+        totalCostLabel.textContent = `KSH. ${totalCost.toFixed(2)}`; // Update displayed cost
+
+        // Update total CO2
+        const totalCo2 = totalKwh * CO2_PER_KWH;
+        totalCo2Label.textContent = `${totalCo2.toFixed(2)} kg CO₂`; // Update displayed CO2
+
+        // Get the current system time
+        const currentTime = new Date();
+
+        // Track cooking time
+        if (firstMessageTime === null) {
+          firstMessageTime = currentTime; // Set the first message time to the current time
+        }
+        const cookingTime = (currentTime - firstMessageTime) / 1000; // Calculate time in seconds
+        cookingTimeLabel.textContent = `${cookingTime.toFixed(0)} seconds`; // Update displayed cooking time
+
+        // Scroll to the bottom of the messages div
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        // Optional: Limit message history to the last 100 messages
+        if (messagesDiv.children.length > 100) {
+          messagesDiv.removeChild(messagesDiv.firstChild); // Remove the oldest message
+        }
+      } else {
+        console.log("Duplicate message ignored:", data); // Log duplicate messages
+      }
+    } catch (error) {
+      console.error("Error parsing message:", error); // Log any parsing errors
+    }
+  };
+
+  socket.onerror = function (error) {
+    console.error("WebSocket error:", error);
+  };
+
+  socket.onclose = function (event) {
+    console.log("WebSocket closed:", event);
+  };
+</script>
+
+<style>
+  #messages {
+    border: 2px solid #0ead00;
+    padding: 10px;
+    background: white;
+    max-height: 700px;
+    overflow-y: auto;
+  }
+  .message {
+    padding: 20px;
+    border-bottom: 2px solid #0ead00;
+    text-align: center;
+    font-size: 20px;
+  }
+  .message:last-child {
+    border-bottom: none; /* Remove border from last message */
+  }
+  label {
+    font-size: 20px;
+  }
+  span {
+    color: #fff;
+    font-weight: bold;
+    margin-top: 45px;
+    margin-left: 10px;
+    font-size:20px;
+  }
+</style>
+{% endblock %}
