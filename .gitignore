@@ -1,0 +1,5 @@
+media
+
+*.sqlite3
+
+manage.py
