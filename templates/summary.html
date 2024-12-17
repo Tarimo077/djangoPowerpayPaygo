@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Powerpay Africa: Summary
+{% endblock %}
+
+{% block content %}
+<div class="container">
+<div class="data-labels">
+    <label class="labelArea">🏢 <br>Organizations:<br>{{ organizations|length }}</label>
+    <label class="labelArea">👥 <br>Active Customers:<br>{{ customers_today }}</label>
+</div>
+<div class="data-labels">
+    <label class="labelArea">📉 <br>Churn Rate:<br>{{ churn_rate }}</label>
+    <label class="labelArea">📈 <br>Portfolio Growth:<br>{{ portfolio_growth }}</label>
+</div>
+    <div class="container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="table_headers">Organization</th>
+                    <th class="table_headers">Number of Devices</th>
+                    <th class="table_headers">Device Runtime</th>
+                    <th class="table_headers">Number of Meals</th>
+                    <th class="table_headers">Energy Usage</th>
+                    <th class="table_headers">Energy Cost</th>
+                    <th class="table_headers">Emissions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for org, data in org_data.items %}
+                <tr>
+                    <td class="table_content"> {{ org }}</td>
+                    <td class="table_content"> {{ data.devs }}</td>
+                    <td class="table_content"> {{ data.runtime|floatformat:1 }} hours</td>
+                    <td class="table_content"> {{ data.meals }}</td>
+                    <td class="table_content"> {{ data.kwh|floatformat:2 }} kWh</td>
+                    <td class="table_content">KSHS. {{ data.cost|floatformat:1}}</td>
+                    <td class="table_content"> {{ data.emissions|floatformat:2}} kg CO₂</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

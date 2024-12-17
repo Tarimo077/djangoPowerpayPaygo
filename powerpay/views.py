@@ -15,6 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import HttpResponse
 from customer_sales.models import Customer, Sale, TestCustomer, TestSale
+from django.utils.timezone import now
 
 # Constants
 BASE_URL = "https://appliapay.com/"
@@ -910,3 +911,67 @@ def fetch_measurement_data(endpoint, q):
     response.raise_for_status()
     return response.json()
 
+
+########################################################GENERAL STATS######################
+def get_customer_statistics(x):
+    # Choose the appropriate model based on the user
+    CustomerModel = Customer
+    
+    # Retrieve all customer records
+    all_customers = CustomerModel.objects.all()
+    
+    # Count total customers
+    total_customers = all_customers.count()
+    
+    # Calculate the date range for x days ago
+    x_days_ago = now() - timedelta(days=x)
+    
+    # Count customers added x days ago or later
+    customers_x_days = all_customers.filter(date__gte=x_days_ago).count()
+    
+    # Return the data
+    return {
+        "total_customers": total_customers,
+        "customer_last_x_days": customers_x_days,
+    }
+
+def summary(request):
+    customerSummary = get_customer_statistics(30)
+    orgs = ['Scode', 'Welight', 'GIZ']
+    rangeC = 999999999
+    org_data = {}
+    
+    for org in orgs:
+        try:
+            data = fetch_data_index(f"allDeviceData{org}Django", rangeC)
+            df = pd.DataFrame(data['rawData'])
+            runtime_sum = sum(data['runtime'].values())
+            devs = len(data['allDevs'])
+            meals, _ = classify_and_count_meals(df.to_dict(orient='records'))
+            kwh_sum = df['kwh'].sum()
+            meal_count = sum(info['count'] for device_id, info in meals.items())
+            org_data[org] = {
+                'runtime': runtime_sum,
+                'meals': meal_count,
+                'kwh': kwh_sum,
+                'emissions': kwh_sum * 0.4999 * 0.28,
+                'cost': kwh_sum * 23.0,
+                'devs': devs
+            }
+        except Exception as e:
+            org_data[org] = {"runtime": 0, "meals": 0, "kwh": 0}
+    
+    total_customers = customerSummary['total_customers']
+    customer_diff = customerSummary['customer_last_x_days'] - total_customers
+    churn_rate = total_customers / customer_diff if customer_diff != 0 else 0
+    portfolio_growth = customerSummary['total_customers']/customerSummary['customer_last_x_days'] if customerSummary['customer_last_x_days'] != 0 else 0
+
+    context = {
+        'customers_today': total_customers,
+        'customers_then': customerSummary['customer_last_x_days'],
+        'churn_rate': churn_rate,
+        'organizations': orgs,
+        'org_data': org_data,
+        'portfolio_growth': portfolio_growth
+    }
+    return render(request, 'summary.html', context)
