@@ -96,10 +96,10 @@
     <div class="greeting-bar" id="greeting-bar"></div>
     <div class="sidebar">
         <h1>PowerPay Africa</h1>
-        <a href="{% url 'home_page' %}"><i class="fa fa-home" aria-hidden="true" style="margin-right:5px;"></i> Home</a>
         {% if user.first_name == 'Geoffrey' or user.first_name == 'Jeff'%}
-            <a href="{% url 'summary' %}"><i class="fa fa-compress" aria-hidden="true" style="margin-right:5px;"></i> Summary</a>
+            <a href="{% url 'summary' %}"><i class="fa fa-compress" aria-hidden="true" style="margin-right:5px;"></i> Overview</a>
         {% endif %}
+        <a href="{% url 'home_page' %}"><i class="fa fa-home" aria-hidden="true" style="margin-right:5px;"></i> Home</a>
         <a href="{% url 'devices_page' %}"><i class="fa fa-cogs" aria-hidden="true" style="margin-right:5px;"></i> Devices</a>
         {% if user.first_name != 'Jimmy'%}
         <a href="{% url 'customers_list' %}"><i class="fa fa-users" aria-hidden="true" style="margin-right:5px;"></i> Customers</a>

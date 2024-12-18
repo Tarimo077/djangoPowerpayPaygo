@@ -1,12 +1,12 @@
 {% extends "layout.html" %}
 {% load humanize %}
 {% block title %}
-    Powerpay Africa: Summary
+    Powerpay Africa: Overview
 {% endblock %}
 
 {% block content %}
 <div class="container">
-<h2>Summary Metrics</h2>
+<h2>Overview Metrics</h2>
 <div class="data-labels">
     <label class="labelArea">🏢 <br>Organizations:<br>{{ organizations|length }}</label>
     <label class="labelArea">👥 <br>Active Customers:<br>{{ customers_today }}</label>
@@ -39,7 +39,7 @@
             </tbody>
         </table>
     </div>
-    <h3 style="text-align:center;">Revenue Summary</h3>
+    <h3 style="text-align:center;">Revenue Overview</h3>
     <div class="data-labels">
         <label class="labelArea">🏦 <br>Total Accounts:<br>{{ accounts|length }}</label>
         <label class="labelArea">💰 <br>Total Amount Collected:<br>KSHS. {{ total_collected|intcomma }}</label>
