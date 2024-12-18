@@ -41,6 +41,11 @@ def fetch_data_index(endpoint, range):
     response.raise_for_status()
     return response.json()
 
+def fetch_data_accounts(endpoint, acc):
+    response = requests.get(BASE_URL + endpoint+"?account="+str(acc), auth=AUTH)
+    response.raise_for_status()
+    return response.json()
+
 
 def login_page(request):
     if request.method == 'POST':
@@ -938,9 +943,64 @@ def get_customer_statistics(x):
 def summary(request):
     customerSummary = get_customer_statistics(30)
     orgs = ['Scode', 'Welight', 'GIZ']
+    revenue_orgs = ['Powerpay Africa', 'Scode']
+    revenue_accounts = ['319403', '4121691_scode']
     rangeC = 999999999
     org_data = {}
+    org_transactions = {}
+    total_collected = 0
     
+    for org, account in zip(revenue_orgs, revenue_accounts):
+        try:
+            # Fetch data for the account
+            data = fetch_data_accounts('accounts', account)
+
+            # Convert the data to a DataFrame
+            df = pd.DataFrame(data)
+
+            # Ensure the DataFrame is not empty
+            if df.empty:
+                total_amount = 0
+                last_30_days_amount = 0
+                last_7_days_amount = 0
+                last_24_hours_amount = 0
+            else:
+                # Convert `transtime` to a datetime format
+                df['transtime'] = pd.to_datetime(df['transtime'], format='%Y%m%d%H%M%S')
+
+                # Calculate overall total
+                total_amount = df['amount'].sum()
+                total_collected = total_collected + total_amount
+
+                # Define time ranges
+                today = datetime.now()
+                last_30_days = today - timedelta(days=30)
+                last_7_days = today - timedelta(days=7)
+                last_24_hours = today - timedelta(hours=24)
+
+                # Filter data for the respective time ranges
+                last_30_days_amount = df.loc[df['transtime'] >= last_30_days, 'amount'].sum()
+                last_7_days_amount = df.loc[df['transtime'] >= last_7_days, 'amount'].sum()
+                last_24_hours_amount = df.loc[df['transtime'] >= last_24_hours, 'amount'].sum()
+
+            # Store results in the org_transactions dictionary
+            org_transactions[org] = {
+                'total_amount': total_amount,
+                'last_30_days_amount': last_30_days_amount,
+                'last_7_days_amount': last_7_days_amount,
+                'last_24_hours_amount': last_24_hours_amount,
+            }
+
+        except Exception as e:
+            # If an error occurs, set all amounts to 0 and log the issue
+            org_transactions[org] = {
+                'total_amount': 0,
+                'last_30_days_amount': 0,
+                'last_7_days_amount': 0,
+                'last_24_hours_amount': 0,
+            }
+
+
     for org in orgs:
         try:
             data = fetch_data_index(f"allDeviceData{org}Django", rangeC)
@@ -972,6 +1032,10 @@ def summary(request):
         'churn_rate': churn_rate,
         'organizations': orgs,
         'org_data': org_data,
-        'portfolio_growth': portfolio_growth
+        'portfolio_growth': portfolio_growth,
+        'org_transactions': org_transactions,
+        'total_collected': total_collected,
+        'accounts': revenue_accounts,
+        'arpa': total_collected/len(revenue_accounts)
     }
     return render(request, 'summary.html', context)

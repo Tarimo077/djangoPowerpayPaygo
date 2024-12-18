@@ -1,11 +1,12 @@
 {% extends "layout.html" %}
-
+{% load humanize %}
 {% block title %}
     Powerpay Africa: Summary
 {% endblock %}
 
 {% block content %}
 <div class="container">
+<h2>Summary Metrics</h2>
 <div class="data-labels">
     <label class="labelArea">🏢 <br>Organizations:<br>{{ organizations|length }}</label>
     <label class="labelArea">👥 <br>Active Customers:<br>{{ customers_today }}</label>
@@ -32,11 +33,41 @@
                 <tr>
                     <td class="table_content"> {{ org }}</td>
                     <td class="table_content"> {{ data.devs }}</td>
-                    <td class="table_content"> {{ data.runtime|floatformat:1 }} hours</td>
-                    <td class="table_content"> {{ data.meals }}</td>
-                    <td class="table_content"> {{ data.kwh|floatformat:2 }} kWh</td>
-                    <td class="table_content">KSHS. {{ data.cost|floatformat:1}}</td>
-                    <td class="table_content"> {{ data.emissions|floatformat:2}} kg CO₂</td>
+                    <td class="table_content"> {{ data.runtime|floatformat:1|intcomma }} hours</td>
+                    <td class="table_content"> {{ data.meals|intcomma }}</td>
+                    <td class="table_content"> {{ data.kwh|floatformat:2|intcomma }} kWh</td>
+                    <td class="table_content">KSHS. {{ data.cost|floatformat:1|intcomma }}</td>
+                    <td class="table_content"> {{ data.emissions|floatformat:2|intcomma }} kg CO₂</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <h3 style="text-align:center;">Revenue Summary</h3>
+    <div class="data-labels">
+        <label class="labelArea">🏦 <br>Total Accounts:<br>{{ accounts|length }}</label>
+        <label class="labelArea">💰 <br>Total Amount Collected:<br>KSHS. {{ total_collected|intcomma }}</label>
+        <label class="labelArea">🧮 <br>Average Revenue Per Account(ARPA):<br>KSHS. {{ arpa|intcomma }}</label>
+    </div>
+    <div class="container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="table_headers">Revenue Account</th>
+                    <th class="table_headers">Total Amount In</th>
+                    <th class="table_headers">Amount in last 1 month</th>
+                    <th class="table_headers">Amount in last 1 week</th>
+                    <th class="table_headers">Amount in last 1 day</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for org, data in org_transactions.items %}
+                <tr>
+                    <td class="table_content"> {{ org }}</td>
+                    <td class="table_content">KSHS. {{ data.total_amount|intcomma }}</td>
+                    <td class="table_content">KSHS. {{ data.last_30_days_amount|intcomma }} </td>
+                    <td class="table_content">KSHS. {{ data.last_7_days_amount|intcomma }} </td>
+                    <td class="table_content">KSHS. {{ data.last_24_hours_amount|intcomma }}</td>
                 </tr>
             {% endfor %}
             </tbody>

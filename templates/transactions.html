@@ -1,5 +1,5 @@
 {% extends 'layout.html' %}
-
+{% load humanize %}
 {% block title %}
     Powerpay Africa: Transactions
 {% endblock %}
@@ -57,7 +57,7 @@
                     <td class="table_content">{{ row.name }}</td>
                     <td class="table_content">{{ row.ref }}</td>
                     <td class="table_content">{{ row.id }}</td>
-                    <td class="table_content">{{ row.amount }}</td>
+                    <td class="table_content">{{ row.amount|intcomma }}</td>
                     <td class="table_content">{{ row.transtime|date:"j M Y h:i:s A" }}</td>
                 </tr>
                 {% endfor %}
