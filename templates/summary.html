@@ -11,10 +11,6 @@
     <label class="labelArea">🏢 <br>Organizations:<br>{{ organizations|length }}</label>
     <label class="labelArea">👥 <br>Active Customers:<br>{{ customers_today }}</label>
 </div>
-<div class="data-labels">
-    <label class="labelArea">📉 <br>Churn Rate:<br>{{ churn_rate|floatformat:1 }}</label>
-    <label class="labelArea">📈 <br>Portfolio Growth:<br>{{ portfolio_growth|floatformat:1 }}</label>
-</div>
     <div class="container">
         <table class="table">
             <thead>
@@ -48,6 +44,13 @@
         <label class="labelArea">🏦 <br>Total Accounts:<br>{{ accounts|length }}</label>
         <label class="labelArea">💰 <br>Total Amount Collected:<br>KSHS. {{ total_collected|intcomma }}</label>
         <label class="labelArea">🧮 <br>Average Revenue Per Account(ARPA):<br>KSHS. {{ arpa|intcomma }}</label>
+        <label class="labelArea">💱 <br>Monthly Recurring Revenue(MRR):<br>KSHS. {{ mrr|floatformat:1|intcomma }}</label>
+    </div>
+    <div class="data-labels">
+        <label class="labelArea">🚫 <br>Receivables at Risk(RAR):<br>{{ rar|floatformat:1 }} %</label>
+        <label class="labelArea">💹 <br>Month on month growth:<br>{{ month_growth|floatformat:1 }} %</label>
+        <label class="labelArea">📉 <br>Churn Rate:<br>{{ churn_rate|floatformat:1 }}</label>
+    <label class="labelArea">📈 <br>Portfolio Growth:<br>{{ portfolio_growth|floatformat:1 }}</label>
     </div>
     <div class="container">
         <table class="table">

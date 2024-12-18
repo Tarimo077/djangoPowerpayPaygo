@@ -16,6 +16,7 @@ import json
 from django.http import HttpResponse
 from customer_sales.models import Customer, Sale, TestCustomer, TestSale
 from django.utils.timezone import now
+from calendar import monthrange
 
 # Constants
 BASE_URL = "https://appliapay.com/"
@@ -944,50 +945,72 @@ def get_customer_statistics(x):
         "customer_last_x_days": customers_x_days,
     }
 
+def calculate_rar(sales_data):
+    # Initialize totals
+    total_overdue_risk = 0
+    total_amount_due = 0
+    today = now().date()
+    
+    for sale in sales_data:
+        payment_data = sale.get("paymentData", {})
+        balance = payment_data.get("balance", 0)
+        days_overdue = payment_data.get("days", 0)
+
+        # Add to total amount due
+        total_amount_due += balance
+
+        # Check if overdue by 90 days or more
+        if payment_data.get("payment_status") == "overdue" and days_overdue >= 90:
+            total_overdue_risk += balance
+
+    # Avoid division by zero
+    if total_amount_due == 0:
+        return 0
+
+    # Calculate RAR
+    rar = (total_overdue_risk / total_amount_due) * 100
+    return rar
+
 def summary(request):
     customerSummary = get_customer_statistics(30)
     orgs = ['Scode', 'Welight', 'GIZ']
     revenue_orgs = ['Powerpay Africa', 'Scode']
     revenue_accounts = ['319403', '4121691_scode']
-    rangeC = 999999999
+    total_collected = 0
+    total_cash_in = 0
+    last_month_in = 0
+    this_month_in = 0
     org_data = {}
     org_transactions = {}
-    total_collected = 0
     
+    today = datetime.now()
+    first_day_last_month = (today.replace(day=1) - timedelta(days=1)).replace(day=1)
+    last_day_last_month = first_day_last_month.replace(
+        day=monthrange(first_day_last_month.year, first_day_last_month.month)[1]
+    )
+
     for org, account in zip(revenue_orgs, revenue_accounts):
         try:
-            # Fetch data for the account
             data = fetch_data_accounts('accounts', account)
-
-            # Convert the data to a DataFrame
             df = pd.DataFrame(data)
 
-            # Ensure the DataFrame is not empty
             if df.empty:
-                total_amount = 0
-                last_30_days_amount = 0
-                last_7_days_amount = 0
-                last_24_hours_amount = 0
+                total_amount = last_30_days_amount = last_7_days_amount = last_24_hours_amount = last_month_amount = 0
             else:
-                # Convert `transtime` to a datetime format
                 df['transtime'] = pd.to_datetime(df['transtime'], format='%Y%m%d%H%M%S')
 
-                # Calculate overall total
                 total_amount = df['amount'].sum()
-                total_collected = total_collected + total_amount
+                last_30_days_amount = df.loc[df['transtime'] >= today - timedelta(days=30), 'amount'].sum()
+                last_7_days_amount = df.loc[df['transtime'] >= today - timedelta(days=7), 'amount'].sum()
+                last_24_hours_amount = df.loc[df['transtime'] >= today - timedelta(hours=24), 'amount'].sum()
+                last_month_amount = df.loc[
+                    (df['transtime'] >= first_day_last_month) & (df['transtime'] <= last_day_last_month),
+                    'amount'
+                ].sum()
+                total_collected += last_30_days_amount
+                total_cash_in += total_amount
+                last_month_in += last_month_amount
 
-                # Define time ranges
-                today = datetime.now()
-                last_30_days = today - timedelta(days=30)
-                last_7_days = today - timedelta(days=7)
-                last_24_hours = today - timedelta(hours=24)
-
-                # Filter data for the respective time ranges
-                last_30_days_amount = df.loc[df['transtime'] >= last_30_days, 'amount'].sum()
-                last_7_days_amount = df.loc[df['transtime'] >= last_7_days, 'amount'].sum()
-                last_24_hours_amount = df.loc[df['transtime'] >= last_24_hours, 'amount'].sum()
-
-            # Store results in the org_transactions dictionary
             org_transactions[org] = {
                 'total_amount': total_amount,
                 'last_30_days_amount': last_30_days_amount,
@@ -996,7 +1019,6 @@ def summary(request):
             }
 
         except Exception as e:
-            # If an error occurs, set all amounts to 0 and log the issue
             org_transactions[org] = {
                 'total_amount': 0,
                 'last_30_days_amount': 0,
@@ -1004,10 +1026,9 @@ def summary(request):
                 'last_24_hours_amount': 0,
             }
 
-
     for org in orgs:
         try:
-            data = fetch_data_index(f"allDeviceData{org}Django", rangeC)
+            data = fetch_data_index(f"allDeviceData{org}Django", 999999999)
             df = pd.DataFrame(data['rawData'])
             runtime_sum = sum(data['runtime'].values())
             devs = len(data['allDevs'])
@@ -1020,15 +1041,25 @@ def summary(request):
                 'kwh': kwh_sum,
                 'emissions': kwh_sum * 0.4999 * 0.28,
                 'cost': kwh_sum * 23.0,
-                'devs': devs
+                'devs': devs,
             }
         except Exception as e:
             org_data[org] = {"runtime": 0, "meals": 0, "kwh": 0}
-    
+
     total_customers = customerSummary['total_customers']
     customer_diff = customerSummary['customer_last_x_days'] - total_customers
-    churn_rate = total_customers / customer_diff if customer_diff != 0 else 0
-    portfolio_growth = customerSummary['total_customers']/customerSummary['customer_last_x_days'] if customerSummary['customer_last_x_days'] != 0 else 0
+
+    churn_rate = (customer_diff / total_customers) * 100 if total_customers != 0 else 0
+    portfolio_growth = (
+        (customerSummary['total_customers'] / customerSummary['customer_last_x_days']) * 100
+        if customerSummary['customer_last_x_days'] != 0
+        else 0
+    )
+    
+    paygo_data = fetch_data('paygoScode')
+    rar = calculate_rar(paygo_data)
+
+    month_growth = ((total_collected - last_month_in) / last_month_in) * 100 if last_month_in != 0 else 0
 
     context = {
         'customers_today': total_customers,
@@ -1038,8 +1069,12 @@ def summary(request):
         'org_data': org_data,
         'portfolio_growth': portfolio_growth,
         'org_transactions': org_transactions,
-        'total_collected': total_collected,
+        'total_collected': total_cash_in,
         'accounts': revenue_accounts,
-        'arpa': total_collected/len(revenue_accounts)
+        'arpa': total_collected / len(revenue_accounts) if revenue_accounts else 0,
+        'rar': rar,
+        'mrr': total_collected,
+        'month_growth': month_growth,
     }
+
     return render(request, 'summary.html', context)
