@@ -12,8 +12,8 @@
     <label class="labelArea">👥 <br>Active Customers:<br>{{ customers_today }}</label>
 </div>
 <div class="data-labels">
-    <label class="labelArea">📉 <br>Churn Rate:<br>{{ churn_rate }}</label>
-    <label class="labelArea">📈 <br>Portfolio Growth:<br>{{ portfolio_growth }}</label>
+    <label class="labelArea">📉 <br>Churn Rate:<br>{{ churn_rate|floatformat:1 }}</label>
+    <label class="labelArea">📈 <br>Portfolio Growth:<br>{{ portfolio_growth|floatformat:1 }}</label>
 </div>
     <div class="container">
         <table class="table">
