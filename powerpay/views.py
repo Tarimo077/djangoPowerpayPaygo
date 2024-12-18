@@ -56,7 +56,7 @@ def login_page(request):
         if user is not None:
             login(request, user)
             # Redirect to 'summary' only if the username is 'Kimiti' or 'Tarimo'
-            if user.username in ['Kimiti', 'Tarimo']:
+            if user.username in ['Kimiti', 'Tarimo', 'powerpayadmin1']:
                 return redirect('summary')
             else:
                 return redirect('home_page')
