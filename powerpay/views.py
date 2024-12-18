@@ -54,7 +54,11 @@ def login_page(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('home_page')
+            # Redirect to 'summary' only if the username is 'Kimiti' or 'Tarimo'
+            if user.username in ['Kimiti', 'Tarimo']:
+                return redirect('summary')
+            else:
+                return redirect('home_page')
         else:
             messages.error(request, 'Invalid username or password.')
     return render(request, 'login.html')
