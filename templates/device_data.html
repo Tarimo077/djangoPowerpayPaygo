@@ -1,5 +1,5 @@
 {% extends 'layout.html' %}
-
+{% load humanize %}
 {% block title %}
     Powerpay Africa: {{ device_id }} data
 {% endblock %}
@@ -167,10 +167,10 @@
         {% endif %}
 
         <div class="data-labels">
-            <label class="labelArea">🍳 <br>Cooking Time:<br>{{ runtime|floatformat:1 }} hours</label>
-            <label class="labelArea">⚡ <br>Total Energy:<br>{{ sum_kwh|floatformat:2 }} kWh</label>
+            <label class="labelArea">🍳 <br>Cooking Time:<br>{{ runtime|floatformat:1|intcomma }} hours</label>
+            <label class="labelArea">⚡ <br>Total Energy:<br>{{ sum_kwh|floatformat:2|intcomma }} kWh</label>
             <label class="labelArea">🤑 <br>Total Energy Cost:<br>KSHS. {{ energy_cost|floatformat:1 }}</label>
-            <label class="labelArea">🏭 <br>Emissions:<br>{{ emissions|floatformat:2 }} kg CO₂</label>
+            <label class="labelArea">🏭 <br>Emissions:<br>{{ emissions|floatformat:2|intcomma }} kg CO₂</label>
         </div>
         <h3 style="text-align:center">Cooking Events</h3>
         <div style="margin-bottom:20px; float:right;">

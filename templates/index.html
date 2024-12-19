@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-
+{% load humanize %}
 {% block title %}
     Powerpay Africa: Home
 {% endblock %}
@@ -73,8 +73,8 @@
             </select>
             </div>
         <div class="data-labels">
-            <label class="labelArea"><i class="fa fa-bolt" aria-hidden="true" style="margin-right:5px;"></i><br>Total Energy:<br>{{ sumKwh|floatformat:2 }} kWh</label>
-            <label class="labelArea"><i class="fa fa-usd" aria-hidden="true" style="margin-right:5px;"></i><br>Total Energy Cost:<br>KSHS. {{ sumEnergyCost|floatformat:1 }}</label>
+            <label class="labelArea"><i class="fa fa-bolt" aria-hidden="true" style="margin-right:5px;"></i><br>Total Energy:<br>{{ sumKwh|floatformat:2|intcomma }} kWh</label>
+            <label class="labelArea"><i class="fa fa-usd" aria-hidden="true" style="margin-right:5px;"></i><br>Total Energy Cost:<br>KSHS. {{ sumEnergyCost|floatformat:1|intcomma }}</label>
         </div>
         <div class="pie">
             <div class="meals-pie">{{ pie_chart|safe }}</div>
@@ -110,8 +110,8 @@
             </select>
             </div>
         <div class="data-labels">
-            <label class="labelArea">🍳 <br>Total Cooking Time:<br>{{ sumRuntime|floatformat:1 }} hours</label>
-            <label class="labelArea"><i class="fa fa-cutlery" aria-hidden="true" style="margin-right:5px;"></i> <br>Total Meals:<br>{{ sumMeals }} Meals</label>
+            <label class="labelArea">🍳 <br>Total Cooking Time:<br>{{ sumRuntime|floatformat:1|intcomma }} hours</label>
+            <label class="labelArea"><i class="fa fa-cutlery" aria-hidden="true" style="margin-right:5px;"></i> <br>Total Meals:<br>{{ sumMeals|intcomma }} Meals</label>
         </div>
         <div class="pie">
             <div class="meals-pie">{{ meals_pie_html|safe }}</div>
@@ -145,7 +145,7 @@
             </select>
             </div>
         <div class="data-labels">
-            <label class="labelArea"><i class="fa fa-industry" aria-hidden="true" style="margin-right:5px;"></i><br>Total Emissions:<br>{{ sumEmissions|floatformat:2 }} kg CO2</label>
+            <label class="labelArea"><i class="fa fa-industry" aria-hidden="true" style="margin-right:5px;"></i><br>Total Emissions:<br>{{ sumEmissions|floatformat:2|intcomma }} kg CO2</label>
         </div>
         <div class="pie">
             <div class="meals-pie">{{ pie_chart_emissions |safe }}</div>

@@ -1,5 +1,5 @@
 {% extends 'layout.html' %}
-
+{% load humanize %}
 {% block title %}Powerpay Africa: Paygo-Sale Details{% endblock %}
 
 {% block content %}
@@ -34,8 +34,8 @@
         {% endif %}
     "></span> {{paymentStatus.payment_status}}</p>
     <p><strong>Total Paid:</strong> {{paymentStatus.totalPaid}}</p>
-    <p><strong>Balance:</strong> {{paymentStatus.balance}}</p>
-    <p><strong>Paygo Balance:</strong> {{paymentStatus.paygoBalance}}</p>
+    <p><strong>Balance:</strong> {{paymentStatus.balance|intcomma}}</p>
+    <p><strong>Paygo Balance:</strong> {{paymentStatus.paygoBalance|intcomma}}</p>
     <p><strong>Schedule:</strong> {% if paymentStatus.payment_status == 'overdue' %}
         {{ paymentStatus.days }} {% if paymentStatus.days == 1 %}day{% else %}days{% endif %} behind payment
     {% elif paymentStatus.payment_status == 'on-time' %}
@@ -61,7 +61,7 @@
             <td class="table_content">{{ row.name }}</td>
             <td class="table_content">{{ row.ref }}</td>
             <td class="table_content">{{ row.id }}</td>
-            <td class="table_content">{{ row.amount }}</td>
+            <td class="table_content">{{ row.amount|intcomma }}</td>
             <td class="table_content">{{ row.transtime|date:"j M Y h:i:s A" }}</td>
         </tr>
         {% endfor %}

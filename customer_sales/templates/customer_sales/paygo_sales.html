@@ -1,5 +1,5 @@
 {% extends 'layout.html' %}
-
+{% load humanize %}
 {% block title %}Powerpay Africa: PayGo Sales(Metered){% endblock %}
 
 {% block content %}
@@ -70,8 +70,8 @@
                         {% endif %}
                     "></span> {{ sale.paymentData.payment_status }}
                 </td>
-                <td class="table_content">{{ sale.amount }}</td>
-                <td class="table_content">{{ sale.paymentData.paygoBalance }}</td>
+                <td class="table_content">{{ sale.amount|intcomma }}</td>
+                <td class="table_content">{{ sale.paymentData.paygoBalance|intcomma }}</td>
                 <td class="table_content">
                     {% if sale.paymentData.payment_status == 'overdue' %}
                         {{ sale.paymentData.days }} {% if sale.paymentData.days == 1 %}day{% else %}days{% endif %} behind payment
@@ -81,7 +81,7 @@
                         N/A
                     {% endif %}
                 </td>
-                <td class="table_content">{{ sale.paymentData.balance }}</td>
+                <td class="table_content">{{ sale.paymentData.balance|intcomma }}</td>
                 <td class="table_content">
                     <a href="{% url 'paygo_sale_detail' sale.id %}">🕵️‍♀️ Details</a> |
                     <a href="{% url 'customer_detail' sale.customer_id %}">👤 Customer</a> |
