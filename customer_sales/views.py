@@ -413,3 +413,32 @@ def export_sales_data(request):
     df.to_excel(response, index=False, engine='openpyxl')
 
     return response
+
+###############################DOWNLOAD PAYGO DATA###############################################################
+def export_paygo_data(request):
+    data = fetch_data('paygoScode')
+    for obj in data:
+        # Extract relevant fields from paymentData
+        payment_data = obj.pop("paymentData", {})
+        obj["balance"] = payment_data.get("balance", 0)
+        obj["paygo_balance"] = payment_data.get("paygoBalance", 0)
+        obj["payment_status"] = payment_data.get("payment_status", "unknown")
+        obj["days_past/to_payment_date"] = payment_data.get("days", 0)  # Days past/to payment day
+        obj["amount_paid"] = payment_data.get("totalPaid", 0)  # Rename amount to amount paid
+        obj.pop("date", None)
+        obj.pop("amount", None)
+    df = pd.DataFrame(data)
+    # Create the filename
+    fileName = "paygo_data.xlsx"
+    
+    # Create a HttpResponse with content_type as ms-excel
+    response = HttpResponse(content_type='application/vnd.ms-excel')
+    
+    # Specify the file name using f-string
+    response['Content-Disposition'] = f'attachment; filename="{fileName}"'
+    
+    # Use pandas to save the dataframe as an excel file in the response
+    df.to_excel(response, index=False, engine='openpyxl')
+
+    return response
+    

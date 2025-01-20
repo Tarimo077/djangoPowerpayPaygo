@@ -18,5 +18,6 @@ urlpatterns = [
     path('paygo_sales_non_metered/', views.paygo_sales_non_metered, name='paygo_sales_non_metered'),
     path('export/customers/', views.export_customer_data, name='export_customers'),
     path('export/sales/', views.export_sales_data, name='export_sales'),
+    path('export/paygoScode/', views.export_paygo_data, name='export_paygoscode'),
 ]
 

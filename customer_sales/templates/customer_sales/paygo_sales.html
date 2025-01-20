@@ -12,9 +12,12 @@
             <a href="{% url 'paygo_sales' %}" class="clear-search">Clear</a>
         </form>
     </div>
-    <div style="margin-bottom:20px">
+    <div style="margin-bottom:20px; display: flex; justify-content: space-between;">
         <form method="get" action="{% url 'sales_add' %}">
             <button type="submit" class="device_data_btn">Add New Sale</button>
+        </form>
+        <form method="get" action="{% url 'export_paygoscode' %}">
+            <button type="submit" class="device_data_btn">Export Paygo Data</button>
         </form>
     </div>
     <table class="table">
