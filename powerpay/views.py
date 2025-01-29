@@ -76,51 +76,57 @@ def logout_page(request):
 @login_required
 def homepage(request):
     usr = request.user.username
-    range = request.GET.get('range', 9999999)
+    range_value = request.GET.get('range', 9999999)
 
-    def fetch_and_process_data(range):
-        if usr == 'John-Maina':
-            data = fetch_data_index("allDeviceDataScodeDjango", range)
-        elif usr == 'Welight':
-            data = fetch_data_index("allDeviceDataWelightDjango", range)
-        elif usr == 'GIZ':
-            data = fetch_data_index("allDeviceDataGIZDjango", range)
-        else:
-            data = fetch_data_index("allDeviceDataDjango", range)
+    def fetch_and_process_data(range_value):
+        endpoint_mapping = {
+            'John-Maina': "allDeviceDataScodeDjango",
+            'Welight': "allDeviceDataWelightDjango",
+            'GIZ': "allDeviceDataGIZDjango",
+        }
+        endpoint = endpoint_mapping.get(usr, "allDeviceDataDjango")
 
-        # Check if the data response is empty
-        if data['totalkwh'] == 0 and data['runtime'] == 0 and not data['rawData']:
+        try:
+            data = fetch_data_index(endpoint, range_value)
+        except Exception as e:
+            messages.error(request, f"Error fetching data: {e}")
+            return None
+
+        if not data or (data.get('totalkwh') == 0 and data.get('runtime') == 0 and not data.get('rawData')):
             return None
 
         runtime = data['runtime']
         raw_data = data['rawData']
+        
+        if not raw_data:
+            return None  # Prevent unnecessary DataFrame creation
+
         df = pd.DataFrame(raw_data)
         data_list = df.to_dict(orient='records')
         meals, mls = classify_and_count_meals(data_list)
         morning, afternoon, night = categorize_kwh(data_list)
-        return runtime, data_list, meals, morning, afternoon, night
-    
-    processed_data = fetch_and_process_data(range)
 
-    # If no data is returned, refetch with default range
+        processed_data = (runtime, data_list, meals, morning, afternoon, night)
+        return processed_data
+
+    processed_data = fetch_and_process_data(range_value)
+
     if not processed_data:
         messages.warning(request, 'No data for the selected range. Showing default data.')
-        range = 9999999
-        processed_data = fetch_and_process_data(range)
-    
+        range_value = 9999999
+        processed_data = fetch_and_process_data(range_value)
+
     runtime, data_list, meals, morning, afternoon, night = processed_data
 
-    meal_counts = [info['count'] for device_id, info in meals.items()]
+    meal_counts = [info['count'] for info in meals.values()]
     sumKwh = sum(x['kwh'] for x in data_list)
     sumRuntime = sum(runtime.values())
     sumMeals = sum(meal_counts)
 
     charts = generate_charts(data_list, runtime, meals, morning, afternoon, night)
-    
-    # Step 1: Link meal data and kWh data with sales and customer data
     linked_data = linkAllDataAndKwh(request, meals, data_list)
     linked_data = pd.DataFrame(linked_data)
-    
+
     # Generate meal and kWh classifications
     locations, countries, genders, household_size, household_type, sales_reps, locations_kwh, countries_kwh, genders_kwh, household_size_kwh, household_type_kwh, sales_reps_kwh = plot_classifications(linked_data)
 
@@ -197,7 +203,6 @@ def linkAllDataAndKwh(request, devData, kwhData):
                 linked_data.append(linked_entry)
 
     return linked_data
-
 
 def plot_classifications(data):
     # Create a dictionary to store the HTML of each graph
