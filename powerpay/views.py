@@ -17,6 +17,7 @@ from django.http import HttpResponse
 from customer_sales.models import Customer, Sale, TestCustomer, TestSale
 from django.utils.timezone import now
 from calendar import monthrange
+from django.views.decorators.cache import cache_page
 
 # Constants
 BASE_URL = "https://appliapay.com/"
@@ -71,6 +72,7 @@ def logout_page(request):
     logout(request)
     return redirect('login')
 
+@cache_page(60 * 10)
 @login_required
 def homepage(request):
     usr = request.user.username
@@ -971,6 +973,7 @@ def calculate_rar(sales_data):
     rar = (total_overdue_risk / total_amount_due) * 100
     return rar
 
+@cache_page(60 * 10)
 def summary(request):
     customerSummary = get_customer_statistics(30)
     orgs = ['Scode', 'Welight', 'GIZ']
