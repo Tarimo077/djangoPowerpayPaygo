@@ -18,6 +18,7 @@ from customer_sales.models import Customer, Sale, TestCustomer, TestSale
 from django.utils.timezone import now
 from calendar import monthrange
 from django.views.decorators.cache import cache_page
+from django.core.cache import cache
 
 # Constants
 BASE_URL = "https://appliapay.com/"
@@ -72,12 +73,18 @@ def logout_page(request):
     logout(request)
     return redirect('login')
 
-@cache_page(60 * 60)
+# Custom function to generate a cache key based on user
+def get_user_cache_key(user):
+    return f"homepage_cache_{user.username}"
+
+# View with user-based caching
 @login_required
+@cache_page(60 * 60)  # Cache the page for 1 hour
 def homepage(request):
     usr = request.user.username
     range_value = request.GET.get('range', 9999999)
 
+    # Define function to fetch and process data
     def fetch_and_process_data(range_value):
         endpoint_mapping = {
             'John-Maina': "allDeviceDataScodeDjango",
@@ -109,15 +116,24 @@ def homepage(request):
         processed_data = (runtime, data_list, meals, morning, afternoon, night)
         return processed_data
 
-    processed_data = fetch_and_process_data(range_value)
+    # Try fetching data from cache (stored in cache using custom cache key)
+    cache_key = get_user_cache_key(request.user)
+    processed_data = cache.get(cache_key)
 
     if not processed_data:
-        messages.warning(request, 'No data for the selected range. Showing default data.')
-        range_value = 9999999
         processed_data = fetch_and_process_data(range_value)
+
+        if not processed_data:
+            messages.warning(request, 'No data for the selected range. Showing default data.')
+            range_value = 9999999
+            processed_data = fetch_and_process_data(range_value)
+
+        # Store the result in the cache with a timeout of 60 minutes
+        cache.set(cache_key, processed_data, timeout=60 * 60)  # Cache for 1 hour
 
     runtime, data_list, meals, morning, afternoon, night = processed_data
 
+    # Summing up data for charts and other outputs
     meal_counts = [info['count'] for info in meals.values()]
     sumKwh = sum(x['kwh'] for x in data_list)
     sumRuntime = sum(runtime.values())
@@ -144,7 +160,7 @@ def homepage(request):
         'sumEmissions': sumKwh * 0.28 * 0.4999,
         'sumEnergyCost': sumKwh * 23.0,
         'sumMeals': sumMeals,
-        'selected_range': str(range),
+        'selected_range': str(range_value),
         'meals': meals,
         'linked_data': linked_data,
         'location_graph': locations,
@@ -162,6 +178,7 @@ def homepage(request):
     }
 
     return render(request, 'index.html', context)
+
 
 
 def linkAllDataAndKwh(request, devData, kwhData):
