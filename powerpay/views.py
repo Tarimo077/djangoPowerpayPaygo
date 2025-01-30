@@ -73,16 +73,21 @@ def logout_page(request):
     logout(request)
     return redirect('login')
 
-# Custom function to generate a cache key based on user
-def get_user_cache_key(user):
-    return f"homepage_cache_{user.username}"
+def get_user_cache_key(user, range_value):
+    """Generate a cache key based on username and range."""
+    return f"homepage_data_{user.username}_{range_value}"
 
-# View with user-based caching
-@login_required
-@cache_page(60 * 60)  # Cache the page for 1 hour
 def homepage(request):
     usr = request.user.username
     range_value = request.GET.get('range', 9999999)
+
+    # Generate cache key
+    cache_key = get_user_cache_key(request.user, range_value)
+
+    # Check if context is already cached
+    cached_context = cache.get(cache_key)
+    if cached_context:
+        return render(request, 'index.html', cached_context)  # Re-render with cached context
 
     # Define function to fetch and process data
     def fetch_and_process_data(range_value):
@@ -116,20 +121,13 @@ def homepage(request):
         processed_data = (runtime, data_list, meals, morning, afternoon, night)
         return processed_data
 
-    # Try fetching data from cache (stored in cache using custom cache key)
-    cache_key = get_user_cache_key(request.user)
-    processed_data = cache.get(cache_key)
+    # Fetch and process data if not cached
+    processed_data = fetch_and_process_data(range_value)
 
     if not processed_data:
+        messages.warning(request, 'No data for the selected range. Showing default data.')
+        range_value = 9999999
         processed_data = fetch_and_process_data(range_value)
-
-        if not processed_data:
-            messages.warning(request, 'No data for the selected range. Showing default data.')
-            range_value = 9999999
-            processed_data = fetch_and_process_data(range_value)
-
-        # Store the result in the cache with a timeout of 60 minutes
-        cache.set(cache_key, processed_data, timeout=60 * 60)  # Cache for 1 hour
 
     runtime, data_list, meals, morning, afternoon, night = processed_data
 
@@ -146,7 +144,7 @@ def homepage(request):
     # Generate meal and kWh classifications
     locations, countries, genders, household_size, household_type, sales_reps, locations_kwh, countries_kwh, genders_kwh, household_size_kwh, household_type_kwh, sales_reps_kwh = plot_classifications(linked_data)
 
-    # Output result
+    # Create context dictionary
     context = {
         'line_chart': charts['line_chart'],
         'pie_chart': charts['pie_chart'],
@@ -176,6 +174,9 @@ def homepage(request):
         'household_type_graph_kwh': household_type_kwh,
         'sales_reps_graph_kwh': sales_reps_kwh
     }
+
+    # Cache the context for 1 hour
+    cache.set(cache_key, context, timeout=60 * 60)  
 
     return render(request, 'index.html', context)
 
