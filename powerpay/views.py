@@ -79,15 +79,15 @@ def get_user_cache_key(user, range_value):
 
 def homepage(request):
     usr = request.user.username
-    range_value = request.GET.get('range', 9999999)
+    range_value = request.GET.get('range', 9999999)  # Default range value
 
-    # Generate cache key
+    # Generate cache key based on user and range
     cache_key = get_user_cache_key(request.user, range_value)
 
-    # Check if context is already cached
-    cached_context = cache.get(cache_key)
-    if cached_context:
-        return render(request, 'index.html', cached_context)  # Re-render with cached context
+    # Check if the entire page context is cached
+    cached_page = cache.get(cache_key)
+    if cached_page:
+        return cached_page  # Return the cached page directly
 
     # Define function to fetch and process data
     def fetch_and_process_data(range_value):
@@ -175,11 +175,11 @@ def homepage(request):
         'sales_reps_graph_kwh': sales_reps_kwh
     }
 
-    # Cache the context for 1 hour
-    cache.set(cache_key, context, timeout=60 * 60)  
+    # Cache the entire page context for 1 hour
+    response = render(request, 'index.html', context)
+    cache.set(cache_key, response, timeout=60*60)  # Cache the full response
 
-    return render(request, 'index.html', context)
-
+    return response
 
 
 def linkAllDataAndKwh(request, devData, kwhData):
