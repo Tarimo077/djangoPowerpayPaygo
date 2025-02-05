@@ -1,17 +1,17 @@
 {% extends 'layout.html' %}
 {% load humanize %}
 {% block title %}
-    Powerpay Africa: {{ device_id }} data
+    Powerpay Africa: {{ deviceID }} data
 {% endblock %}
 
 {% block content %}
     <div class="container">
-        <h2>Device Data for {{ device_id }}</h2> 
+        <h2>Device Data for {{ deviceID }}</h2> 
         <div style="padding: 10px; margin-bottom:10px"> 
             <label>Choose another device: </label>
             <select name="device" id="deviceDropdown" class="dropdown">
             {% for dev in dev_List %}
-                <option value="{{ dev }}" {% if dev == device_id %}selected{% endif %}><strong>{{ dev }}</strong></option>
+                <option value="{{ dev }}" {% if dev == deviceID %}selected{% endif %}><strong>{{ dev }}</strong></option>
             {% endfor %}
             </select>
             <div style="padding: 10px; margin-bottom:10px">
@@ -33,14 +33,10 @@
                 <option value="483840" {% if selected_range == '483840' %}selected{% endif %}>1 year</option>
                 <option value="1451520" {% if selected_range == '1451520' %}selected{% endif %}>3 years</option>
             </select>
+            
+                {% include 'partials/switchWLabel.html' %}           
             </div>
-            <div class="switch-container">
-                <label class="switch-label">{% if status %}Turn Off {{device_id}}: {% else %} Turn On {{device_id}}: {% endif %} </label>
-                <label class="switch">
-                    <input type="checkbox" id="statusSwitch" {% if status %}checked{% endif %}>
-                    <span class="slider round"></span>
-                </label>
-            </div>
+            
         </div>
 
         <script>
@@ -56,39 +52,6 @@
                 window.location.href = '/device/' + selectedDevice + '/?range=' + selectedRange;
             });
 
-            document.getElementById('statusSwitch').addEventListener('change', function() {
-                var isChecked = this.checked;
-                var confirmMessage = isChecked ? 
-                    'Are you sure you want to turn on {{ device_id }}?' : 
-                    'Are you sure you want to turn off {{ device_id }}?';
-
-                if (confirm(confirmMessage)) {
-                    var csrfToken = '{{ csrf_token }}';
-                    var username = 'admin';  // Replace with your actual username
-                    var password = '123Give!@#';  // Replace with your actual password
-                    var credentials = btoa(username + ':' + password);  // Base64 encode the credentials
-
-                    fetch('https://appliapay.com/changeStatus', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Basic ' + credentials,
-                            'X-CSRFToken': csrfToken  // Include the CSRF token if needed
-                        },
-                        body: JSON.stringify({ selectedDev: '{{ device_id }}', status: !isChecked })
-                    }).then(response => {
-                        if (!response.ok) {
-                            alert('Failed to update status');
-                            this.checked = !isChecked;  // Revert the toggle state on failure
-                        }
-                    }).catch(error => {
-                        alert('Error: ' + error);
-                        this.checked = !isChecked;  // Revert the toggle state on error
-                    });
-                } else {
-                    this.checked = !isChecked;  // Revert the toggle state if not confirmed
-                }
-            });
         </script>
 
         <style>
@@ -160,7 +123,7 @@
                 background-color: #e68a00; 
             }
         </style>
-        {% if device_id == "device14"%}
+        {% if deviceID == "device14"%}
         <div style="margin-bottom:20px;margin-left:10px;float:left;">
             <a href="{% url 'live_page' %}" class="add-device-btn">Live Window</a>
         </div>
@@ -174,7 +137,7 @@
         </div>
         <h3 style="text-align:center">Cooking Events</h3>
         <div style="margin-bottom:20px; float:right;">
-            <a href="{% url 'export_device_data' device_id=device_id range=selected_range %}" class="add-device-btn">Export Cooking Data</a>
+            <a href="{% url 'export_device_data' device_id=deviceID range=selected_range %}" class="add-device-btn">Export Cooking Data</a>
         </div>
         <div class="container">
             <table class="table">

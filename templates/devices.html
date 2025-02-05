@@ -32,28 +32,7 @@ Powerpay Africa: Devices
         </thead>
         <tbody>
             {% for row in devices_table %}
-            <tr>
-                <td class="table_content">{{ row.deviceID }}</td>
-                {% if row.active %}
-                <td class="table_content">ON</td>
-                {% else %}
-                <td class="table_content">OFF</td>
-                {% endif %}
-                
-                <td class="table_content">{{ row.time|date:"j M Y h:i:s A" }}</td>
-                <td class="table_content">
-                <label class="switch">
-                    <input type="checkbox" class="statusSwitch" data-device-id="{{ row.deviceID }}" {% if row.active %}checked{% endif %}>
-                    <span class="slider round"></span>
-                </label>
-                </td>
-                <td class="table_content">
-                    <form method="get" action="{% url 'device_data_page' device_id=row.deviceID %}">
-                        <!-- <input type="hidden" name="all_devices" value="{{ device_list|join:',' }}"> -->
-                        <button type="submit" class="device_data_btn"> {{ row.deviceID }} data</button>
-                    </form>
-                </td>
-            </tr>
+               {% include 'partials/device_row.html' %}
             {% endfor %}
         </tbody>
     </table>
@@ -77,7 +56,7 @@ Powerpay Africa: Devices
         </span>
     </div>
 </div>
-
+<!-- 
 <script>
     document.querySelectorAll('.statusSwitch').forEach(switchElement => {
         switchElement.addEventListener('change', function() {
@@ -116,6 +95,7 @@ Powerpay Africa: Devices
         });
     });
 </script>
+-->
 <style>
     .switch {
         position: relative;

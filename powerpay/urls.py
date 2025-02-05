@@ -37,7 +37,7 @@ urlpatterns = [
     path('payment_confirmation_status', views.payment_confirmation_status, name='payment_confirmation_status'),
     path('payment_confirmation_page/', views.payment_confirmation_page, name='payment_confirmation_page'),
     path('devices/', views.devices_page, name='devices_page'),
-    path('device/<str:device_id>/', views.device_data_page, name='device_data_page'),
+    path('device/<str:deviceID>/', views.device_data_page, name='device_data_page'),
     path('export/device_data/<str:device_id>/<str:range>', views.export_device_data, name='export_device_data'),
     path('export/ml-data/', views.export_ml_dataset, name='export_ml_data'),
     path('export/<str:set>/', views.export_ml, name='export_ml'),
@@ -49,6 +49,8 @@ urlpatterns = [
     path('password_reset_confirm/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='password_reset_confirm.html'), name='password_reset_confirm'),
     path('password_reset_complete/', auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'), name='password_reset_complete'),
     path('summary/', views.summary, name='summary'),
+    path('change_device_status/', views.change_device_status, name='change_device_status'),
+    path('status_dev/', views.status_dev, name='status_dev')
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -320,7 +320,7 @@ def devices_page(request):
 
         # Convert 'time' to datetime format
         data['time'] = pd.to_datetime(data['time'], format="%Y-%m-%dT%H:%M:%S.%fZ")
-
+        data['time'] = data['time'] + timedelta(hours=3)
         # Handle search query
         query = request.GET.get('q')
         if query:
@@ -345,6 +345,95 @@ def devices_page(request):
     }
 
     return render(request, 'devices.html', context)
+
+
+def change_device_status(request):
+    if request.method == "POST":
+        try:
+            # ✅ Parse form data instead of JSON
+            selected_dev = request.POST.get("selectedDev")
+            status = request.POST.get("status") == "true"  # Convert string "true"/"false" to boolean
+
+            print(f"Device: {selected_dev}, Status: {status}")  # Debugging
+
+            # ✅ Send request to external API
+            response = requests.post("https://appliapay.com/changeStatus", json={
+                "selectedDev": selected_dev,
+                "status": not status
+            })
+
+            response_data = response.json()  # Parse response
+            print(f"Response: { response.status_code }")
+
+            if response.status_code == 200:
+                # ✅ Extract updated values from API response
+                new_device_id = response_data.get("selectedDev", selected_dev)
+                new_status = response_data.get("status")
+                updated_time = pd.to_datetime(response_data.get("time"), format="%Y-%m-%dT%H:%M:%S.%fZ")
+
+                # ✅ Render updated row
+                return render(
+                    request,
+                    "partials/device_row.html",
+                    {
+                        "row": {
+                            "deviceID": new_device_id,
+                            "active": new_status,
+                            "time": updated_time
+                        }
+                    },
+                )
+            else:
+                return JsonResponse({"error": "Failed to update device status"}, status=500)
+
+        except requests.exceptions.RequestException as e:
+            return JsonResponse({"error": f"External API error: {str(e)}"}, status=500)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+def status_dev(request):
+    print('aye')
+    if request.method == "POST":
+        try:
+            print('hit')
+            # ✅ Parse form data instead of JSON
+            selected_dev = request.POST.get("selectedDev")
+            status = request.POST.get("status") == "true"  # Convert string "true"/"false" to boolean
+
+            print(f"Device: {selected_dev}, Status: {status}")  # Debugging
+
+            # ✅ Send request to external API
+            response = requests.post("https://appliapay.com/changeStatus", json={
+                "selectedDev": selected_dev,
+                "status": not status
+            })
+
+            response_data = response.json()  # Parse response
+            print(f"Response: { response.status_code }")
+
+            if response.status_code == 200:
+                # ✅ Extract updated values from API response
+                new_device_id = response_data.get("selectedDev", selected_dev)
+                new_status = response_data.get("status")
+                updated_time = pd.to_datetime(response_data.get("time"), format="%Y-%m-%dT%H:%M:%S.%fZ")
+
+                # ✅ Render updated row
+                return render(
+                    request,
+                    "partials/switchWLabel.html",
+                    {
+                            "deviceID": new_device_id,
+                            "active": new_status,
+                            "time": updated_time
+                    },
+                )
+            else:
+                return JsonResponse({"error": "Failed to update device status"}, status=500)
+
+        except requests.exceptions.RequestException as e:
+            return JsonResponse({"error": f"External API error: {str(e)}"}, status=500)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
 
 
 def classify_and_count_meals(data):
@@ -702,10 +791,10 @@ def payment_waiting(request, ref):
 
 
 @login_required
-def device_data_page(request, device_id):
+def device_data_page(request, deviceID):
     range_value = request.GET.get('range', 9999999)
     # Fetch data based on device_id and range_value
-    data = fetch_data_with_params("deviceDataDjangoo", device_id, range_value)
+    data = fetch_data_with_params("deviceDataDjangoo", deviceID, range_value)
     runtime = data['runtime']
     sum_kwh = data['sumKwh']
     emissions = sum_kwh * 0.4999 * 0.28
@@ -770,7 +859,7 @@ def device_data_page(request, device_id):
     else:
         dat = fetch_data("command")
     for z in dat:
-        if z["deviceID"] == device_id:
+        if z["deviceID"] == deviceID:
             status = z["active"]
     dat = pd.DataFrame(dat)
     if not dat.empty:
@@ -796,7 +885,7 @@ def device_data_page(request, device_id):
     dev_List = dat['deviceID'].tolist()
 
     context = {
-        "device_id": str(device_id),  # Ensure device_id is a string
+        "deviceID": str(deviceID),  # Ensure device_id is a string
         "runtime": runtime,
         "sum_kwh": sum_kwh,
         "emissions": emissions,
@@ -806,7 +895,7 @@ def device_data_page(request, device_id):
         "metrics_chart": metrics_chart,  # Pass the metrics chart HTML to the template
         "energy_cost": energy_cost,
         "dev_List": dev_List,  # Ensure dev_List is a list of strings
-        "status": status,
+        "active": status,
         "selected_range": str(range_value)
     }
 

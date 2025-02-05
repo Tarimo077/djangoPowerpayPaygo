@@ -1,0 +1,114 @@
+<tr id="device-{{ row.deviceID }}">
+    <td class="table_content">{{ row.deviceID }}</td>
+
+    <td class="table_content">
+        {% if row.active %}
+            ON
+        {% else %}
+            OFF
+        {% endif %}
+    </td>
+
+    <td class="table_content">{{ row.time|date:"j M Y h:i:s A" }}</td>
+
+    <td class="table_content">
+        <label class="switch">
+            <input type="checkbox" class="statusSwitch" 
+                data-device-id="{{ row.deviceID }}"
+                {% if row.active %}checked{% endif %}
+                hx-post="{% url 'change_device_status' %}"
+                hx-trigger="click"
+                hx-target="#device-{{ row.deviceID }}"
+                hx-swap="outerHTML"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}", "Content-Type": "application/json"}'
+                hx-ext="json-enc"
+                hx-vals='{"selectedDev": "{{ row.deviceID }}", "status": {{ row.active|yesno:"false,true" }}}'>
+
+            <span class="slider round"></span>
+        </label>
+    </td>
+
+    <td class="table_content">
+        <form method="get" action="{% url 'device_data_page' deviceID=row.deviceID %}">
+            <button type="submit" class="device_data_btn"> {{ row.deviceID }} data</button>
+        </form>
+    </td>
+</tr>
+
+<!-- SweetAlert Confirmation for HTMX -->
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script>
+document.body.addEventListener('htmx:confirm', function(evt) {
+    let target = evt.target;
+
+    if (target.matches(".statusSwitch")) {
+        evt.preventDefault();  // Stop HTMX from executing immediately
+
+        let deviceID = target.dataset.deviceId;
+        let isChecked = target.checked;
+        let action = isChecked ? "activate" : "deactivate";
+
+        swal({
+            title: `Confirm Action`,
+            text: `Are you sure you want to ${action} ${deviceID}?`,
+            icon: "warning",
+            buttons: {
+                cancel: {
+                    text: "Cancel",
+                    value: false,
+                    visible: true,
+                    className: "swal-cancel-btn",
+                    closeModal: true,
+                },
+                confirm: {
+                    text: `${action.charAt(0).toUpperCase() + action.slice(1)}`,
+                    value: true,
+                    visible: true,
+                    className: "swal-confirm-btn",
+                    closeModal: true,
+                },
+            },
+            dangerMode: true,
+        }).then((confirmed) => {
+            if (confirmed) {
+                evt.detail.issueRequest(); // Proceed with HTMX request
+            } else {
+                target.checked = !isChecked; // Revert checkbox state
+            }
+        });
+    }
+});
+</script>
+
+<!-- Custom Styles for the SweetAlert Dialog -->
+<style>
+/* Customizing the SweetAlert buttons */
+.swal-confirm-btn {
+    background-color: #28a745 !important; /* Green confirm button */
+    color: white !important;
+    border-radius: 5px !important;
+    padding: 10px 20px !important;
+}
+
+.swal-cancel-btn {
+    background-color: #dc3545 !important; /* Red cancel button */
+    color: white !important;
+    border-radius: 5px !important;
+    padding: 10px 20px !important;
+}
+
+/* Customizing the dialog text */
+.swal-text {
+    font-size: 16px !important;
+    color: #333 !important;
+    font-family: "Poppins", sans-serif !important;
+}
+
+/* Customizing the dialog title */
+.swal-title {
+    font-size: 20px !important;
+    font-weight: bold !important;
+    color: #444 !important;
+    font-family: "Poppins", sans-serif !important;
+}
+</style>
