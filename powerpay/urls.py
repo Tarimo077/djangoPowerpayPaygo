@@ -50,7 +50,8 @@ urlpatterns = [
     path('password_reset_complete/', auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'), name='password_reset_complete'),
     path('summary/', views.summary, name='summary'),
     path('change_device_status/', views.change_device_status, name='change_device_status'),
-    path('status_dev/', views.status_dev, name='status_dev')
+    path('status_dev/', views.status_dev, name='status_dev'),
+    path('export_bulk_device_data/', views.export_bulk_device_data, name='export_bulk_device_data'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

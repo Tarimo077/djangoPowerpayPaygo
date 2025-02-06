@@ -937,10 +937,14 @@ def export_transactions_excel(request, range):
 
     # Convert the data to a DataFrame
     df = pd.DataFrame(data)
-
-    # Convert 'transtime' to datetime format
-    df['transtime'] = pd.to_datetime(df['transtime'], format='%Y%m%d%H%M%S')
-
+    
+    if usr == 'SAF':
+        df['name'] = '**REDACTED**'
+        df['ref'] = '**REDACTED**'
+        df['transtime'] = pd.to_datetime(df['transtime'], format='%Y%m%d%H%M%S').dt.strftime('%Y-%m-%dT%H:%M:%S')
+    else:
+        # Convert 'transtime' to datetime format
+        df['transtime'] = pd.to_datetime(df['transtime'], format='%Y%m%d%H%M%S')
     # Sort the data by 'transtime' in descending order
     df = df.sort_values(by='transtime', ascending=False)
 
@@ -977,6 +981,27 @@ def export_device_data(request, device_id, range):
     
     # Create the filename
     fileName = f"{device_id}_cooking_data.xlsx"
+    
+    # Create a HttpResponse with content_type as ms-excel
+    response = HttpResponse(content_type='application/vnd.ms-excel')
+    
+    # Specify the file name using f-string
+    response['Content-Disposition'] = f'attachment; filename="{fileName}"'
+    
+    # Use pandas to save the dataframe as an excel file in the response
+    df.to_excel(response, index=False, engine='openpyxl')
+
+    return response
+
+#######################BULK METER DATA FOR SAF###################################################
+def export_bulk_device_data(request):
+     # Fetch data based on device_id and range_value
+    data = fetch_data("bulkDeviceData")
+    # Convert the data to a DataFrame
+    df = pd.DataFrame(data)
+    
+    # Create the filename
+    fileName = f"bulk_meter_data.xlsx"
     
     # Create a HttpResponse with content_type as ms-excel
     response = HttpResponse(content_type='application/vnd.ms-excel')

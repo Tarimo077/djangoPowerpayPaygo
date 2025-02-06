@@ -54,8 +54,8 @@
             <tbody>
                 {% for row in transactions_table %}
                 <tr>
-                    <td class="table_content">{{ row.name }}</td>
-                    <td class="table_content">{{ row.ref }}</td>
+                    <td class="table_content"> {%if user.first_name == 'Kelvin'%} **REDACTED** {% else %}{{ row.name }} {% endif %}</td>
+                    <td class="table_content">{%if user.first_name == 'Kelvin'%} **REDACTED** {% else %}{{ row.ref }} {% endif %}</td>
                     <td class="table_content">{{ row.id }}</td>
                     <td class="table_content">{{ row.amount|intcomma }}</td>
                     <td class="table_content">{{ row.transtime|date:"j M Y h:i:s A" }}</td>

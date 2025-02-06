@@ -19,6 +19,11 @@ Powerpay Africa: Devices
 {% if user.username == "powerpayadmin1" or user.username == "nbolasya@powerpayafrica.com" %}
 <a href="{% url 'add_device' %}" class="add-device-btn">Add New Device</a>
 {% endif %}
+{% if user.first_name == 'Kelvin' or user.first_name == 'Jeff' or user.first_name == 'Geoffrey' %}
+<div style="margin-bottom:20px; float:right;">
+    <a href="{% url 'export_bulk_device_data' %}" class="add-device-btn">Export Bulk Device Data</a>
+</div>
+{% endif %}
 </div>
     <table class="table">
         <thead>
