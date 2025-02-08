@@ -1,6 +1,10 @@
 # admin.py
 from django.contrib import admin
-from .models import Customer, Sale, TestCustomer, TestSale
+from .models import Customer, Sale, TestCustomer, TestSale, userProfile
+
+@admin.register(userProfile)
+class userProfileAdmin(admin.ModelAdmin):
+    list_display = ('tnc_flag', 'org_name')
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):

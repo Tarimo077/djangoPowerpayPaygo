@@ -14,7 +14,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import HttpResponse
-from customer_sales.models import Customer, Sale, TestCustomer, TestSale
+from customer_sales.models import Customer, Sale, TestCustomer, TestSale, userProfile
 from django.utils.timezone import now
 from calendar import monthrange
 from django.views.decorators.cache import cache_page
@@ -49,22 +49,58 @@ def fetch_data_accounts(endpoint, acc):
     response.raise_for_status()
     return response.json()
 
+def terms_of_service(request):
+    return render(request, 'terms_of_service.html')
 
 def login_page(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
+        
         if user is not None:
+            user_profile, created = userProfile.objects.get_or_create(user=user)
+
+            # If T&C not accepted, show popup (but don't log in yet)
+            if not user_profile.tnc_flag:
+                print(username)
+                return render(request, 'partials/tnc_popup.html', {'username': username, 'p': password})
+
+            # Log in and redirect
             login(request, user)
-            # Redirect to 'summary' only if the username is 'Kimiti' or 'Tarimo'
             if user.username in ['Kimiti', 'Tarimo', 'powerpayadmin1']:
                 return redirect('summary')
-            else:
-                return redirect('home_page')
+            return redirect('home_page')
+        
         else:
             messages.error(request, 'Invalid username or password.')
+
     return render(request, 'login.html')
+
+def accept_tnc(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)  # Parse JSON body
+            username = data.get('username')
+            password = data.get('p')
+
+            print("Received Username:", username)
+
+            user = authenticate(username=username, password=password)
+            if user:
+                user_profile, created = userProfile.objects.get_or_create(user=user)
+                user_profile.tnc_flag = True
+                user_profile.save()
+
+                login(request, user)
+                return JsonResponse({'success': True, 'redirect_url': '/'})  # Redirect to home_page
+
+            return JsonResponse({'error': 'User not found'}, status=404)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 def live_page(request):
     return render(request, 'live.html')
