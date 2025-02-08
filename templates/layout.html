@@ -193,7 +193,10 @@
                 // Assuming you have a variable `username` in your template context
                 const username = "{{ user.first_name }}";
                 const time = formatTime(now);
-                document.getElementById('greeting-bar').innerText = `⌚ ${time} | ${greeting}, ${username}`;
+                document.getElementById('greeting-bar').innerHTML = ` <a id="terms-link" href="{% url 'terms_of_service' %}" target="_blank" rel="noopener noreferrer" style=" color: #fff; margin-right:5px;">
+                         Read our Terms of Service
+                    </a>  | ⌚ ${time} | ${greeting}, ${username} `;
+
             }
 
             // Call the updateGreeting function initially
