@@ -15,7 +15,7 @@ Powerpay Africa: Devices
 <a href="{% url 'devices_page' %}" class="clear-search">Clear</a>
 </form>
 </div>
-<div style="margin-bottom:20px; float:right;">
+<div style="margin-bottom:20px; float:right; display: inline-block">
 {% if user.username == "powerpayadmin1" or user.username == "nbolasya@powerpayafrica.com" %}
 <a href="{% url 'add_device' %}" class="add-device-btn">Add New Device</a>
 {% endif %}
