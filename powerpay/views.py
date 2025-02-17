@@ -14,7 +14,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import HttpResponse
-from customer_sales.models import Customer, Sale, TestCustomer, TestSale, userProfile
+from customer_sales.models import Customer, Sale, TestCustomer, TestSale, userProfile, SayonaCustomer, SayonaSale
 from django.utils.timezone import now
 from calendar import monthrange
 from django.views.decorators.cache import cache_page
@@ -131,6 +131,7 @@ def homepage(request):
             'John-Maina': "allDeviceDataScodeDjango",
             'Welight': "allDeviceDataWelightDjango",
             'GIZ': "allDeviceDataGIZDjango",
+            'Sayona': "allDeviceDataSayonaDjango",
         }
         endpoint = endpoint_mapping.get(usr, "allDeviceDataDjango")
 
@@ -221,9 +222,20 @@ def homepage(request):
 def linkAllDataAndKwh(request, devData, kwhData):
     user = request.user
     # Choose the model based on user
-    CustomerModel = TestCustomer if user.first_name == 'Welight' else Customer
+    if user.first_name == 'Welight':
+        CustomerModel = TestCustomer
+    elif user.first_name == 'Sayona':
+        CustomerModel = SayonaCustomer
+    else:
+        CustomerModel = Customer
     customer_data = CustomerModel.objects.all().values()
-    SaleModel = TestSale if user.first_name == 'Welight' else Sale
+    # Choose the model based on user
+    if user.first_name == 'Welight':
+        SaleModel = TestSale
+    elif user.first_name == 'Sayona':
+        SaleModel = SayonaSale
+    else:
+        SaleModel = Sale
     sales_data = SaleModel.objects.all().values()
     linked_data = []
 
@@ -336,6 +348,8 @@ def devices_page(request):
         data = fetch_data("commandWelight")
     elif usr == 'GIZ':
         data = fetch_data("commandGIZ")
+    elif usr == 'Sayona':
+        data = fetch_data("commandSayona")
     else:
         data = fetch_data("command")
     data = pd.DataFrame(data)
@@ -890,6 +904,8 @@ def device_data_page(request, deviceID):
         dat = fetch_data("commandScode")
     elif usr == 'Welight':
         dat = fetch_data("commandWelight")
+    elif usr == 'Sayona':
+        dat = fetch_data("commandSayona")
     elif usr == 'GIZ':
         dat = fetch_data("commandGIZ")
     else:

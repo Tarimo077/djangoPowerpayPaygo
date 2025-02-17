@@ -1,6 +1,6 @@
 # admin.py
 from django.contrib import admin
-from .models import Customer, Sale, TestCustomer, TestSale, userProfile
+from .models import Customer, Sale, TestCustomer, TestSale, userProfile, SayonaCustomer, SayonaSale
 
 @admin.register(userProfile)
 class userProfileAdmin(admin.ModelAdmin):
@@ -15,12 +15,21 @@ class SaleAdmin(admin.ModelAdmin):
     list_display = ('product_name', 'product_model', 'customer', 'registration_date')
 
 
-##############FOR TEST PURPOSES ONLY##################
+############## FOR WELIGHT ##################
 @admin.register(TestCustomer)
 class TestCustomerAdmin(admin.ModelAdmin):
     list_display = ('name', 'id_number', 'phone_number')
 
 @admin.register(TestSale)
 class TestSaleAdmin(admin.ModelAdmin):
+    list_display = ('product_name', 'product_model', 'customer', 'registration_date')
+
+############## FOR SAYONA ##################
+@admin.register(SayonaCustomer)
+class SayonaCustomerAdmin(admin.ModelAdmin):
+    list_display = ('name', 'id_number', 'phone_number')
+
+@admin.register(SayonaSale)
+class SayonaSaleAdmin(admin.ModelAdmin):
     list_display = ('product_name', 'product_model', 'customer', 'registration_date')
 

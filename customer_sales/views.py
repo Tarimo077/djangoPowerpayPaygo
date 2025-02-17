@@ -1,8 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.core.paginator import Paginator
-from .models import Customer, Sale, TestCustomer, TestSale
-from .forms import CustomerForm, SaleForm, TestCustomerForm, TestSaleForm
+from .models import Customer, Sale, TestCustomer, TestSale, SayonaCustomer, SayonaSale
+from .forms import CustomerForm, SaleForm, TestCustomerForm, TestSaleForm, SayonaCustomerForm, SayonaSaleForm
 from datetime import timedelta
 import requests
 from requests.auth import HTTPBasicAuth
@@ -39,7 +39,12 @@ def customers_list(request):
     query = request.GET.get('q')
     user = request.user
     # Choose the model based on user
-    CustomerModel = TestCustomer if user.first_name == 'Welight' else Customer
+    if user.first_name == 'Welight':
+        CustomerModel = TestCustomer
+    elif user.first_name == 'Sayona':
+        CustomerModel = SayonaCustomer
+    else:
+        CustomerModel = Customer
     # Query the appropriate model
     if query:
         customers = CustomerModel.objects.filter(name__icontains=query)
@@ -58,7 +63,12 @@ def customer_detail(request, pk):
     user = request.user
     
     # Choose the correct customer model based on the user
-    CustomerModel = TestCustomer if user.first_name == 'Welight' else Customer
+    if user.first_name == 'Welight':
+        CustomerModel = TestCustomer
+    elif user.first_name == 'Sayona':
+        CustomerModel = SayonaCustomer
+    else:
+        CustomerModel = Customer
     
     # Get the customer
     customer = get_object_or_404(CustomerModel, pk=pk)
@@ -67,7 +77,13 @@ def customer_detail(request, pk):
     registration_time = customer.date + timedelta(hours=3)
     
     # Choose the correct sales model based on the user
-    SaleModel = TestSale if user.first_name == 'Welight' else Sale
+    # Choose the model based on user
+    if user.first_name == 'Welight':
+        SaleModel = TestSale
+    elif user.first_name == 'Sayona':
+        SaleModel = SayonaSale
+    else:
+        SaleModel = Sale
     
     # Pull the sales associated with this customer
     sales = SaleModel.objects.filter(customer=customer)
@@ -87,6 +103,9 @@ def customer_edit(request, pk):
     if user.first_name == 'Welight':
         CustomerModel = TestCustomer
         CustomerFormClass = TestCustomerForm
+    elif user.first_name == 'Sayona':
+        CustomerModel = SayonaCustomer
+        CustomerFormClass = SayonaCustomerForm
     else:
         CustomerModel = Customer
         CustomerFormClass = CustomerForm
@@ -110,7 +129,12 @@ def customer_edit(request, pk):
 def customer_delete(request, pk):
     user = request.user
     # Choose the model based on user
-    CustomerModel = TestCustomer if user.first_name == 'Welight' else Customer
+    if user.first_name == 'Welight':
+        CustomerModel = TestCustomer
+    elif user.first_name == 'Sayona':
+        CustomerModel = SayonaCustomer
+    else:
+        CustomerModel = Customer
     customer = get_object_or_404(CustomerModel, pk=pk)
     if request.method == 'POST':
         customer.delete()
@@ -125,6 +149,8 @@ def add_customer(request):
         # Use TestCustomerForm if the user is from Welight, otherwise use CustomerForm
         if user.first_name == 'Welight':
             form = TestCustomerForm(request.POST)
+        elif user.first_name == 'Sayona':
+            form - SayonaCustomer(request.POST)
         else:
             form = CustomerForm(request.POST)
 
@@ -138,6 +164,8 @@ def add_customer(request):
         # Ensure you use the correct form based on the user's first name
         if user.first_name == 'Welight':
             form = TestCustomerForm()
+        elif user.first_name == 'Sayona':
+            form = SayonaCustomerForm()
         else:
             form = CustomerForm()
 
@@ -152,6 +180,9 @@ def sale_add(request, customer_id=None):
     if user.first_name == 'Welight':
         CustomerModel = TestCustomer
         SaleFormClass = TestSaleForm  # Use TestSaleForm for Welight users
+    elif user.first_name == 'Sayona':
+        CustomerModel = SayonaCustomer
+        SaleFormClass = SayonaSaleForm
     else:
         CustomerModel = Customer
         SaleFormClass = SaleForm  # Use SaleForm for regular users
@@ -178,7 +209,12 @@ def sales_list(request):
     query = request.GET.get('q')
     user = request.user
     # Choose the model based on user
-    SaleModel = TestSale if user.first_name == 'Welight' else Sale
+    if user.first_name == 'Welight':
+        SaleModel = TestSale
+    elif user.first_name == 'Sayona':
+        SaleModel = SayonaSale
+    else:
+        SaleModel = Sale
     if query:
         sales = SaleModel.objects.filter(product_name__icontains=query)
     else:
@@ -193,18 +229,34 @@ def sales_list(request):
 def sale_detail(request, pk):
     user = request.user
     # Choose the model based on user
-    SaleModel = TestSale if user.first_name == 'Welight' else Sale
+    # Choose the model based on user
+    if user.first_name == 'Welight':
+        SaleModel = TestSale
+    elif user.first_name == 'Sayona':
+        SaleModel = SayonaSale
+    else:
+        SaleModel = Sale
     sale = get_object_or_404(SaleModel, pk=pk)
     return render(request, 'customer_sales/sale_detail.html', {'sale': sale})
 
 def sale_edit(request, pk):
     user = request.user
     # Choose the model based on user
-    SaleModel = TestSale if user.first_name == 'Welight' else Sale
+    if user.first_name == 'Welight':
+        SaleModel = TestSale
+    elif user.first_name == 'Sayona':
+        SaleModel = SayonaSale
+    else:
+        SaleModel = Sale
     sale = get_object_or_404(SaleModel, pk=pk)
 
     # Choose the correct form based on user
-    SaleFormClass = TestSaleForm if user.first_name == 'Welight' else SaleForm
+    if user.first_name == 'Welight':
+        SaleFormClass = TestSaleForm
+    elif user.first_name == 'Sayona':
+        SaleFormClass = SayonaSaleForm
+    else:
+        SaleFormClass = SaleForm
 
     if request.method == 'POST':
         form = SaleFormClass(request.POST, instance=sale)
@@ -222,7 +274,12 @@ def sale_edit(request, pk):
 def sale_delete(request, pk):
     user = request.user
     # Choose the model based on user
-    SaleModel = TestSale if user.first_name == 'Welight' else Sale
+    if user.first_name == 'Welight':
+        SaleModel = TestSale
+    elif user.first_name == 'Sayona':
+        SaleModel = SayonaSale
+    else:
+        SaleModel = Sale
     sale = get_object_or_404(SaleModel, pk=pk)
     if request.method == 'POST':
         sale.delete()
@@ -368,7 +425,12 @@ def paygo_sales_non_metered(request):
 def export_customer_data(request):
     user = request.user
     # Choose the model based on user
-    CustomerModel = TestCustomer if user.first_name == 'Welight' else Customer
+    if user.first_name == 'Welight':
+        CustomerModel = TestCustomer
+    elif user.first_name == 'Sayona':
+        CustomerModel = SayonaCustomer
+    else:
+        CustomerModel = Customer
     customers = CustomerModel.objects.all().values()
     df = pd.DataFrame(customers)
     # Convert any datetime columns to timezone-unaware
@@ -393,7 +455,12 @@ def export_customer_data(request):
 def export_sales_data(request):
     user = request.user
     # Choose the model based on user
-    SaleModel = TestSale if user.first_name == 'Welight' else Sale
+    if user.first_name == 'Welight':
+        SaleModel = TestSale
+    elif user.first_name == 'Sayona':
+        SaleModel = SayonaSale
+    else:
+        SaleModel = Sale
     sales = SaleModel.objects.all().values()
     df = pd.DataFrame(sales)
     # Convert any datetime columns to timezone-unaware
