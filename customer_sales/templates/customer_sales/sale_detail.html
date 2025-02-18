@@ -7,7 +7,7 @@
     <h2>Sale Details</h2>
     <p><strong>Product Name:</strong> {{ sale.product_name }}</p>
     <p><strong>Product Model:</strong> {{ sale.product_model }}</p>
-    <p><strong>Product Serial Number:</strong> {{ sale.product_serial_number }} <form method="get" action="{% url 'device_data_page' device_id=sale.product_serial_number %}">
+    <p><strong>Product Serial Number:</strong> {{ sale.product_serial_number }} <form method="get" action="{% url 'device_data_page' deviceID=sale.product_serial_number %}">
         <button type="submit" class="device_data_btn"> {{ sale.product_serial_number }} data</button>
     </form></p>
     <p><strong>Registration Date:</strong> {{ sale.registration_date|date:"d M Y " }}</p>
