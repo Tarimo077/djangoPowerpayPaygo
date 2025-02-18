@@ -86,7 +86,7 @@
                 </td>
                 <td class="table_content">{{ sale.paymentData.balance }}</td>
                 <td class="table_content">
-                    <a href="{% url 'sale_detail' sale.id %}">🕵️‍♀️ Details</a> |
+                    <a href="{% url 'paygo_sale_detail' sale.id %}">🕵️‍♀️ Details</a> |
                     <a href="{% url 'customer_detail' sale.customer_id %}">👤 Customer</a> |
                     {% if sale.paymentData.payment_status == 'overdue' %}
                     <form method="get" action="{% url 'payment_prompt' %}" style="display:inline;">
