@@ -12,11 +12,13 @@
             <a href="{% url 'sales_list' %}" class="clear-search">Clear</a>
         </form>
     </div>
+    {% if user.first_name != 'Sayona-Guest' %}
     <div style="margin-bottom:20px">
     <form method="get" action="{% url 'sales_add' %}">
         <button type="submit" class="device_data_btn">Add New Sale</button>
     </form>
     </div>
+    {% endif %}
     <div style="margin-bottom:20px; float:right;">
         <a href="{% url 'export_sales' %}" class="add-device-btn">Export Sales Data</a>
     </div>
@@ -40,9 +42,10 @@
                 <td class="table_content">{{ sale.get_purchase_mode_display}}</td>
                 <td class="table_content">{{ sale.customer.name }}</td>
                 <td class="table_content">
-                    <a href="{% url 'sale_detail' sale.pk %}">🕵️‍♀️ Details</a> |
+                    <a href="{% url 'sale_detail' sale.pk %}">🕵️‍♀️ Details</a> {% if user.first_name != 'Sayona-Guest' %} |
                     <a href="{% url 'sale_edit' sale.pk %}">📝 Edit</a> |
                     <a href="{% url 'sale_delete' sale.pk %}">❌ Delete</a>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}

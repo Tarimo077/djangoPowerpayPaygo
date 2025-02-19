@@ -132,6 +132,7 @@ def homepage(request):
             'Welight': "allDeviceDataWelightDjango",
             'GIZ': "allDeviceDataGIZDjango",
             'Sayona': "allDeviceDataSayonaDjango",
+            'Sayona-Guest': "allDeviceDataSayonaDjango",
         }
         endpoint = endpoint_mapping.get(usr, "allDeviceDataDjango")
 
@@ -224,7 +225,7 @@ def linkAllDataAndKwh(request, devData, kwhData):
     # Choose the model based on user
     if user.first_name == 'Welight':
         CustomerModel = TestCustomer
-    elif user.first_name == 'Sayona':
+    elif user.first_name in ['Sayona', 'Sayona-Guest']:
         CustomerModel = SayonaCustomer
     else:
         CustomerModel = Customer
@@ -232,7 +233,7 @@ def linkAllDataAndKwh(request, devData, kwhData):
     # Choose the model based on user
     if user.first_name == 'Welight':
         SaleModel = TestSale
-    elif user.first_name == 'Sayona':
+    elif user.first_name in ['Sayona', 'Sayona-Guest']:
         SaleModel = SayonaSale
     else:
         SaleModel = Sale
@@ -348,7 +349,7 @@ def devices_page(request):
         data = fetch_data("commandWelight")
     elif usr == 'GIZ':
         data = fetch_data("commandGIZ")
-    elif usr == 'Sayona':
+    elif usr in ['Sayona', 'Sayona-Guest']:
         data = fetch_data("commandSayona")
     else:
         data = fetch_data("command")
@@ -904,7 +905,7 @@ def device_data_page(request, deviceID):
         dat = fetch_data("commandScode")
     elif usr == 'Welight':
         dat = fetch_data("commandWelight")
-    elif usr == 'Sayona':
+    elif usr in ['Sayona', 'Sayona-Guest']:
         dat = fetch_data("commandSayona")
     elif usr == 'GIZ':
         dat = fetch_data("commandGIZ")

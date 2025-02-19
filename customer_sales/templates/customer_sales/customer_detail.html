@@ -66,11 +66,12 @@
             {% endfor %}
         </tbody>
     </table>
+    {% if user.first_name != 'Sayona-Guest' %}
     <div>
     <form method="get" action="{% url 'sale_add' customer.pk %}">
         <button type="submit" class="device_data_btn">Add Sale</button>
     </form>
     </div>
-    <a href="{}" class="btn btn-primary"></a>
+    {% endif %}
 </div>
 {% endblock %}

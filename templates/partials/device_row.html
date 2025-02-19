@@ -10,7 +10,7 @@
     </td>
 
     <td class="table_content">{{ row.time|date:"j M Y h:i:s A" }}</td>
-
+    {% if user.first_name != 'Sayona-Guest' %}
     <td class="table_content">
         <label class="switch">
             <input type="checkbox" class="statusSwitch" 
@@ -27,6 +27,7 @@
             <span class="slider round"></span>
         </label>
     </td>
+    {% endif %}
 
     <td class="table_content">
         <form method="get" action="{% url 'device_data_page' deviceID=row.deviceID %}">

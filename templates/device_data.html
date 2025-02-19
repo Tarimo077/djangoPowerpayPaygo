@@ -33,8 +33,9 @@
                 <option value="483840" {% if selected_range == '483840' %}selected{% endif %}>1 year</option>
                 <option value="1451520" {% if selected_range == '1451520' %}selected{% endif %}>3 years</option>
             </select>
-            
-                {% include 'partials/switchWLabel.html' %}           
+                {% if user.first_name != 'Sayona-Guest' %}
+                {% include 'partials/switchWLabel.html' %}  
+                {% endif %}         
             </div>
             
         </div>

@@ -31,7 +31,9 @@ Powerpay Africa: Devices
                 <th class="table_headers">Device Name</th>
                 <th class="table_headers">Status</th>
                 <th class="table_headers">Last Status Change</th>
+                {% if user.first_name != 'Sayona-Guest' %}
                 <th class="table_headers">Control</th>
+                {% endif %}
                 <th class="table_headers">Device Data</th>
             </tr>
         </thead>

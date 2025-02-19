@@ -41,7 +41,7 @@ def customers_list(request):
     # Choose the model based on user
     if user.first_name == 'Welight':
         CustomerModel = TestCustomer
-    elif user.first_name == 'Sayona':
+    elif user.first_name in ['Sayona', 'Sayona-Guest']:
         CustomerModel = SayonaCustomer
     else:
         CustomerModel = Customer
@@ -65,7 +65,7 @@ def customer_detail(request, pk):
     # Choose the correct customer model based on the user
     if user.first_name == 'Welight':
         CustomerModel = TestCustomer
-    elif user.first_name == 'Sayona':
+    elif user.first_name in ['Sayona', 'Sayona-Guest']:
         CustomerModel = SayonaCustomer
     else:
         CustomerModel = Customer
@@ -80,7 +80,7 @@ def customer_detail(request, pk):
     # Choose the model based on user
     if user.first_name == 'Welight':
         SaleModel = TestSale
-    elif user.first_name == 'Sayona':
+    elif user.first_name in ['Sayona', 'Sayona-Guest']:
         SaleModel = SayonaSale
     else:
         SaleModel = Sale
@@ -103,7 +103,7 @@ def customer_edit(request, pk):
     if user.first_name == 'Welight':
         CustomerModel = TestCustomer
         CustomerFormClass = TestCustomerForm
-    elif user.first_name == 'Sayona':
+    elif user.first_name in ['Sayona', 'Sayona-Guest']:
         CustomerModel = SayonaCustomer
         CustomerFormClass = SayonaCustomerForm
     else:
@@ -131,7 +131,7 @@ def customer_delete(request, pk):
     # Choose the model based on user
     if user.first_name == 'Welight':
         CustomerModel = TestCustomer
-    elif user.first_name == 'Sayona':
+    elif user.first_name in ['Sayona', 'Sayona-Guest']:
         CustomerModel = SayonaCustomer
     else:
         CustomerModel = Customer
@@ -149,7 +149,7 @@ def add_customer(request):
         # Use TestCustomerForm if the user is from Welight, otherwise use CustomerForm
         if user.first_name == 'Welight':
             form = TestCustomerForm(request.POST)
-        elif user.first_name == 'Sayona':
+        elif user.first_name in ['Sayona', 'Sayona-Guest']:
             form - SayonaCustomer(request.POST)
         else:
             form = CustomerForm(request.POST)
@@ -164,7 +164,7 @@ def add_customer(request):
         # Ensure you use the correct form based on the user's first name
         if user.first_name == 'Welight':
             form = TestCustomerForm()
-        elif user.first_name == 'Sayona':
+        elif user.first_name in ['Sayona', 'Sayona-Guest']:
             form = SayonaCustomerForm()
         else:
             form = CustomerForm()
@@ -180,7 +180,7 @@ def sale_add(request, customer_id=None):
     if user.first_name == 'Welight':
         CustomerModel = TestCustomer
         SaleFormClass = TestSaleForm  # Use TestSaleForm for Welight users
-    elif user.first_name == 'Sayona':
+    elif user.first_name in ['Sayona', 'Sayona-Guest']:
         CustomerModel = SayonaCustomer
         SaleFormClass = SayonaSaleForm
     else:
@@ -211,7 +211,7 @@ def sales_list(request):
     # Choose the model based on user
     if user.first_name == 'Welight':
         SaleModel = TestSale
-    elif user.first_name == 'Sayona':
+    elif user.first_name in ['Sayona', 'Sayona-Guest']:
         SaleModel = SayonaSale
     else:
         SaleModel = Sale
@@ -232,7 +232,7 @@ def sale_detail(request, pk):
     # Choose the model based on user
     if user.first_name == 'Welight':
         SaleModel = TestSale
-    elif user.first_name == 'Sayona':
+    elif user.first_name in ['Sayona', 'Sayona-Guest']:
         SaleModel = SayonaSale
     else:
         SaleModel = Sale
@@ -244,7 +244,7 @@ def sale_edit(request, pk):
     # Choose the model based on user
     if user.first_name == 'Welight':
         SaleModel = TestSale
-    elif user.first_name == 'Sayona':
+    elif user.first_name in ['Sayona', 'Sayona-Guest']:
         SaleModel = SayonaSale
     else:
         SaleModel = Sale
@@ -253,7 +253,7 @@ def sale_edit(request, pk):
     # Choose the correct form based on user
     if user.first_name == 'Welight':
         SaleFormClass = TestSaleForm
-    elif user.first_name == 'Sayona':
+    elif user.first_name in ['Sayona', 'Sayona-Guest']:
         SaleFormClass = SayonaSaleForm
     else:
         SaleFormClass = SaleForm
@@ -276,7 +276,7 @@ def sale_delete(request, pk):
     # Choose the model based on user
     if user.first_name == 'Welight':
         SaleModel = TestSale
-    elif user.first_name == 'Sayona':
+    elif user.first_name in ['Sayona', 'Sayona-Guest']:
         SaleModel = SayonaSale
     else:
         SaleModel = Sale
@@ -427,7 +427,7 @@ def export_customer_data(request):
     # Choose the model based on user
     if user.first_name == 'Welight':
         CustomerModel = TestCustomer
-    elif user.first_name == 'Sayona':
+    elif user.first_name in ['Sayona', 'Sayona-Guest']:
         CustomerModel = SayonaCustomer
     else:
         CustomerModel = Customer
@@ -457,7 +457,7 @@ def export_sales_data(request):
     # Choose the model based on user
     if user.first_name == 'Welight':
         SaleModel = TestSale
-    elif user.first_name == 'Sayona':
+    elif user.first_name in ['Sayona', 'Sayona-Guest']:
         SaleModel = SayonaSale
     else:
         SaleModel = Sale
