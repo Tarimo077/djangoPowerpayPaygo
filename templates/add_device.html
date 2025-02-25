@@ -15,15 +15,49 @@ Powerpay Africa: Add Device
     </form>
 </div>
 
+<!-- Use SweetAlert2 instead of outdated SweetAlert -->
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 <script>
     document.getElementById('addDeviceForm').addEventListener('submit', function(event) {
-        event.preventDefault();
+        event.preventDefault(); // Prevent default form submission
+
         var deviceName = document.getElementById('device_name').value;
-        if (confirm(`Are you sure you want to add the device: ${deviceName}?`)) {
-            this.submit();
-        }
+
+        swal({
+            title: `Add New Device`,
+            text: `Are you sure you want to add ${deviceName}?`,
+            icon: "warning",
+            buttons: {
+                cancel: {
+                    text: "Cancel",
+                    value: false,
+                    visible: true,
+                    className: "swal-cancel-btn",
+                    closeModal: true,
+                },
+                confirm: {
+                    text: `Yes`,
+                    value: true,
+                    visible: true,
+                    className: "swal-confirm-btn",
+                    closeModal: true,
+                },
+            },
+            dangerMode: true,
+        }).then((confirmed) => {
+            if (confirmed) {
+                // If confirmed, proceed with submission
+                if (event.detail && event.detail.issueRequest) {
+                    event.detail.issueRequest(); // For HTMX requests
+                } else {
+                    event.target.submit(); // Normal form submission
+                }
+            } 
+            // If canceled, do nothing (spinner won't start)
+        });
     });
 </script>
+
 
 <style>
     .container {
@@ -48,7 +82,22 @@ Powerpay Africa: Add Device
         color: white;
         font-size: 16px;
         cursor: pointer;
-        width: 100px;
+        width: 150px;
+    }
+
+    /* Custom SweetAlert2 Styles */
+    .swal-confirm-btn {
+        background-color: #28a745 !important;
+        color: white !important;
+        border-radius: 5px !important;
+        padding: 10px 20px !important;
+    }
+
+    .swal-cancel-btn {
+        background-color: #dc3545 !important;
+        color: white !important;
+        border-radius: 5px !important;
+        padding: 10px 20px !important;
     }
 </style>
 {% endblock %}

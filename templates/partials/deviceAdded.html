@@ -1,0 +1,58 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let device = "{{ device }}";  // Ensure device is treated as a string
+
+    Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: `${device} added successfully`,
+        showCancelButton: false,
+        confirmButtonText: "OK",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        customClass: {
+            confirmButton: "swal-confirm-btn"
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '/devices/';
+        } 
+    });
+});
+</script>
+
+<!-- Custom Styles for SweetAlert2 -->
+<style>
+    .swal-confirm-btn {
+        background-color: #28a745 !important;
+        color: white !important;
+        border-radius: 5px !important;
+        padding: 10px 20px !important;
+    }
+
+    .swal-cancel-btn {
+        background-color: #dc3545 !important;
+        color: white !important;
+        border-radius: 5px !important;
+        padding: 10px 20px !important;
+    }
+
+    .swal2-title {
+        font-size: 20px !important;
+        font-weight: bold !important;
+        color: #444 !important;
+        font-family: "Poppins", sans-serif !important;
+    }
+
+    .swal2-html-container {
+        font-size: 16px !important;
+        color: #333 !important;
+        font-family: "Poppins", sans-serif !important;
+    }
+</style>
+{% endblock %}
