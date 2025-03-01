@@ -1171,7 +1171,7 @@ def calculate_rar(sales_data):
 @cache_page(60 * 60)
 def summary(request):
     customerSummary = get_customer_statistics(30)
-    orgs = ['Scode', 'Welight', 'GIZ']
+    orgs = ['Scode', 'Welight', 'GIZ', 'Sayona']
     revenue_orgs = ['Powerpay Africa', 'Scode']
     revenue_accounts = ['319403', '4121691_scode']
     total_collected = 0
