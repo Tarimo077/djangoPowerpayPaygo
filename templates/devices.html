@@ -1,5 +1,5 @@
 {% extends 'layout.html' %}
-
+{% load humanize %}
 {% block title %}
 Powerpay Africa: Devices
 {% endblock %}
@@ -7,6 +7,11 @@ Powerpay Africa: Devices
 {% block content %}
 <h2>Devices</h2>
 <div class="container">
+<div class="data-labels">
+        <label class="labelArea"><i class="fa fa-cogs" aria-hidden="true"></i>&emsp;Total Devices:<br>{{ total_count|intcomma }} </label>
+        <label class="labelArea"><i class="fa fa-battery-full" aria-hidden="true"></i>&emsp;Active Devices:<br>{{ active_count|intcomma }} </label>
+        <label class="labelArea"><i class="fa fa-battery-empty" aria-hidden="true"></i>&emsp;Inactive Devices:<br>{{ inactive_count|intcomma }}</label>
+</div>
 <div class="search-container">
 <!-- Search form -->
 <form method="get" action="{% url 'devices_page' %}">
@@ -15,16 +20,16 @@ Powerpay Africa: Devices
 <a href="{% url 'devices_page' %}" class="clear-search">Clear</a>
 </form>
 </div>
-<div style="margin-bottom:20px; float:right; display: inline-block">
+<div style="margin-bottom:20px; float:left; display: inline-block">
 {% if user.username == "powerpayadmin1" or user.username == "nbolasya@powerpayafrica.com" or user.username == "Tarimo" %}
 <a href="{% url 'add_device' %}" class="add-device-btn">Add New Device</a>
 {% endif %}
+</div>
 {% if user.first_name == 'Kelvin' or user.first_name == 'Jeff' or user.first_name == 'Geoffrey' %}
 <div style="margin-bottom:20px; float:right;">
     <a href="{% url 'export_bulk_device_data' %}" class="add-device-btn">Export Bulk Device Data</a>
 </div>
 {% endif %}
-</div>
     <table class="table">
         <thead>
             <tr>

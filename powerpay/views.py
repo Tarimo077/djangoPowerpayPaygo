@@ -353,29 +353,38 @@ def devices_page(request):
         data = fetch_data("commandSayona")
     else:
         data = fetch_data("command")
+
     data = pd.DataFrame(data)
+    
     if not data.empty:
         # Sorting and handling different naming conventions
         def sort_key(x):
             if x == 'OfficeFridge1':
-                return float('inf')
-            elif x.startswith('device'):
-                return int(x.split('device')[-1])
+                return (4, float('inf'))  # Always last
             elif x.startswith('JD-29ED'):
-                return int(x.split('JD-29ED')[-1])
+                return (0, int(x.split('JD-29ED')[-1]))  # Sorted first
+            elif x.isdigit():  # Pure numeric device IDs
+                return (1, int(x))  # Sorted second
+            elif x.startswith('device'):
+                return (2, int(x.split('device')[-1]))  # Sorted third
             else:
-                return float('inf') - 1
-        
+                return (3, float('inf') - 1)  # Other strings sorted fourth
+
         data['sort_key'] = data['deviceID'].apply(sort_key)
         data = data.sort_values(by='sort_key')
 
         # Convert 'time' to datetime format
         data['time'] = pd.to_datetime(data['time'], format="%Y-%m-%dT%H:%M:%S.%fZ")
         data['time'] = data['time'] + timedelta(hours=3)
+
         # Handle search query
         query = request.GET.get('q')
         if query:
             data = data[data['deviceID'].str.lower().str.contains(query.lower())]
+
+        # Get counts of active and inactive devices
+        active_count = data[data['active'] == True].shape[0]
+        inactive_count = data[data['active'] == False].shape[0]
 
         # Convert the DataFrame to a list of dictionaries
         devices_list = data.to_dict(orient='records')
@@ -386,16 +395,21 @@ def devices_page(request):
         page_obj = paginator.get_page(page_number)
     else:
         page_obj = []
+        active_count = 0
+        inactive_count = 0
 
     device_list = [device['deviceID'] for device in devices_list]
-
     context = {
         'devices_table': page_obj,
         'query': query,
-        'device_list': device_list  # Add the device list to the context
+        'device_list': device_list,  # Add the device list to the context
+        'active_count': active_count,  # Add active devices count
+        'inactive_count': inactive_count,  # Add inactive devices count
+        'total_count': active_count + inactive_count
     }
 
     return render(request, 'devices.html', context)
+
 
 
 def change_device_status(request):

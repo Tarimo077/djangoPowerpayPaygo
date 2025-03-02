@@ -13,14 +13,14 @@
         </form>
     </div>
     {% if user.first_name != 'Sayona-Guest' %}
-    <div style="margin-bottom:20px">
+    <div style="margin-bottom:20px; float:left">
     <form method="get" action="{% url 'add_customer' %}">
         <!-- <input type="hidden" name="all_devices" value="{{ device_list|join:',' }}"> -->
         <button type="submit" class="device_data_btn">Add New Customer</button>
     </form>
     </div>
     {% endif %}
-    <div style="margin-bottom:20px; float:right;">
+    <div style="margin-bottom:10px; float:right;">
         <a href="{% url 'export_customers' %}" class="add-device-btn">Export Customer Data</a>
     </div>
     <table class="table">

@@ -7,7 +7,7 @@
     <h2>Sales</h2>
     <div class="search-container">
         <form method="get" action="{% url 'sales_list' %}">
-            <input type="text" name="q" value="{{ query }}" placeholder="Search Sale by product name">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search by serial number">
             <button type="submit">Search</button>
             <a href="{% url 'sales_list' %}" class="clear-search">Clear</a>
         </form>

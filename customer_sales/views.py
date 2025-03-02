@@ -9,6 +9,7 @@ from requests.auth import HTTPBasicAuth
 import pandas as pd
 from django.http import HttpResponse
 from datetime import datetime
+from collections import Counter
 
 # Constants
 BASE_URL = "https://appliapay.com/"
@@ -216,7 +217,7 @@ def sales_list(request):
     else:
         SaleModel = Sale
     if query:
-        sales = SaleModel.objects.filter(product_name__icontains=query)
+        sales = SaleModel.objects.filter(product_serial_number__icontains=query)
     else:
         sales = SaleModel.objects.all()
     
@@ -304,6 +305,15 @@ def paygo_sales(request):
 
     # Fetch sales data (assuming it's coming from an external source or model)
     sales_data = fetch_data('paygoScode')
+    total_sales = len(sales_data)
+    # Count the number of sales by payment status
+    status_counts = Counter(sale['paymentData'].get('payment_status', 'unknown') for sale in sales_data)
+
+    if query:
+        sales_data = [
+            sale for sale in sales_data
+            if query in sale['product_serial_number'].lower()
+        ]
 
     # Custom sorting function
     def sort_sales(data, sort_field, direction='asc'):
@@ -346,6 +356,10 @@ def paygo_sales(request):
         'sort_field': sort_field,
         'sort_direction': sort_direction,
         'query': query,
+        'fully_paid_count': status_counts.get('fully-paid', 0),
+        'on_time_count': status_counts.get('on-time', 0),
+        'overdue_count': status_counts.get('overdue', 0),
+        'total_count': total_sales
     }
     return render(request, 'customer_sales/paygo_sales.html', context)
 
@@ -376,6 +390,14 @@ def paygo_sales_non_metered(request):
 
     # Fetch sales data (assuming it's coming from an external source or model)
     sales_data = fetch_data('paygoScodeNonMetered')
+    total_sales = len(sales_data)
+    # Count the number of sales by payment status
+    status_counts = Counter(sale['paymentData'].get('payment_status', 'unknown') for sale in sales_data)
+    if query:
+        sales_data = [
+            sale for sale in sales_data
+            if query in sale['product_serial_number'].lower()
+        ]
 
     # Custom sorting function
     def sort_sales(data, sort_field, direction='asc'):
@@ -418,6 +440,10 @@ def paygo_sales_non_metered(request):
         'sort_field': sort_field,
         'sort_direction': sort_direction,
         'query': query,
+        'fully_paid_count': status_counts.get('fully-paid', 0),
+        'on_time_count': status_counts.get('on-time', 0),
+        'overdue_count': status_counts.get('overdue', 0),
+        'total_count': total_sales
     }
     return render(request, 'customer_sales/paygo_sales_non_metered.html', context)
 

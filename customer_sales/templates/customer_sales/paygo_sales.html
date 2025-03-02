@@ -5,9 +5,15 @@
 {% block content %}
 <div class="container">
     <h2>PayGo Sales(Metered)</h2>
+    <div class="data-labels">
+        <label class="labelArea"><i class="fa fa-cogs" aria-hidden="true"></i>&emsp;Total Paygo Devices:<br>{{ total_count|intcomma }} </label>
+        <label class="labelArea"><i class="fa fa-check-circle" aria-hidden="true"></i>&emsp;Fully-Paid Devices:<br>{{ fully_paid_count|intcomma }} </label>
+        <label class="labelArea"><i class="fa fa-calendar-check" aria-hidden="true"></i></i>&emsp;On-Time Devices:<br>{{ on_time_count|intcomma }}</label>
+        <label class="labelArea"><i class="fa fa-exclamation-circle" aria-hidden="true"></i>&emsp;Overdue Devices:<br>{{ overdue_count|intcomma }}</label>
+</div>
     <div class="search-container">
         <form method="get" action="{% url 'paygo_sales' %}">
-            <input type="text" name="q" value="{{ query }}" placeholder="Search Sale by product name">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search by serial number">
             <button type="submit">Search</button>
             <a href="{% url 'paygo_sales' %}" class="clear-search">Clear</a>
         </form>
