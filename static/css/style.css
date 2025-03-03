@@ -300,6 +300,92 @@ form button:hover {
     border-radius: 10px;
 }
 
+.chart-container {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #0ead00; 
+    border-radius: 10px;
+}
+
+.dashboard-container {
+    display: flex;
+    align-items: stretch; /* Makes both elements equal height */
+    gap: 20px;
+    height:50%;
+}
+
+.data-label {
+    background: #0ead00;
+    color: white;
+    padding: 5px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
+.data-label i {
+    font-size: 24px;
+    display: block;
+    margin-bottom: 5px;
+    margin-top: 5px;
+}
+
+.data-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    width: 50%;
+    justify-content: center;
+}
+
+.device-card {
+    background-color: #0ead00; /* Green background */
+    color: white; /* White text */
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    text-align: center; /* Center title */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h3 {
+    margin: 0;
+    padding-bottom: 10px;
+}
+
+.device-stats {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.device-stats p {
+    margin: 0;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+.device-stats span {
+    margin-left: 5px;
+    font-weight: normal;
+}
+
+.divider {
+    width: 5px;
+    height: 40px;
+    background-color: white; /* White divider */
+}
+
 .labelArea {
     background-color: #0ead00;
     color: #fff;

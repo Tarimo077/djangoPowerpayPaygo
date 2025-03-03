@@ -70,7 +70,7 @@ def login_page(request):
             login(request, user)
             if user.username in ['Kimiti', 'Tarimo', 'powerpayadmin1']:
                 return redirect('summary')
-            return redirect('home_page')
+            return redirect('landing_page')
         
         else:
             messages.error(request, 'Invalid username or password.')
@@ -112,6 +112,127 @@ def logout_page(request):
 def get_user_cache_key(user, range_value):
     """Generate a cache key based on username and range."""
     return f"homepage_data_{user.username}_{range_value}"
+
+def get_user_cache_key_landing_page(user):
+    return f"landingpage_data_{user}"
+
+def landingpage(request):
+    usr = request.user.username
+    # Generate cache key based on user and range
+    cache_key = get_user_cache_key_landing_page(usr)
+
+    # Check if the entire page context is cached
+    cached_page = cache.get(cache_key)
+    if cached_page:
+        return cached_page  # Return the cached page directly
+
+    if usr == 'John-Maina':
+        devs = fetch_data("commandScode")
+        CustomerModel = Customer
+        SaleModel = Sale
+    elif usr == 'Welight':
+        devs = fetch_data("commandWelight")
+        CustomerModel = TestCustomer
+        SaleModel = TestSale
+    elif usr == 'GIZ':
+        devs = fetch_data("commandGIZ")
+        CustomerModel = TestCustomer
+        SaleModel = TestSale
+    elif usr in ['Sayona', 'Sayona-Guest']:
+        devs = fetch_data("commandSayona")
+        CustomerModel = SayonaCustomer
+        SaleModel = SayonaSale
+    else:
+        devs = fetch_data("command")
+        CustomerModel = Customer
+        SaleModel = Sale
+
+    devs = pd.DataFrame(devs)
+    active_count = devs[devs['active'] == True].shape[0]
+    inactive_count = devs[devs['active'] == False].shape[0]
+    total_customers = CustomerModel.objects.count() if usr != 'GIZ' else 0
+    total_sales = SaleModel.objects.count() if usr != 'GIZ' else 0
+
+    # Define function to fetch and process data
+    def fetch_and_process_data():
+        endpoint_mapping = {
+            'John-Maina': "allDeviceDataScodeDjango",
+            'Welight': "allDeviceDataWelightDjango",
+            'GIZ': "allDeviceDataGIZDjango",
+            'Sayona': "allDeviceDataSayonaDjango",
+            'Sayona-Guest': "allDeviceDataSayonaDjango",
+        }
+        endpoint = endpoint_mapping.get(usr, "allDeviceDataDjango")
+
+        try:
+            data = fetch_data_index(endpoint, 9999999)
+        except Exception as e:
+            messages.error(request, f"Error fetching data: {e}")
+            return None
+
+        if not data or (data.get('totalkwh') == 0 and data.get('runtime') == 0 and not data.get('rawData')):
+            return None
+
+        runtime = data['runtime']
+        top_devices = sorted(runtime.items(), key=lambda x: x[1], reverse=True)[:3]
+        sumRuntime = sum(runtime.values())
+        totalKwh = data['totalkwh']
+        return sumRuntime, totalKwh, data['rawData'], top_devices
+    
+    runtime, kwh, rawData, top_devices = fetch_and_process_data()
+    df = pd.DataFrame(rawData)
+    df['txtime'] = pd.to_datetime(df['txtime'], format='%Y%m%d%H%M%S')
+    df = df[df['kwh'] >= 0]
+    # Group by week
+    df['week'] = df['txtime'].dt.to_period('W').apply(lambda r: r.start_time)  # Get start of each week
+    df_weekly = df.groupby('week')['kwh'].sum().reset_index()
+
+    # Convert 'week' column back to datetime for plotting
+    df_weekly['week'] = pd.to_datetime(df_weekly['week'])
+
+    # Create filled line plot
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(
+        x=df_weekly['week'], 
+        y=df_weekly['kwh'], 
+        fill='tozeroy',  # Fill area below line
+        mode='lines', 
+        line=dict(color='#0ead00'),
+        fillcolor='#d0ffcc',
+        line_shape='spline',
+        hovertemplate='Week Start: %{x|%Y-%m-%d}<br>Energy: %{y:.2f} kWh'
+    ))
+
+    fig.update_layout(
+        title="Weekly Energy Consumption",
+        xaxis_title="",
+        yaxis_title="Energy (kWh)",
+        xaxis=dict(type='date'),
+        title_x=0.5,
+        paper_bgcolor='rgba(0,0,0,0)',  # Transparent background
+        plot_bgcolor='rgba(0,0,0,0)',
+        margin=dict(l=10, r=10, t=50, b=10),  # Reduce margins for better fit
+    )
+    context = {
+        'kwh': kwh,
+        'runtime': runtime,
+        'active_devs': active_count,
+        'inactive_devs': inactive_count,
+        'total_devs' : active_count + inactive_count,
+        'emissions' : kwh * 0.28 * 0.4999,
+        'cost' : kwh * 23.0,
+        'energy_chart': pio.to_html(fig, full_html=False),
+        'top_devices': top_devices,
+        'total_sales': total_sales,
+        'total_customers': total_customers
+    }
+    # Cache the entire page context for 1 hour
+    response = render(request, 'landingPage.html', context)
+    cache.set(cache_key, response, timeout=60*60)  # Cache the full response
+
+    return response
+
 
 def homepage(request):
     usr = request.user.username
@@ -225,18 +346,14 @@ def linkAllDataAndKwh(request, devData, kwhData):
     # Choose the model based on user
     if user.first_name == 'Welight':
         CustomerModel = TestCustomer
-    elif user.first_name in ['Sayona', 'Sayona-Guest']:
-        CustomerModel = SayonaCustomer
-    else:
-        CustomerModel = Customer
-    customer_data = CustomerModel.objects.all().values()
-    # Choose the model based on user
-    if user.first_name == 'Welight':
         SaleModel = TestSale
     elif user.first_name in ['Sayona', 'Sayona-Guest']:
+        CustomerModel = SayonaCustomer
         SaleModel = SayonaSale
     else:
+        CustomerModel = Customer
         SaleModel = Sale
+    customer_data = CustomerModel.objects.all().values()    
     sales_data = SaleModel.objects.all().values()
     linked_data = []
 

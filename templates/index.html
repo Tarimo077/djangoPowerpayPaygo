@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% load humanize %}
 {% block title %}
-    Powerpay Africa: Home
+    Powerpay Africa: Analytics
 {% endblock %}
 
 {% block content %}
@@ -52,6 +52,14 @@
 
     <div id="energy-summary" class="tabcontent">
         <h1 style="text-align:center">Energy Dashboard</h1>
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+            <a href="{% url 'landing_page' %}" style="color:#0ead00; text-decoration:none; font-weight: bold; transition: color 0.3s;"
+               onmouseover="this.style.color='#ff9500'" 
+               onmouseout="this.style.color='#0ead00'">
+                See General Stats 
+                <i class="fa fa-long-arrow-right" aria-hidden="true" style="color:#0ead00; transition: color 0.3s;"></i>
+            </a>
+        </div>
         <div style="padding: 10px; margin-bottom:10px">
             <label>Choose time range: </label>
             <select name="range" id="rangeDropdown" class="dropdown">
@@ -89,6 +97,14 @@
 
     <div id="cooking-summary" class="tabcontent">
         <h1 style="text-align:center">Cooking Dashboard</h1>
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+            <a href="{% url 'landing_page' %}" style="color:#0ead00; text-decoration:none; font-weight: bold; transition: color 0.3s;"
+               onmouseover="this.style.color='#ff9500'" 
+               onmouseout="this.style.color='#0ead00'">
+                See General Stats 
+                <i class="fa fa-long-arrow-right" aria-hidden="true" style="color:#0ead00; transition: color 0.3s;"></i>
+            </a>
+        </div>
         <div style="padding: 10px; margin-bottom:10px">
             <label>Choose time range: </label>
             <select name="range1" id="rangeDropdown1" class="dropdown">
@@ -124,6 +140,14 @@
 
     <div id="emissions-summary" class="tabcontent">
         <h1 style="text-align:center">Emissions Dashboard</h1>
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+            <a href="{% url 'landing_page' %}" style="color:#0ead00; text-decoration:none; font-weight: bold; transition: color 0.3s;"
+               onmouseover="this.style.color='#ff9500'" 
+               onmouseout="this.style.color='#0ead00'">
+                See General Stats 
+                <i class="fa fa-long-arrow-right" aria-hidden="true" style="color:#0ead00; transition: color 0.3s;"></i>
+            </a>
+        </div>
         <div style="padding: 10px; margin-bottom:10px">
             <label>Choose time range: </label>
             <select name="range2" id="rangeDropdown2" class="dropdown">
@@ -145,7 +169,7 @@
             </select>
             </div>
         <div class="data-labels">
-            <label class="labelArea"><i class="fa fa-industry" aria-hidden="true" style="margin-right:5px;"></i><br>Total Emissions:<br>{{ sumEmissions|floatformat:2|intcomma }} kg CO2</label>
+            <label class="labelArea"><i class="fa fa-industry" aria-hidden="true" style="margin-right:5px;"></i><br>Total Emissions:<br>{{ sumEmissions|floatformat:2|intcomma }} kg CO₂</label>
         </div>
         <div class="pie">
             <div class="meals-pie">{{ pie_chart_emissions |safe }}</div>
@@ -155,6 +179,14 @@
 
     <div id="customer-summary" class="tabcontent">
             <h1 style="text-align:center">Customer Dashboard</h1>
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                <a href="{% url 'landing_page' %}" style="color:#0ead00; text-decoration:none; font-weight: bold; transition: color 0.3s;"
+                   onmouseover="this.style.color='#ff9500'" 
+                   onmouseout="this.style.color='#0ead00'">
+                    See General Stats 
+                    <i class="fa fa-long-arrow-right" aria-hidden="true" style="color:#0ead00; transition: color 0.3s;"></i>
+                </a>
+            </div>
             <div style="padding: 10px; margin-bottom:10px">
                 <label>Choose time range: </label>
                 <select name="range3" id="rangeDropdown3" class="dropdown">
