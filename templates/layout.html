@@ -21,91 +21,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="{% static 'js/htmx.min.js' %}" defer></script>
-    <style>
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3); /* Light border */
-            border-top: 4px solid #0ead00; /* Primary color */
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: none; /* Initially hidden */
-            z-index: 9999; /* Ensure it is on top of other elements */
-        }
-        @keyframes spin {
-            0% { transform: translate(-50%, -50%) rotate(0deg); }
-            100% { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-        .greeting-bar {
-            background-color: #0ead00;
-            color: white;
-            padding: 5px;
-            text-align: right;
-            position: fixed;
-            top: 0;
-            right: 0;
-            left: 0;
-            z-index: 1000;
-            font-size: 16px;
-            margin-bottom: 20px;
-        }
-        .sidebar {
-            /* Sidebar styles here */
-        }
-        .justbody {
-            /* Body styles here */
-        }
-
-        /* New dropdown class */
-        .sales-dropdown {
-            position: relative;
-            display: inline-block;
-            align-items: center;
-            margin-left: 15px;
-        }
-
-        .sales-dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #f9f9f9;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
-        }
-
-        .sales-dropdown:hover .sales-dropdown-content {
-            display: block;
-        }
-
-        .sales-dropdown-content a {
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-        }
-
-        .sales-dropdown-content a:hover {
-            background-color: #f1f1f1;
-        }
-    </style>
 </head>
 <body>
     <div class="greeting-bar" id="greeting-bar"></div>
     <div class="sidebar">
         <h1>PowerPay Africa</h1>
         {% if user.first_name == 'Geoffrey' or user.first_name == 'Jeff'%}
-            <a href="{% url 'summary' %}"><i class="fa fa-compress" aria-hidden="true" style="margin-right:5px;"></i> Overview</a>
+            <a href="{% url 'summary' %}" class="{% if request.resolver_match.url_name == 'summary'%}active-link{% endif %}"><i class="fa fa-compress" aria-hidden="true" style="margin-right:5px;"></i> Overview</a>
         {% endif %}
-        <a href="{% url 'landing_page' %}"><i class="fa fa-home" aria-hidden="true" style="margin-right:5px;"></i> Home</a>
-        <a href="{% url 'devices_page' %}"><i class="fa fa-cogs" aria-hidden="true" style="margin-right:5px;"></i> Devices</a>
+        <a href="{% url 'landing_page' %}" class="{% if request.resolver_match.url_name == 'landing_page' or request.resolver_match.url_name == 'home_page' %}active-link{% endif %}"><i class="fa fa-home" aria-hidden="true" style="margin-right:5px;"></i> Home</a>
+        <a href="{% url 'devices_page' %}" class="{% if request.resolver_match.url_name == 'devices_page' or request.resolver_match.url_name == 'add_device' or request.resolver_match.url_name == 'device_data_page' or request.resolver_match.url_name == 'live_page' %}active-link{% endif %}"><i class="fa fa-cogs" aria-hidden="true" style="margin-right:5px;"></i> Devices</a>
         {% if user.first_name != 'Jimmy' and user.first_name != 'Kelvin' %}
-        <a href="{% url 'customers_list' %}"><i class="fa fa-users" aria-hidden="true" style="margin-right:5px;"></i> Customers</a>
+        <a href="{% url 'customers_list' %}" class="{% if request.resolver_match.url_name == 'customers_list' or request.resolver_match.url_name == 'customer_detail' or request.resolver_match.url_name == 'customer_edit' or request.resolver_match.url_name == 'customer_delete' or request.resolver_match.url_name == 'add_customer' or request.resolver_match.url_name == 'sale_add' %}active-link{% endif %}"><i class="fa fa-users" aria-hidden="true" style="margin-right:5px;"></i> Customers</a>
         <div class="sales-dropdown">
-            <a href="{% url 'sales_list' %}"><i class="fa fa-shopping-cart" aria-hidden="true" style="margin-right:5px;"></i> Sales</a>
+            <a href="{% url 'sales_list' %}" class="{% if request.resolver_match.url_name == 'sales_list' or request.resolver_match.url_name == 'paygo_sales' or request.resolver_match.url_name == 'paygo_sales_non_metered' or request.resolver_match.url_name == 'sales_add' or request.resolver_match.url_name == 'sale_detail' or request.resolver_match.url_name == 'sale_edit' or request.resolver_match.url_name == 'sale_delete' or request.resolver_match.url_name == 'paygo_sale_detail' %}active-link{% endif %}"
+            ><i class="fa fa-shopping-cart" aria-hidden="true" style="margin-right:5px;"></i> Sales</a>
             <div class="sales-dropdown-content">
                 <a href="{% url 'sales_list' %}">All Sales</a>
                 {% if user.first_name != 'Welight' and user.first_name != 'Sayona' and user.first_name != 'Sayona-Guest'%}
@@ -116,12 +46,12 @@
         </div>
         {% endif %}
         {% if user.first_name != 'Welight' and user.first_name != 'Jimmy' and user.first_name != 'Sayona' and user.first_name != 'Sayona-Guest' %}
-        <a href="{% url 'transactions_page' %}"><i class="fa fa-exchange" aria-hidden="true" style="margin-right:5px;"></i> Transactions</a>
+        <a href="{% url 'transactions_page' %}" class="{% if request.resolver_match.url_name == 'transactions_page' or request.resolver_match.url_name == 'payment_prompt' or request.resolver_match.url_name == 'payment_waiting' or request.resolver_match.url_name == 'payment_confirmation' or request.resolver_match.url_name == 'payment_confirmation_status' or request.resolver_match.url_name == 'payment_confirmation_page' %}active-link{% endif %}"><i class="fa fa-exchange" aria-hidden="true" style="margin-right:5px;"></i> Transactions</a>
         {% endif %}
         <a href="https://powerpayafrica.com/new-ticket/" target="_blank" rel="noopener noreferrer"><i class="fa fa-ticket" aria-hidden="true" style="margin-right:5px;"></i> Support</a>
         {% if user.first_name == 'Sophia' or user.first_name == 'Jeff'%}
-            <a href="{% url 'export_meter_data' %}"><i class="fa fa-download" aria-hidden="true" style="margin-right:5px;"></i> Migaa Meter Data </a>
-            <a href="{% url 'export_ml_data' %}"><i class="fa fa-download" aria-hidden="true" style="margin-right:5px;"></i> ML Dataset Downloads</a>
+            <a href="{% url 'export_meter_data' %}" class="{% if request.resolver_match.url_name == 'export_meter_data' %}active-link{% endif %}"><i class="fa fa-download" aria-hidden="true" style="margin-right:5px;"></i> Migaa Meter Data </a>
+            <a href="{% url 'export_ml_data' %}" class="{% if request.resolver_match.url_name == 'export_ml_data' %}active-link{% endif %}"><i class="fa fa-download" aria-hidden="true" style="margin-right:5px;"></i> ML Downloads</a>
         {% endif %}
         {% if user.is_authenticated %}
             <a href="{% url 'logout' %}"><i class="fa fa-sign-out" aria-hidden="true" style="margin-right:5px;"></i> Logout</a>
