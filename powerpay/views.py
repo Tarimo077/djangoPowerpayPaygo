@@ -773,13 +773,12 @@ def transactions_page(request):
     # Convert data to a DataFrame
     if data:  # Check if data is not empty
         data = pd.DataFrame(data)
-        # Convert 'transtime' to datetime format
         data['transtime'] = pd.to_datetime(data['transtime'], format='%Y%m%d%H%M%S')
 
         # Sort the data by 'transtime' in descending order
         data = data.sort_values(by='transtime', ascending=False)
     else:
-        data = pd.DataFrame(columns=['name', 'ref', 'id', 'transtime', 'amount'])  # Empty DataFrame with expected columns
+        data = pd.DataFrame(columns=['name', 'ref', 'id', 'transtime', 'amount'])  # Empty DataFrame
 
     # Handle search query
     query = request.GET.get('q')
@@ -788,6 +787,14 @@ def transactions_page(request):
                                              query.lower() in row['ref'].lower() or
                                              query.lower() in row['id'].lower(), axis=1)]
     
+    # Group by week and sum 'amount'
+    if not data.empty:
+        data['week'] = data['transtime'].dt.to_period('W').apply(lambda r: r.start_time)  # Get start of each week
+        df_weekly = data.groupby('week')['amount'].sum().reset_index()
+
+        # Convert 'week' column back to datetime for plotting
+        df_weekly['week'] = pd.to_datetime(df_weekly['week'])
+
     # Convert the DataFrame to a list of dictionaries
     transactions_list = data.to_dict(orient='records')
 
@@ -797,36 +804,39 @@ def transactions_page(request):
     page_obj = paginator.get_page(page_number)
 
     # Line chart data (only if there's data to plot)
-    line_chart = ''
+    weekly_chart = ''
     if not data.empty:
-        line_chart_data = data[['transtime', 'amount']].sort_values(by='transtime')
+        # Plotting weekly aggregated data
+        fig_weekly = px.line(df_weekly, x='week', y='amount', title='Weekly Transaction Amounts',
+                             labels={'week': 'Week', 'amount': 'Total Amount'},
+                             line_shape='spline')
 
-        # Plotting the line chart
-        fig_line = px.line(line_chart_data, x='transtime', y='amount', title='Amount Over Time',
-                           labels={'transtime': 'Transaction Time', 'amount': 'Amount'}, line_shape='spline')
-        fig_line.update_traces(line=dict(color="#0ead00"), hovertemplate='%{x}<br>Amount: %{y}', mode='lines+markers')
-        fig_line.update_traces(text=data['id'])  # Pass the transaction ID as text for hover template
-        fig_line.update_layout(
-            xaxis_title='Transaction Time',
-            yaxis_title='Amount',
+        fig_weekly.update_traces(line=dict(color="#0ead00"), hovertemplate='Week Start: %{x|%Y-%m-%d}<br>Amount: KSHS. %{y:,.0f}', mode='lines', fillcolor='#d0ffcc', fill='tozeroy')
+        fig_weekly.update_layout(
+            xaxis_title='Week',
+            yaxis_title='Total Amount',
             showlegend=False,
             autosize=True,
             title_x=0.5,
             height=400,
-            margin=dict(l=20, r=20, t=40, b=20)
+            margin=dict(l=20, r=20, t=40, b=20),
+            paper_bgcolor='rgba(0,0,0,0)',  # Transparent background
+            plot_bgcolor='rgba(0,0,0,0)',
         )
-        line_chart = pio.to_html(fig_line, full_html=False)
+
+        weekly_chart = pio.to_html(fig_weekly, full_html=False)
 
     # Prepare the context with the relevant data
     context = {
         'transactions_table': page_obj,  # Pass the page object to the template
         'query': query,  # Pass the query to the template to preserve it in the search box
-        'line_chart': line_chart,  # Pass the line chart HTML to the template (could be empty)
+        'line_chart': weekly_chart,  # Pass the weekly aggregated line chart HTML
         'selected_range': str(range_value),
         'is_data_empty': data.empty  # Pass whether data is empty to the template
     }
 
     return render(request, 'transactions.html', context)
+
 
 
 def fetch_data_with_params(endpoint, dev, range_value):
