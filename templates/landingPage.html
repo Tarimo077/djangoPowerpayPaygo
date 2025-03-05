@@ -8,14 +8,13 @@
 {% block content %}
     <h2><i class="fa fa-th-large" aria-hidden="true" style='color:#0ead00'></i> Dashboard </h2>
     <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-        <a href="{% url 'home_page' %}" style="color:#0ead00; text-decoration:none; font-weight: bold; transition: color 0.3s;"
+        <a id="home_page_link" href="{% url 'home_page' %}" style="color:#0ead00; text-decoration:none; font-weight: bold; transition: color 0.3s;"
            onmouseover="this.style.color='#ff9500'" 
            onmouseout="this.style.color='#0ead00'">
             See Advanced Stats 
             <i class="fa fa-long-arrow-right" aria-hidden="true" style="color:#0ead00; transition: color 0.3s;"></i>
         </a>
     </div>
-    
     
     <div class="dashboard-container">
         <div class="data-cards">
@@ -78,4 +77,56 @@
             <label class="labelArea"><br><i class="fa fa-shopping-cart" aria-hidden="true">&emsp;</i><br>Total Sales:<br>{{ total_sales|intcomma }}</label>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Select the specific link directly
+        const targetLink = document.querySelector("#home_page_link");
+    
+        if (targetLink) {
+            targetLink.addEventListener("click", function (event) {
+                event.preventDefault(); // Prevent immediate navigation
+    
+                // Disable the link to prevent multiple clicks
+                targetLink.style.pointerEvents = "none";
+    
+                // Show loading Swal with progress bar
+                let progress = 0;
+                Swal.fire({
+                    title: "Loading...",
+                    html: `<div id="progress-container" style="width: 100%; background: #f3f3f3; height: 10px; border-radius: 5px;">
+                              <div id="progress-bar" style="width: 0%; height: 100%; background: #0ead00; border-radius: 5px;"></div>
+                           </div>
+                           <p id="loading-message">Initializing...</p>`,
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        let progressBar = document.getElementById("progress-bar");
+                        let loadingMessage = document.getElementById("loading-message");
+    
+                        let interval = setInterval(() => {
+                            progress += 10; // Increase progress
+                            progressBar.style.width = progress + "%";
+    
+                            // Change messages at different stages
+                            if (progress === 10) loadingMessage.innerText = "Fetching database records...";
+                            if (progress === 40) loadingMessage.innerText = "Processing data...";
+                            if (progress === 70) loadingMessage.innerText = "Finalizing...";
+    
+                            if (progress >= 100) {
+                                clearInterval(interval);
+                            }
+                        }, 2200);
+                    }
+                });
+    
+                // Navigate to the target page
+                window.location.href = targetLink.href;
+            });
+    
+            // Close Swal when the new page fully loads
+            window.addEventListener("load", function () {
+                Swal.close();
+            });
+        }
+    </script>
 {% endblock %}

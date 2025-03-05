@@ -53,7 +53,7 @@
     <div id="energy-summary" class="tabcontent">
         <h1 style="text-align:center">Energy Dashboard</h1>
         <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-            <a href="{% url 'landing_page' %}" style="color:#0ead00; text-decoration:none; font-weight: bold; transition: color 0.3s;"
+            <a href="{% url 'landing_page' %}" class="landing_page_link" style="color:#0ead00; text-decoration:none; font-weight: bold; transition: color 0.3s;"
                onmouseover="this.style.color='#ff9500'" 
                onmouseout="this.style.color='#0ead00'">
                 See General Stats 
@@ -98,7 +98,7 @@
     <div id="cooking-summary" class="tabcontent">
         <h1 style="text-align:center">Cooking Dashboard</h1>
         <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-            <a href="{% url 'landing_page' %}" style="color:#0ead00; text-decoration:none; font-weight: bold; transition: color 0.3s;"
+            <a href="{% url 'landing_page' %}" class="landing_page_link" style="color:#0ead00; text-decoration:none; font-weight: bold; transition: color 0.3s;"
                onmouseover="this.style.color='#ff9500'" 
                onmouseout="this.style.color='#0ead00'">
                 See General Stats 
@@ -141,7 +141,7 @@
     <div id="emissions-summary" class="tabcontent">
         <h1 style="text-align:center">Emissions Dashboard</h1>
         <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-            <a href="{% url 'landing_page' %}" style="color:#0ead00; text-decoration:none; font-weight: bold; transition: color 0.3s;"
+            <a href="{% url 'landing_page' %}" class="landing_page_link" style="color:#0ead00; text-decoration:none; font-weight: bold; transition: color 0.3s;"
                onmouseover="this.style.color='#ff9500'" 
                onmouseout="this.style.color='#0ead00'">
                 See General Stats 
@@ -180,7 +180,7 @@
     <div id="customer-summary" class="tabcontent">
             <h1 style="text-align:center">Customer Dashboard</h1>
             <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-                <a href="{% url 'landing_page' %}" style="color:#0ead00; text-decoration:none; font-weight: bold; transition: color 0.3s;"
+                <a href="{% url 'landing_page' %}" class="landing_page_link" style="color:#0ead00; text-decoration:none; font-weight: bold; transition: color 0.3s;"
                    onmouseover="this.style.color='#ff9500'" 
                    onmouseout="this.style.color='#0ead00'">
                     See General Stats 
@@ -348,6 +348,61 @@
             window.location.href = '?range=' + selectedRange;
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Select all links with the class "landing_page_link"
+    const links = document.querySelectorAll(".landing_page_link");
+
+    links.forEach(link => {
+        link.addEventListener("click", function (event) {
+            event.preventDefault(); // Prevent immediate navigation
+
+            // Disable the link to prevent multiple clicks
+            link.style.pointerEvents = "none";
+
+            // Show loading Swal with progress bar
+            let progress = 0;
+            Swal.fire({
+                title: "Loading...",
+                html: `<div id="progress-container" style="width: 100%; background: #f3f3f3; height: 10px; border-radius: 5px;">
+                          <div id="progress-bar" style="width: 0%; height: 100%; background: #0ead00; border-radius: 5px;"></div>
+                       </div>
+                       <p id="loading-message">Initializing...</p>`,
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    let progressBar = document.getElementById("progress-bar");
+                    let loadingMessage = document.getElementById("loading-message");
+
+                    let interval = setInterval(() => {
+                        progress += 10; // Increase progress
+                        progressBar.style.width = progress + "%";
+
+                        // Change messages at different stages
+                        if (progress === 10) loadingMessage.innerText = "Fetching database records...";
+                        if (progress === 40) loadingMessage.innerText = "Processing data...";
+                        if (progress === 70) loadingMessage.innerText = "Finalizing...";
+
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                        }
+                    }, 2800);
+                }
+            });
+
+            // Navigate to the target page after a short delay
+            setTimeout(() => {
+                window.location.href = link.href;
+            }, 500);
+        });
+    });
+
+    // Close Swal when the new page fully loads
+    window.addEventListener("load", function () {
+        Swal.close();
+    });
+</script>
+
 
     <style>
         /* Modal styles */

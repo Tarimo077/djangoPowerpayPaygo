@@ -29,7 +29,7 @@
         {% if user.first_name == 'Geoffrey' or user.first_name == 'Jeff'%}
             <a href="{% url 'summary' %}" class="{% if request.resolver_match.url_name == 'summary'%}active-link{% endif %}"><i class="fa fa-compress" aria-hidden="true" style="margin-right:5px;"></i> Overview</a>
         {% endif %}
-        <a href="{% url 'landing_page' %}" class="{% if request.resolver_match.url_name == 'landing_page' or request.resolver_match.url_name == 'home_page' %}active-link{% endif %}"><i class="fa fa-home" aria-hidden="true" style="margin-right:5px;"></i> Home</a>
+        <a id="landing_page_link" href="{% url 'landing_page' %}" class="{% if request.resolver_match.url_name == 'landing_page' or request.resolver_match.url_name == 'home_page' %}active-link{% endif %}"><i class="fa fa-home" aria-hidden="true" style="margin-right:5px;"></i> Home</a>
         <a href="{% url 'devices_page' %}" class="{% if request.resolver_match.url_name == 'devices_page' or request.resolver_match.url_name == 'add_device' or request.resolver_match.url_name == 'device_data_page' or request.resolver_match.url_name == 'live_page' %}active-link{% endif %}"><i class="fa fa-cogs" aria-hidden="true" style="margin-right:5px;"></i> Devices</a>
         {% if user.first_name != 'Jimmy' and user.first_name != 'Kelvin' %}
         <a href="{% url 'customers_list' %}" class="{% if request.resolver_match.url_name == 'customers_list' or request.resolver_match.url_name == 'customer_detail' or request.resolver_match.url_name == 'customer_edit' or request.resolver_match.url_name == 'customer_delete' or request.resolver_match.url_name == 'add_customer' or request.resolver_match.url_name == 'sale_add' %}active-link{% endif %}"><i class="fa fa-users" aria-hidden="true" style="margin-right:5px;"></i> Customers</a>
@@ -136,5 +136,57 @@
             setInterval(updateGreeting, 1000);
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Select the specific link directly
+    const targetLink = document.querySelector("#landing_page_link");
+
+    if (targetLink) {
+        targetLink.addEventListener("click", function (event) {
+            event.preventDefault(); // Prevent immediate navigation
+
+            // Disable the link to prevent multiple clicks
+            targetLink.style.pointerEvents = "none";
+
+            // Show loading Swal with progress bar
+            let progress = 0;
+            Swal.fire({
+                title: "Loading...",
+                html: `<div id="progress-container" style="width: 100%; background: #f3f3f3; height: 10px; border-radius: 5px;">
+                          <div id="progress-bar" style="width: 0%; height: 100%; background: #0ead00; border-radius: 5px;"></div>
+                       </div>
+                       <p id="loading-message">Initializing...</p>`,
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    let progressBar = document.getElementById("progress-bar");
+                    let loadingMessage = document.getElementById("loading-message");
+
+                    let interval = setInterval(() => {
+                        progress += 10; // Increase progress
+                        progressBar.style.width = progress + "%";
+
+                        // Change messages at different stages
+                        if (progress === 10) loadingMessage.innerText = "Fetching database records...";
+                        if (progress === 40) loadingMessage.innerText = "Processing data...";
+                        if (progress === 70) loadingMessage.innerText = "Finalizing...";
+
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                        }
+                    }, 2800);
+                }
+            });
+
+            // Navigate to the target page
+            window.location.href = targetLink.href;
+        });
+
+        // Close Swal when the new page fully loads
+        window.addEventListener("load", function () {
+            Swal.close();
+        });
+    }
+</script>
 </body>
 </html>
