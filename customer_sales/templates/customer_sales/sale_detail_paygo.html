@@ -14,7 +14,7 @@
     <p><strong>Release Date:</strong> {{ sale.release_date|date:"d M Y " }}</p>
     <p><strong>Product Type:</strong> {{ sale.product_type }}</p>
     <p><strong>Purchase Mode:</strong> {{ sale.purchase_mode }}</p>
-    <p><strong>Payment Plan:</strong> {{ sale.get_payment_plan_display }}</p>
+    <p><strong>Payment Plan:</strong> {{ sale.payment_plan }} {%if sale.payment_plan == 'Plan_1'%}: Deposit 4,500 with weekly payments of 190 for 40 weeks(12,100){% elif sale.payment_plan == 'Plan_2'%}: Deposit 2,500 with weekly payments of 250 for 48 weeks(14,500) {% elif sale.payment_plan == 'Wholesale' %} 10,600 {% else %} 12,100 {% endif %}</p> 
     <p><form method="get" action="{% url 'customer_detail' pk=sale.customer_id %}">
         <button type="submit" class="device_data_btn"> See Customer data</button>
     </form></p>
