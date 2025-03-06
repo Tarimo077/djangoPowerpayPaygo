@@ -33,6 +33,7 @@
                 <th class="table_headers">Product Model</th>
                 <th class="table_headers">Product Serial Number</th>
                 <th class="table_headers">Mode of Purchase</th>
+                <th class="table_headers">Payment Plan</th>
                 <th class="table_headers">Referred by</th>
                 <th class="table_headers">Sales Rep</th>
                 <th class="table_headers">Metered</th>
@@ -52,6 +53,7 @@
                 <td class="table_content">{{ sale.product_model }}</td>
                 <td class="table_content">{{ sale.product_serial_number }}</td>
                 <td class="table_content">{{ sale.get_purchase_mode_display }}</td>
+                <td class="table_content">{{ sale.get_payment_plan_display }}</td>
                 <td class="table_content">{{ sale.referred_by }}</td>
                 <td class="table_content">{{ sale.sales_rep }}</td>
                 <td class="table_content">{% if sale.metered %}Yes{% else %}No{% endif %}</td>

@@ -71,6 +71,12 @@ class Sale(models.Model):
         ('Business', 'Business'),
         ('Other', 'Other')
     ]
+    PAYMENT_PLAN_CHOICES = [
+        ('Wholesale', 'Wholesale 10,600'),
+        ('Plan_1', 'Plan 1: Deposit 4,500 with weekly payments of 190 for 40 weeks(12,100)'),
+        ('Plan_2', 'Plan 2: Deposit 2,500 with weekly payments of 250 for 48 weeks(14,500)'),
+        ('Retail', 'Retail 12,100')
+    ]
     
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='sales')
     registration_date = models.DateField()
@@ -88,6 +94,17 @@ class Sale(models.Model):
     type_of_use = models.CharField(max_length=10, choices=TYPE_OF_USE_CHOICES, default='Domestic')
     specific_economic_activity = models.CharField(max_length=255, null=True, blank=True)
     location_of_use = models.CharField(max_length=255, null=True, blank=True)
+    payment_plan = models.CharField(max_length=10, choices=PAYMENT_PLAN_CHOICES, blank=True, null=True)  # Allow blank initially
+
+    def save(self, *args, **kwargs):
+        # Set default payment plan based on purchase mode
+        if not self.payment_plan:
+            if self.purchase_mode == 'C':  # Cash Purchase
+                self.payment_plan = 'Retail'
+            else:  # Other purchase modes
+                self.payment_plan = 'Plan_1'
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.product_name} ({self.product_model})"
