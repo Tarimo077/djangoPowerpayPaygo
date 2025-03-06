@@ -34,9 +34,9 @@
             red
         {% endif %}
     "></span> {{paymentStatus.payment_status}}</p>
-    <p><strong>Total Paid:</strong> {{paymentStatus.totalPaid}}</p>
-    <p><strong>Balance:</strong> {{paymentStatus.balance|intcomma}}</p>
-    <p><strong>Paygo Balance:</strong> {{paymentStatus.paygoBalance|intcomma}}</p>
+    <p><strong>Total Paid:</strong> {{paymentStatus.totalPaid|floatformat:1|intcomma}}</p>
+    <p><strong>Balance:</strong> {{paymentStatus.balance|floatformat:1|intcomma}}</p>
+    <p><strong>Paygo Balance:</strong> {{paymentStatus.paygoBalance|floatformat:1|intcomma}}</p>
     <p><strong>Schedule:</strong> {% if paymentStatus.payment_status == 'overdue' %}
         {{ paymentStatus.days }} {% if paymentStatus.days == 1 %}day{% else %}days{% endif %} behind payment
     {% elif paymentStatus.payment_status == 'on-time' %}
