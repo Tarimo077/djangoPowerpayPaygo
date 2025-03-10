@@ -1104,7 +1104,10 @@ def add_device(request):
             for devEntry in devs:
                 if devEntry['deviceID'] == device_name:
                     print(device_name + " already exists")
-                    return render(request, 'partials/deviceExistSwal.html', {'device': device_name})
+                    return JsonResponse({
+                        "exists": True,
+                        "device": device_name
+                    })
             # Replace with your actual endpoint URL
             endpoint = 'https://appliapay.com/addDevice'
             # Replace with your actual credentials
@@ -1118,10 +1121,14 @@ def add_device(request):
             response = requests.post(endpoint, json=data, auth=credentials, headers=headers)
 
             if response.status_code == 200:
-                # Redirect to the devices page on success
-                return render(request, 'partials/deviceAdded.html', {'device': device_name})
+                return JsonResponse({
+                    "added": True,
+                    "device": device_name
+                })  # ✅ Return JSON success response
             else:
-                return render(request, 'add_device.html', {'error': 'Failed to add device'})
+                return JsonResponse({
+                    "error": "Failed to add device"
+                })
 
     return render(request, 'add_device.html')
 

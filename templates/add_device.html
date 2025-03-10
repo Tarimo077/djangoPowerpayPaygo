@@ -16,50 +16,82 @@ Powerpay Africa: Add Device
 </div>
 
 <!-- Use SweetAlert2 instead of outdated SweetAlert -->
-<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.getElementById('addDeviceForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent default form submission
+        event.preventDefault(); // Prevent form from submitting normally
 
-        var deviceName = document.getElementById('device_name').value;
+        var spinner = document.getElementById("spinner");
+        if (spinner) spinner.style.display = "block"; // Show spinner
 
-        swal({
-            title: `Add New Device`,
-            text: `Are you sure you want to add ${deviceName}?`,
-            icon: "warning",
-            buttons: {
-                cancel: {
-                    text: "Cancel",
-                    value: false,
-                    visible: true,
-                    className: "swal-cancel-btn",
-                    closeModal: true,
-                },
-                confirm: {
-                    text: `Yes`,
-                    value: true,
-                    visible: true,
-                    className: "swal-confirm-btn",
-                    closeModal: true,
-                },
-            },
-            dangerMode: true,
-        }).then((confirmed) => {
-            if (confirmed) {
-                // If confirmed, proceed with submission
-                if (event.detail && event.detail.issueRequest) {
-                    event.detail.issueRequest(); // For HTMX requests
-                } else {
-                    event.target.submit(); // Normal form submission
-                }
-            } 
-            // If canceled, do nothing (spinner won't start)
+        var formData = new FormData(event.target);
+
+        fetch("{% url 'add_device' %}", {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"  // Ensure Django treats it as an AJAX request
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+           // if (spinner) spinner.style.display = "none"; // Hide spinner
+
+            if (data.exists) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: `${data.device} already exists`,
+                    footer: `<a href="/device/${data.device}/">See device data</a>`,
+                    showCancelButton: true,
+                    confirmButtonText: "Add another device",
+                    cancelButtonText: "Back to devices",
+                    customClass: {
+                        confirmButton: "swal-confirm-btn",
+                        cancelButton: "swal-cancel-btn"
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/add-device/';
+                    } else {
+                        window.location.href = '/devices/';
+                    }
+                });
+            } else if (data.added) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Success",
+                    text: `Device ${data.device} has been added successfully!`,
+                    confirmButtonText: "Go to Devices"
+                }).then(() => {
+                    window.location.href = '/devices/';
+                });
+            } else if (data.error) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: data.error,
+                    confirmButtonText: "Try Again"
+                });
+            }
+        })
+        .catch(error => {
+            if (spinner) spinner.style.display = "none"; // Hide spinner
+            console.error("Error:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Something went wrong. Please try again.",
+                confirmButtonText: "OK"
+            });
         });
     });
 </script>
-
-
 <style>
+    #spinner {
+        display: none !important;
+    }
+
     .container {
         margin: 20px;
         font-family: Arial, sans-serif;

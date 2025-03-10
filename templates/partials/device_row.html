@@ -10,6 +10,7 @@
     </td>
 
     <td class="table_content">{{ row.time|date:"j M Y h:i:s A" }}</td>
+    
     {% if user.first_name != 'Sayona-Guest' %}
     <td class="table_content">
         <label class="switch">
@@ -17,12 +18,11 @@
                 data-device-id="{{ row.deviceID }}"
                 {% if row.active %}checked{% endif %}
                 hx-post="{% url 'change_device_status' %}"
-                hx-trigger="click"
+                hx-trigger="change"
                 hx-target="#device-{{ row.deviceID }}"
                 hx-swap="outerHTML"
-                hx-headers='{"X-CSRFToken": "{{ csrf_token }}", "Content-Type": "application/json"}'
-                hx-ext="json-enc"
-                hx-vals='{"selectedDev": "{{ row.deviceID }}", "status": {{ row.active|yesno:"false,true" }}}'>
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                hx-vals='{"selectedDev": "{{ row.deviceID }}", "status": "{{ row.active|yesno:"false,true" }}"}'>
 
             <span class="slider round"></span>
         </label>
@@ -36,76 +36,73 @@
     </td>
 </tr>
 
-<!-- SweetAlert Confirmation for HTMX -->
-<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<!-- Load HTMX if not already included 
+<script src="https://unpkg.com/htmx.org@1.9.6"></script>
+<script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script> 
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-document.body.addEventListener('htmx:confirm', function(evt) {
-    let target = evt.target;
+    document.body.addEventListener('htmx:confirm', function(event) {
+        let target = event.target;
 
-    if (target.matches(".statusSwitch")) {
-        evt.preventDefault();  // Stop HTMX from executing immediately
+        if (target.matches(".statusSwitch")) {
+            event.preventDefault(); // Stop HTMX request until confirmation
 
-        let deviceID = target.dataset.deviceId;
-        let isChecked = target.checked;
-        let action = isChecked ? "activate" : "deactivate";
+            let deviceID = target.dataset.deviceId;
+            let isChecked = target.checked;
+            let action = isChecked ? "activate" : "deactivate";
 
-        swal({
-            title: `Confirm Action`,
-            text: `Are you sure you want to ${action} ${deviceID}?`,
-            icon: "warning",
-            buttons: {
-                cancel: {
-                    text: "Cancel",
-                    value: false,
-                    visible: true,
-                    className: "swal-cancel-btn",
-                    closeModal: true,
-                },
-                confirm: {
-                    text: `${action.charAt(0).toUpperCase() + action.slice(1)}`,
-                    value: true,
-                    visible: true,
-                    className: "swal-confirm-btn",
-                    closeModal: true,
-                },
-            },
-            dangerMode: true,
-        }).then((confirmed) => {
-            if (confirmed) {
-                evt.detail.issueRequest(); // Proceed with HTMX request
-            } else {
-                target.checked = !isChecked; // Revert checkbox state
-            }
-        });
-    }
-});
+            Swal.fire({
+                title: `Confirm Action`,
+                text: `Are you sure you want to ${action} ${deviceID}?`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: `Yes`,
+                cancelButtonText: "Cancel",
+                customClass: {
+                    confirmButton: "swal-confirm-btn",
+                    cancelButton: "swal-cancel-btn"
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    // ✅ Resume HTMX request if available
+                    if (event.detail && event.detail.issueRequest) {
+                        event.detail.issueRequest(); // 🔥 Proceed with HTMX
+                    } else {
+                        target.submit(); // 🔥 Fallback for normal form submission
+                    }
+                } else {
+                    target.checked = !isChecked; // ❌ Revert checkbox if cancelled
+                }
+            });
+        }
+    });
 </script>
 
-<!-- Custom Styles for the SweetAlert Dialog -->
 <style>
 /* Customizing the SweetAlert buttons */
 .swal-confirm-btn {
-    background-color: #28a745 !important; /* Green confirm button */
+    background-color: #28a745 !important;
     color: white !important;
     border-radius: 5px !important;
     padding: 10px 20px !important;
 }
 
 .swal-cancel-btn {
-    background-color: #dc3545 !important; /* Red cancel button */
+    background-color: #dc3545 !important;
     color: white !important;
     border-radius: 5px !important;
     padding: 10px 20px !important;
 }
 
-/* Customizing the dialog text */
 .swal-text {
     font-size: 16px !important;
     color: #333 !important;
     font-family: "Poppins", sans-serif !important;
 }
 
-/* Customizing the dialog title */
 .swal-title {
     font-size: 20px !important;
     font-weight: bold !important;
