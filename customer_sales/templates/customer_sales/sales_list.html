@@ -42,7 +42,7 @@
                 <td class="table_content">{{ sale.get_purchase_mode_display}}</td>
                 <td class="table_content">{{ sale.customer.name }}</td>
                 <td class="table_content">
-                    <a href="{% url 'sale_detail' sale.pk %}">🕵️‍♀️ Details</a> {% if user.first_name != 'Sayona-Guest' %} |
+                    {% if sale.purchase_mode == 'P' %}<a href="{% url 'paygo_sale_detail' sale.pk %}">🕵️‍♀️ Details</a>{% else %} <a href="{% url 'sale_detail' sale.pk %}">🕵️‍♀️ Details</a>  {% endif %} {% if user.first_name != 'Sayona-Guest' %} |
                     <a href="{% url 'sale_edit' sale.pk %}">📝 Edit</a> |
                     <a href="{% url 'sale_delete' sale.pk %}">❌ Delete</a>
                     {% endif %}
