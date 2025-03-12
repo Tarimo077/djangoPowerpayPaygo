@@ -103,7 +103,21 @@ def accept_tnc(request):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 def live_page(request, deviceID):
-    return render(request, 'live.html', {'deviceID': deviceID})
+    usr = request.user.username
+    if usr == 'John-Maina':
+        dat = fetch_data("commandScode")
+    elif usr == 'Welight':
+        dat = fetch_data("commandWelight")
+    elif usr in ['Sayona', 'Sayona-Guest']:
+        dat = fetch_data("commandSayona")
+    elif usr == 'GIZ':
+        dat = fetch_data("commandGIZ")
+    else:
+        dat = fetch_data("command")
+    for z in dat:
+        if z["deviceID"] == deviceID:
+            status = z["active"]
+    return render(request, 'live.html', {'deviceID': deviceID, 'active': status})
 
 def logout_page(request):
     logout(request)

@@ -4,16 +4,23 @@
 
 {% block content %}
 <h1>Live Data Stream for Device: {{ deviceID }}</h1>
+<div id="live-container">
+  <div id="device-info">
+      <h3>Device ID: <span id="device-id">{{ deviceID }}</span></h3>
+      
+      <label>➕ Data Count: <span id="count">0</span></label>
+      <label>🍳 Cooking Time: <span id="cooking">0 sec</span></label>
+      <label>⚡ Energy: <span id="kwh">0 kWh</span></label>
+      <label>🤑 Cost: <span id="cost">KSH. 0.00</span></label>
+      <label>🏭 Emissions: <span id="co2">0.00 kg CO₂</span></label>
+      <p id="status" style="color: red;">🔴 Disconnected</p>
+  </div>
 
-<div id="device-info">
-    <h3>Device ID: <span id="device-id">{{ deviceID }}</span></h3>
-    <label>➕ Data Count: <span id="count">0</span></label>
-    <label>🍳 Cooking Time: <span id="cooking">0 sec</span></label>
-    <label>⚡ Energy: <span id="kwh">0 kWh</span></label>
-    <label>🤑 Cost: <span id="cost">KSH. 0.00</span></label>
-    <label>🏭 Emissions: <span id="co2">0.00 kg CO₂</span></label>
-    <p id="status" style="color: red;">🔴 Disconnected</p>
+  <div id="switchContainer">
+      {% include 'partials/switchWLabel.html' %}
+  </div>
 </div>
+
 
 <div id="messages"></div>
 
@@ -37,7 +44,7 @@
       return;
     }
 
-    socket = new WebSocket(`ws://127.0.0.1:8000/ws/mqtt/${deviceID}/`);
+    socket = new WebSocket(`ws://127.0.0.1:8000/ws/mqtt/${deviceID}/`); //USE 'wss://appliatrix.com/ws/mqtt/${deviceID}' in production
 
     socket.onopen = function () {
       console.log(`✅ Connected to WebSocket for device: ${deviceID}`);
@@ -72,8 +79,25 @@
 
           const messageDiv = document.createElement("div");
           messageDiv.className = "message";
-          messageDiv.textContent = data.message;
+          // Add an icon element
+          const icon = document.createElement("i");
+          icon.className = "fa fa-caret-square-right";
+          icon.style.color = "#0ead00"; // Always green
+          icon.style.marginRight = "10px"; // Spacing
+
+          // Add a message text span
+          const messageText = document.createElement("span");
+          messageText.textContent = data.message; // Space for spacing
+          messageDiv.style.color = "#0ead00";
+          // Append icon and text to message div
+          messageDiv.appendChild(icon);
+          messageDiv.appendChild(messageText);
+
+          // Append message div to #messages container
           messagesDiv.appendChild(messageDiv);
+
+          // Auto-scroll to the latest message
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
           if (messagesDiv.children.length > 50) {
             messagesDiv.removeChild(messagesDiv.firstChild);
@@ -105,6 +129,7 @@
 </script>
 
 <style>
+
   #device-info {
     border: 2px solid #0ead00;
     padding: 15px;
@@ -112,12 +137,40 @@
     background: white;
     border-radius: 10px;
   }
+  /* Individual messages */
+.message {
+    padding: 10px;
+    border-bottom: 1px solid #0ead00;
+    font-size: 22px; /* Larger font size */
+    font-weight: bold;
+    color: #333;
+}
+.message i {
+  font-size: 22px;
+  margin-right: 8px;
+}
+  #live-container {
+    display: flex;
+    align-items: center; /* Align items vertically in the center */
+    justify-content: space-between; /* Push elements apart */
+    width: 100%;
+}
+
+#switchContainer {
+    margin-left: 20px; /* Add spacing between device info and switch */
+}
+
   #messages {
-    max-height: 200px;
-    overflow-y: auto;
+    flex-grow: 1; /* Allow it to take up remaining space */
+    max-height: calc(100vh - 250px); /* Fill screen height but leave space for other content */
+    overflow-y: auto; /* Show scrollbar only when needed */
     border-top: 2px solid #0ead00;
     margin-top: 10px;
     padding-top: 5px;
+    text-align: center; /* Center messages */
+    font-size: 18px; /* Larger font */
+    padding: 10px;
+    background: #f9f9f9; /* Light background for contrast */
   }
   .message {
     padding: 10px;
@@ -133,6 +186,62 @@
     color: #0ead00;
     font-weight: bold;
   }
+  .switch-container {
+    display: flex;
+    align-items: center;
+    float: right;
+}
+
+.switch-label {
+    margin-right: 10px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    float: right;
+    margin-bottom: 10px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #0ead00;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
 </style>
 
 {% endblock %}
