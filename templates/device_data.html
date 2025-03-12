@@ -124,11 +124,9 @@
                 background-color: #e68a00; 
             }
         </style>
-        {% if deviceID == "device14"%}
         <div style="margin-bottom:20px;margin-left:10px;float:left;">
-            <a href="{% url 'live_page' %}" class="add-device-btn">Live Window</a>
+            <a href="{% url 'live_page' deviceID=deviceID %}" class="add-device-btn">Live Window</a>
         </div>
-        {% endif %}
 
         <div class="data-labels">
             <label class="labelArea">🍳 <br>Cooking Time:<br>{{ runtime|floatformat:1|intcomma }} hours</label>

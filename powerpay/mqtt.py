@@ -4,20 +4,26 @@ from channels.layers import get_channel_layer
 
 def on_connect(mqtt_client, userdata, flags, rc):
     if rc == 0:
-        print('Connected successfully')
-        mqtt_client.subscribe('/testTopic')
+        mqtt_client.subscribe('/testTopic/#')
     else:
-        print('Bad connection. Code:', rc)
+        pass
 
 
 def on_message(client, userdata, msg):
-    print(f"Message received: {msg.payload.decode()}")
+    topic_parts = msg.topic.split("/")  # Extract deviceID
+    if len(topic_parts) < 3:
+        return  # Ignore invalid topics
+
+    deviceID = topic_parts[2]  # Extract deviceID from topic
+    payload = msg.payload.decode()
+
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
-        "mqtt_group",
+        f"mqtt_{deviceID}",  # Unique group for each device
         {
             "type": "mqtt_message",
-            "message": msg.payload.decode(),
+            "message": payload,
+            "deviceID": deviceID,
         }
     )
 

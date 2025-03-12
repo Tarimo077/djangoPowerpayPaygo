@@ -102,8 +102,8 @@ def accept_tnc(request):
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
-def live_page(request):
-    return render(request, 'live.html')
+def live_page(request, deviceID):
+    return render(request, 'live.html', {'deviceID': deviceID})
 
 def logout_page(request):
     logout(request)

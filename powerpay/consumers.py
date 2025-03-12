@@ -3,24 +3,27 @@ import json
 
 class MqttConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        self.deviceID = self.scope["url_route"]["kwargs"]["deviceID"]
+        self.group_name = f"mqtt_{self.deviceID}"  # Unique group for each device
+        
         try:
-            await self.channel_layer.group_add("mqtt_group", self.channel_name)
+            await self.channel_layer.group_add(self.group_name, self.channel_name)
             await self.accept()
-            print(f"WebSocket connected: {self.channel_name}")
         except Exception as e:
-            print(f"Error connecting WebSocket: {e}")
+            pass
 
     async def disconnect(self, close_code):
         try:
-            await self.channel_layer.group_discard("mqtt_group", self.channel_name)
-            print(f"WebSocket disconnected: {self.channel_name}")
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
         except Exception as e:
-            print(f"Error disconnecting WebSocket: {e}")
+            pass
 
     async def mqtt_message(self, event):
-        message = event["message"]
+        print(f"📡 Received event from Channels: {event}")  # DEBUG
         try:
-            await self.send(text_data=json.dumps({"message": message}))
-            print(f"Message sent to WebSocket: {message}")
+            await self.send(text_data=json.dumps({
+                "message": event["message"],
+                "deviceID": event["deviceID"]
+            }))
         except Exception as e:
-            print(f"Error sending message to WebSocket: {e}")
+            pass

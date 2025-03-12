@@ -24,7 +24,7 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('live/', views.live_page, name='live_page'),
+    path('live/<str:deviceID>/', views.live_page, name='live_page'),
     path('customer_sales/', include('customer_sales.urls'), name="customers"),
     path('', views.landingpage, name='landing_page'),
     path('analysis/', views.homepage, name='home_page'),
