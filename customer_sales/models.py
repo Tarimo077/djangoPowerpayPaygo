@@ -12,6 +12,8 @@ class userProfile(models.Model):
 
     def __str__(self):
         return str(self.user)
+    class Meta:
+        db_table = 'customer_sales_userProfile'
 
 class Customer(models.Model):
     GENDER_CHOICES = [
