@@ -32,7 +32,7 @@
             <div id="user-dropdown" class="user-dropdown">
                 <div  style="color: #0ead00; font-weight:bold; margin-bottom:10px;"><i class="fa fa-industry" aria-hidden="true" style="margin-right:10px;"></i>{{ profile.org_name }}</div>
                 <hr class="dropdown-divider">
-                <a href="#"><i class="fa fa-user" aria-hidden="true" style="margin-right:10px;"></i>Profile</a>
+                <a href="{% url 'profile' %}"><i class="fa fa-user" aria-hidden="true" style="margin-right:10px;"></i>Profile</a>
                 <a href="https://powerpayafrica.com/new-ticket/" target="_blank" rel="noopener noreferrer"><i class="fa fa-ticket" aria-hidden="true" style="margin-right:10px;"></i> Support</a>
                 <a href="{% url 'terms_of_service' %}" target="_blank" rel="noopener noreferrer"><i class="fa fa-file-text" aria-hidden="true" style="margin-right:10px;"></i>Terms of Service</a> 
                 <a href="{% url 'logout' %}"><i class="fa fa-sign-out" aria-hidden="true" style="margin-right:10px;"></i> Logout</a>
