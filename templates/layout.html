@@ -23,7 +23,24 @@
     <script src="{% static 'js/htmx.min.js' %}" defer></script>
 </head>
 <body>
-    <div class="greeting-bar" id="greeting-bar"></div>
+    <div class="greeting-bar" id="greeting-bar">
+        <div id="greeting-text" style="margin-right:5px; color: #fff" > </div>
+        <div class="user-menu">
+            <button id="user-button">
+                <i class="fa fa-user"></i>
+            </button>
+            <div id="user-dropdown" class="user-dropdown">
+                <div  style="color: #0ead00; font-weight:bold; margin-bottom:10px;"><i class="fa fa-industry" aria-hidden="true" style="margin-right:10px;"></i>{{ profile.org_name }}</div>
+                <hr class="dropdown-divider">
+                <a href="#"><i class="fa fa-user" aria-hidden="true" style="margin-right:10px;"></i>Profile</a>
+                <a href="https://powerpayafrica.com/new-ticket/" target="_blank" rel="noopener noreferrer"><i class="fa fa-ticket" aria-hidden="true" style="margin-right:10px;"></i> Support</a>
+                <a href="{% url 'terms_of_service' %}" target="_blank" rel="noopener noreferrer"><i class="fa fa-file-text" aria-hidden="true" style="margin-right:10px;"></i>Terms of Service</a> 
+                <a href="{% url 'logout' %}"><i class="fa fa-sign-out" aria-hidden="true" style="margin-right:10px;"></i> Logout</a>
+                <hr class="dropdown-divider">
+                <div id="time-div" style="color: #0ead00; font-weight:bold; margin-bottom:10px;"> </div>
+            </div>
+        </div>        
+    </div>
     <div class="sidebar">
         <h1>PowerPay Africa</h1>
         {% if user.first_name == 'Geoffrey' or user.first_name == 'Jeff'%}
@@ -48,15 +65,9 @@
         {% if user.first_name != 'Welight' and user.first_name != 'Jimmy' and user.first_name != 'Sayona' and user.first_name != 'Sayona-Guest' %}
         <a href="{% url 'transactions_page' %}" class="{% if request.resolver_match.url_name == 'transactions_page' or request.resolver_match.url_name == 'payment_prompt' or request.resolver_match.url_name == 'payment_waiting' or request.resolver_match.url_name == 'payment_confirmation' or request.resolver_match.url_name == 'payment_confirmation_status' or request.resolver_match.url_name == 'payment_confirmation_page' %}active-link{% endif %}"><i class="fa fa-exchange" aria-hidden="true" style="margin-right:5px;"></i> Transactions</a>
         {% endif %}
-        <a href="https://powerpayafrica.com/new-ticket/" target="_blank" rel="noopener noreferrer"><i class="fa fa-ticket" aria-hidden="true" style="margin-right:5px;"></i> Support</a>
         {% if user.first_name == 'Sophia' or user.first_name == 'Jeff'%}
             <a href="{% url 'export_meter_data' %}" class="{% if request.resolver_match.url_name == 'export_meter_data' %}active-link{% endif %}"><i class="fa fa-download" aria-hidden="true" style="margin-right:5px;"></i> Migaa Meter Data </a>
             <a href="{% url 'export_ml_data' %}" class="{% if request.resolver_match.url_name == 'export_ml_data' %}active-link{% endif %}"><i class="fa fa-download" aria-hidden="true" style="margin-right:5px;"></i> ML Downloads</a>
-        {% endif %}
-        {% if user.is_authenticated %}
-            <a href="{% url 'logout' %}"><i class="fa fa-sign-out" aria-hidden="true" style="margin-right:5px;"></i> Logout</a>
-        {% else %}
-            <a href="{% url 'login' %}"><i class="fa fa-sign-in" aria-hidden="true" style="margin-right:5px;"></i> Login</a>
         {% endif %}
         <h5 class="sticky"><i class="fa fa-copyright" aria-hidden="true" style="margin-right:5px;"></i> 2023 Powerpay Africa. All Rights Reserved </h5>
     </div>
@@ -69,18 +80,20 @@
         document.addEventListener("DOMContentLoaded", function() {
             const spinner = document.getElementById('spinner');
             spinner.style.display = 'none'; // Hide spinner initially
-
+    
             // Function to show the spinner
             function showSpinner() {
-                spinner.style.display = 'block';
+                if (!document.body.classList.contains("swal-active")) {
+                    spinner.style.display = 'block';
+                }
             }
-
+    
             // Function to hide the spinner
             function hideSpinner() {
                 spinner.style.display = 'none';
             }
-
-            // Show spinner on form submissions
+    
+            // Show spinner on form submissions, unless SweetAlert is active
             const forms = document.querySelectorAll('form');
             forms.forEach(form => {
                 form.addEventListener('submit', () => {
@@ -106,6 +119,29 @@
                 return strTime;
             }
 
+            //user button
+            document.getElementById("user-button").addEventListener("click", function(event) {
+                event.stopPropagation(); // Prevent click from closing immediately
+                let dropdown = document.getElementById("user-dropdown");
+            
+                // Toggle visibility
+                if (dropdown.style.display === "block") {
+                    dropdown.style.display = "none";
+                } else {
+                    dropdown.style.display = "block";
+                }
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener("click", function(event) {
+                let dropdown = document.getElementById("user-dropdown");
+                let button = document.getElementById("user-button");
+            
+                if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+                    dropdown.style.display = "none";
+                }
+            });
+
             // Function to update the greeting message
             function updateGreeting() {
                 const now = new Date();
@@ -113,20 +149,19 @@
                 let greeting;
 
                 if (hours < 12) {
-                    greeting = "👋 Good Morning";
+                    greeting = " Good Morning";
                 } else if (hours < 18) {
-                    greeting = "👋 Good Afternoon";
+                    greeting = " Good Afternoon";
                 } else {
-                    greeting = "👋 Good Evening";
+                    greeting = " Good Evening";
                 }
 
                 // Assuming you have a variable `username` in your template context
                 const username = "{{ user.first_name }}";
                 const time = formatTime(now);
-                document.getElementById('greeting-bar').innerHTML = ` <a id="terms-link" href="{% url 'terms_of_service' %}" target="_blank" rel="noopener noreferrer" style=" color: #fff; margin-right:5px;">
-                         Read our Terms of Service
-                    </a>  | ⌚ ${time} | ${greeting}, ${username} `;
-
+                // Insert animated hand icon
+                document.getElementById('greeting-text').innerHTML = `<span class="wave-hand"><i class="fa fa-hand-paper" aria-hidden="true"></i></span> ${greeting}, ${username} |`;
+                document.getElementById('time-div').innerHTML = `<i class="fa fa-clock" aria-hidden="true" style="margin-right:10px;"></i> ${time}  `;
             }
 
             // Call the updateGreeting function initially

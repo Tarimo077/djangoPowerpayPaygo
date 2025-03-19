@@ -14,7 +14,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import HttpResponse
-from customer_sales.models import Customer, Sale, TestCustomer, TestSale, userProfile, SayonaCustomer, SayonaSale
+from customer_sales.models import Customer, Sale, TestCustomer, TestSale, userProfile, SayonaCustomer, SayonaSale, userProfile
 from django.utils.timezone import now
 from calendar import monthrange
 from django.views.decorators.cache import cache_page
@@ -51,6 +51,24 @@ def fetch_data_accounts(endpoint, acc):
 
 def terms_of_service(request):
     return render(request, 'terms_of_service.html')
+
+@login_required
+def profile_view(request):
+    return render(request, 'profile.html')
+
+@login_required
+def edit_profile(request):
+    profile, created = userProfile.objects.get_or_create(user=request.user)
+
+    if request.method == "POST":
+        profile.org_name = request.POST.get("org_name", "")
+        profile.org_address = request.POST.get("org_address", "")
+        profile.org_phone_number = request.POST.get("org_phone_number", "")
+        profile.org_email = request.POST.get("org_email", "")
+        profile.save()
+        return redirect("profile")  # Redirect back to profile page
+
+    return render(request, "my_profile.html", {"profile": profile})
 
 def login_page(request):
     if request.method == 'POST':

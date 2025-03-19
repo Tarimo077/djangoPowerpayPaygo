@@ -5,3 +5,9 @@ media
 manage.py
 
 *.pyc
+
+customer_sales/migrations
+
+powerpay/__pycache__
+
+customer_sales/__pycache__

@@ -55,6 +55,8 @@ urlpatterns = [
     path('change_device_status/', views.change_device_status, name='change_device_status'),
     path('status_dev/', views.status_dev, name='status_dev'),
     path('export_bulk_device_data/', views.export_bulk_device_data, name='export_bulk_device_data'),
+    path('profile/', views.profile_view, name='profile'),
+    path('profile/edit/', views.edit_profile, name="edit_profile"),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

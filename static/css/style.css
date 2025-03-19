@@ -115,6 +115,7 @@ body {
     0% { transform: translate(-50%, -50%) rotate(0deg); }
     100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
+/* Fix the greeting bar */
 .greeting-bar {
     background-color: #0ead00;
     color: #fff;
@@ -126,8 +127,87 @@ body {
     left: 0;
     z-index: 1000;
     font-size: 16px;
-    margin-bottom: 10px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 }
+
+/* Ensure the user button is perfectly round */
+.user-menu {
+    position: relative;
+    display: inline-block;
+    margin-right: 15px; /* Adjust spacing */
+}
+
+#user-button {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background-color: #fff; /* White for contrast */
+    color: #0ead00; /* Green icon */
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Dropdown should appear BELOW the button */
+.user-dropdown {
+    display: none;
+    position: absolute;
+    top: 50px; /* Moves dropdown below button */
+    right: 0;
+    background-color: #f9f9f9;
+    min-width: 200px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+    border-radius: 5px;
+    overflow: hidden;
+    align-items: center;
+    text-align: center;
+    gap: 20px;;
+}
+
+/* Style dropdown links */
+.user-dropdown a {
+    display: block;
+    padding: 10px 15px;
+    color: #333;
+    text-decoration: none;
+    transition: background 0.3s ease;
+}
+
+.user-dropdown a:hover {
+    color: #ff9500;
+    margin-left: 10px;
+    transition: 0.5s;
+
+}
+
+.dropdown-divider {
+    margin: 10px 10px; /* Adds space from both ends */
+    border: none;
+    border-top: 2px solid #ccc; /* Light grey divider */
+}
+
+.wave-hand {
+    display: inline-block;
+    animation: wave-animation 1.2s infinite ease-in-out;
+}
+
+@keyframes wave-animation {
+    0% { transform: rotate(0deg); }
+    20% { transform: rotate(-25deg); }
+    40% { transform: rotate(20deg); }
+    60% { transform: rotate(-25deg); }
+    80% { transform: rotate(20deg); }
+    100% { transform: rotate(0deg); }
+}
+
+
 
 /* New dropdown class */
 /* Sales Dropdown */

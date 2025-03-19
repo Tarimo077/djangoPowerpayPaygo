@@ -1,7 +1,13 @@
 # forms.py
 from django import forms
-from .models import Customer, Sale, TestCustomer, TestSale, SayonaCustomer, SayonaSale
+from .models import Customer, Sale, TestCustomer, TestSale, SayonaCustomer, SayonaSale, userProfile
 
+
+class userProfileForm(forms.ModelForm):
+    class Meta:
+        model = userProfile
+        fields = ['org_name', 'org_address', 'org_phone_number', 'org_email']
+        
 class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
