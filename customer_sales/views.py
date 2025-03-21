@@ -10,6 +10,7 @@ import pandas as pd
 from django.http import HttpResponse
 from datetime import datetime
 from collections import Counter
+from powerpay.notifications import send_notification
 
 # Constants
 BASE_URL = "https://appliapay.com/"
@@ -119,6 +120,7 @@ def customer_edit(request, pk):
         form = CustomerFormClass(request.POST, instance=customer)
         if form.is_valid():
             form.save()
+            send_notification(user, "Customer Edited", f"{customer.name} details changed")
             return redirect('customer_detail', pk=customer.pk)
     else:
         # Use the correct form for the GET request to prefill the customer data
@@ -139,6 +141,7 @@ def customer_delete(request, pk):
     customer = get_object_or_404(CustomerModel, pk=pk)
     if request.method == 'POST':
         customer.delete()
+        send_notification(user, "Customer Deleted", f"{customer.name} deleted")
         return redirect('customers_list')
     return render(request, 'customer_sales/customer_delete.html', {'customer': customer})
 
@@ -151,13 +154,14 @@ def add_customer(request):
         if user.first_name == 'Welight':
             form = TestCustomerForm(request.POST)
         elif user.first_name in ['Sayona', 'Sayona-Guest']:
-            form - SayonaCustomer(request.POST)
+            form = SayonaCustomerForm(request.POST)  # Fixed the typo
         else:
             form = CustomerForm(request.POST)
 
         # Validate the form and save if valid
         if form.is_valid():
-            form.save()
+            customer = form.save()  # Save and get the new customer instance
+            send_notification(user, "Customer Added", f"{customer.name} added")  # Send notification
             return redirect('customers_list')
     
     # If it's not a POST request (i.e., it's a GET request), initialize the form
@@ -198,6 +202,7 @@ def sale_add(request, customer_id=None):
             if customer:
                 sale.customer = customer
             sale.save()
+            send_notification(user, "Sale Added", f"{sale.product_serial_number} has been sold to {customer.name}")
             return redirect('customer_detail', pk=sale.customer.pk if sale.customer else 'sales_list')
     else:
         form = SaleFormClass(current_customer_id=customer_id if customer_id else None)
@@ -263,6 +268,7 @@ def sale_edit(request, pk):
         form = SaleFormClass(request.POST, instance=sale)
         if form.is_valid():
             form.save()
+            send_notification(user, "Sale Edited", f"{sale.product_serial_number} sale has been edited")
             if sale.customer:
                 return redirect('customer_detail', pk=sale.customer.pk)
             else:
@@ -284,6 +290,7 @@ def sale_delete(request, pk):
     sale = get_object_or_404(SaleModel, pk=pk)
     if request.method == 'POST':
         sale.delete()
+        send_notification(user, "Sale Deleted", f"{sale.product_serial_number} sale has been deleted")
         return redirect('sales_list')
     return render(request, 'customer_sales/sale_confirm_delete.html', {'sale': sale})
 

@@ -27,3 +27,26 @@ class MqttConsumer(AsyncWebsocketConsumer):
             }))
         except Exception as e:
             pass
+
+class NotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        """Add user to a notifications group when they connect"""
+        self.group_name = f"user_{self.scope['user'].id}_notifications"
+        
+        # Add the user to their personal notification group
+        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        """Remove user from the notification group on disconnect"""
+        await self.channel_layer.group_discard(self.group_name, self.channel_name)
+
+    async def send_notification(self, event):
+        """Send notification data to WebSocket"""
+        print("sending notification from consumer")
+        await self.send(text_data=json.dumps({
+            "type": "send_notification",
+            "message": event["message"],
+            "timestamp": event["timestamp"],
+            "title": event["title"],
+        }))

@@ -25,6 +25,20 @@
 <body>
     <div class="greeting-bar" id="greeting-bar">
         <div id="greeting-text" style="margin-right:5px; color: #fff" > </div>
+        <!-- Notification Button -->
+        <div class="notification-container">
+            <button id="notification-button" class="notification-btn">
+                <i class="fa fa-bell"></i> <!-- Default empty bell icon -->
+                <span id="notification-badge" class="badge"></span>
+            </button>
+
+            <!-- Notification Dropdown -->
+            <div id="notification-dropdown" class="notification-dropdown">
+                <div class="notification-header">Notifications</div>
+                <ul id="notification-list"></ul>
+            </div>
+        </div>
+        <div style="color:#fff;margin-right:5px;"> | </div>
         <div class="user-menu">
             <button id="user-button">
                 <i class="fa fa-user"></i>
@@ -34,6 +48,7 @@
                 <hr class="dropdown-divider">
                 <a href="{% url 'profile' %}"><i class="fa fa-user" aria-hidden="true" style="margin-right:10px;"></i>Profile</a>
                 <a href="https://powerpayafrica.com/new-ticket/" target="_blank" rel="noopener noreferrer"><i class="fa fa-ticket" aria-hidden="true" style="margin-right:10px;"></i> Support</a>
+                <a href="https://powerpayafrica.com" target="_blank" rel="noopener noreferrer"><i class="fa fa-globe" aria-hidden="true" style="margin-right:10px;"></i>Visit our Website</a>
                 <a href="{% url 'terms_of_service' %}" target="_blank" rel="noopener noreferrer"><i class="fa fa-file-text" aria-hidden="true" style="margin-right:10px;"></i>Terms of Service</a> 
                 <a href="{% url 'logout' %}"><i class="fa fa-sign-out" aria-hidden="true" style="margin-right:10px;"></i> Logout</a>
                 <hr class="dropdown-divider">
@@ -41,6 +56,8 @@
             </div>
         </div>        
     </div>
+
+
     <div class="sidebar">
         <h1>PowerPay Africa</h1>
         {% if user.first_name == 'Geoffrey' or user.first_name == 'Jeff'%}
@@ -223,5 +240,105 @@
         });
     }
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const notificationButton = document.getElementById("notification-button");
+        const notificationDropdown = document.getElementById("notification-dropdown");
+        const notificationBadge = document.getElementById("notification-badge");
+        const notificationList = document.getElementById("notification-list");
+    
+        const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+        const wsPath = wsProtocol + window.location.host + "/ws/notifications/";
+        const notificationSocket = new WebSocket(wsPath);
+    
+        // Restore unread status and notifications from session storage
+        let hasUnread = sessionStorage.getItem("hasUnread") === "true";
+        let storedNotifications = JSON.parse(sessionStorage.getItem("notifications")) || [];
+    
+        // Function to update UI based on unread status
+        function updateNotificationUI() {
+            notificationBadge.style.display = hasUnread ? "inline-block" : "none";
+        }
+    
+        // Function to remove a notification
+        function removeNotification(index) {
+            storedNotifications.splice(index, 1); // Remove from array
+            sessionStorage.setItem("notifications", JSON.stringify(storedNotifications)); // Update session storage
+            renderNotifications(); // Re-render notifications
+        }
+    
+        // Function to render notifications from stored data
+        function renderNotifications() {
+            notificationList.innerHTML = ""; // Clear list before reloading
+    
+            storedNotifications.forEach((notif, index) => {
+                const li = document.createElement("li");
+                li.innerHTML = `
+                    <span><strong>${notif.title}:</strong> ${notif.message} at ${notif.timestamp}</span>
+                    <button class="close-btn" data-index="${index}">&times;</button>
+                `;
+                notificationList.insertBefore(li, notificationList.firstChild);
+            });
+    
+            // Attach event listeners to close buttons
+            document.querySelectorAll(".close-btn").forEach((btn) => {
+                btn.addEventListener("click", function () {
+                    const index = this.getAttribute("data-index");
+                    removeNotification(index);
+                });
+            });
+    
+            // Hide badge if no notifications remain
+            if (storedNotifications.length === 0) {
+                hasUnread = false;
+                sessionStorage.setItem("hasUnread", "false");
+                updateNotificationUI();
+            }
+        }
+    
+        // Load stored notifications on page reload
+        renderNotifications();
+        updateNotificationUI();
+    
+        // Handle incoming WebSocket messages
+        notificationSocket.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+    
+            hasUnread = true;
+            sessionStorage.setItem("hasUnread", "true"); // Store unread state
+    
+            // Save the new notification in session storage
+            storedNotifications.push(data);
+            sessionStorage.setItem("notifications", JSON.stringify(storedNotifications));
+    
+            updateNotificationUI();
+            renderNotifications();
+        };
+    
+        // Show dropdown & mark as read when opened
+        notificationButton.addEventListener("click", function (event) {
+            event.stopPropagation();
+    
+            if (notificationDropdown.style.display === "block") {
+                notificationDropdown.style.display = "none";
+            } else {
+                notificationDropdown.style.display = "block";
+    
+                // Mark notifications as read
+                hasUnread = false;
+                sessionStorage.setItem("hasUnread", "false"); // Update session storage
+                updateNotificationUI();
+            }
+        });
+    
+        // Hide dropdown when clicking outside
+        document.addEventListener("click", function (event) {
+            if (!notificationButton.contains(event.target)) {
+                notificationDropdown.style.display = "none";
+            }
+        });
+    });    
+</script>
+    
 </body>
 </html>

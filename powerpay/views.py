@@ -19,6 +19,7 @@ from django.utils.timezone import now
 from calendar import monthrange
 from django.views.decorators.cache import cache_page
 from django.core.cache import cache
+from . import notifications
 
 # Constants
 BASE_URL = "https://appliapay.com/"
@@ -585,6 +586,11 @@ def change_device_status(request):
                 new_status = response_data.get("status")
                 updated_time = pd.to_datetime(response_data.get("time"), format="%Y-%m-%dT%H:%M:%S.%fZ")
 
+                #send notification
+                user = request.user
+                action = "activated" if new_status == True else "deactivated"
+                notifications.send_notification(user, "Status Change", f"{new_device_id} has been {action}")
+
                 # ✅ Render updated row
                 return render(
                     request,
@@ -597,6 +603,7 @@ def change_device_status(request):
                         }
                     },
                 )
+            
             else:
                 return JsonResponse({"error": "Failed to update device status"}, status=500)
 
@@ -631,6 +638,10 @@ def status_dev(request):
                 new_status = response_data.get("status")
                 updated_time = pd.to_datetime(response_data.get("time"), format="%Y-%m-%dT%H:%M:%S.%fZ")
 
+                #send notification 
+                user = request.user
+                action = "activated" if new_status == True else "deactivated"
+                notifications.send_notification(user, "Status Change", f"{new_device_id} has been {action}")
                 # ✅ Render updated row
                 return render(
                     request,
