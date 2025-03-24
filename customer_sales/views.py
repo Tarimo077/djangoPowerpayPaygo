@@ -202,7 +202,7 @@ def sale_add(request, customer_id=None):
             if customer:
                 sale.customer = customer
             sale.save()
-            send_notification(user, "Sale Added", f"{sale.product_serial_number} has been sold to {customer.name}")
+            send_notification(user, "Sale Added", f"{sale.product_serial_number} has been sold")
             return redirect('customer_detail', pk=sale.customer.pk if sale.customer else 'sales_list')
     else:
         form = SaleFormClass(current_customer_id=customer_id if customer_id else None)
