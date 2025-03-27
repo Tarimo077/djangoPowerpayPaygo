@@ -14,7 +14,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import HttpResponse
-from customer_sales.models import Customer, Sale, TestCustomer, TestSale, userProfile, SayonaCustomer, SayonaSale, userProfile
+from customer_sales.models import Customer, Sale, TestCustomer, TestSale, userProfile, SayonaCustomer, SayonaSale, MecCustomer, MecSale
 from django.utils.timezone import now
 from calendar import monthrange
 from django.views.decorators.cache import cache_page
@@ -41,6 +41,7 @@ def fetch_data(endpoint):
     return response.json()
 
 def fetch_data_index(endpoint, range):
+    print(BASE_URL + endpoint+"?range="+str(range))
     response = requests.get(BASE_URL + endpoint+"?range="+str(range), auth=AUTH)
     response.raise_for_status()
     return response.json()
@@ -125,6 +126,8 @@ def live_page(request, deviceID):
     usr = request.user.username
     if usr == 'John-Maina':
         dat = fetch_data("commandScode")
+    elif usr =='Mec':
+        dat = fetch_data("commandMec")
     elif usr == 'Welight':
         dat = fetch_data("commandWelight")
     elif usr in ['Sayona', 'Sayona-Guest']:
@@ -163,6 +166,10 @@ def landingpage(request):
         devs = fetch_data("commandScode")
         CustomerModel = Customer
         SaleModel = Sale
+    if usr == 'Mec':
+        devs = fetch_data("commandMec")
+        CustomerModel = MecCustomer
+        SaleModel = MecSale
     elif usr == 'Welight':
         devs = fetch_data("commandWelight")
         CustomerModel = TestCustomer
@@ -191,11 +198,13 @@ def landingpage(request):
         endpoint_mapping = {
             'John-Maina': "allDeviceDataScodeDjango",
             'Welight': "allDeviceDataWelightDjango",
-            'GIZ': "allDeviceDataGIZDjango",
+            'GIZ': "allDeviceDataGIZ",
             'Sayona': "allDeviceDataSayonaDjango",
             'Sayona-Guest': "allDeviceDataSayonaDjango",
+            'Mec': "allDeviceDataMecDjango"
         }
         endpoint = endpoint_mapping.get(usr, "allDeviceDataDjango")
+        print(endpoint)
 
         try:
             data = fetch_data_index(endpoint, 9999999)
@@ -287,6 +296,7 @@ def homepage(request):
             'GIZ': "allDeviceDataGIZDjango",
             'Sayona': "allDeviceDataSayonaDjango",
             'Sayona-Guest': "allDeviceDataSayonaDjango",
+            'Mec' : "allDeviceDataMecDjango"
         }
         endpoint = endpoint_mapping.get(usr, "allDeviceDataDjango")
 
@@ -380,6 +390,9 @@ def linkAllDataAndKwh(request, devData, kwhData):
     if user.first_name == 'Welight':
         CustomerModel = TestCustomer
         SaleModel = TestSale
+    elif user.first_name == 'Mec':
+        CustomerModel = MecCustomer
+        SaleModel = MecSale
     elif user.first_name in ['Sayona', 'Sayona-Guest']:
         CustomerModel = SayonaCustomer
         SaleModel = SayonaSale
@@ -495,6 +508,8 @@ def devices_page(request):
     usr = request.user.username
     if usr == 'John-Maina':
         data = fetch_data("commandScode")
+    elif usr == 'Mec':
+        data = fetch_data("commandMec")
     elif usr == 'Welight':
         data = fetch_data("commandWelight")
     elif usr == 'GIZ':
@@ -613,15 +628,11 @@ def change_device_status(request):
     return JsonResponse({"error": "Invalid request"}, status=400)
 
 def status_dev(request):
-    print('aye')
     if request.method == "POST":
         try:
-            print('hit')
             # ✅ Parse form data instead of JSON
             selected_dev = request.POST.get("selectedDev")
             status = request.POST.get("status") == "true"  # Convert string "true"/"false" to boolean
-
-            print(f"Device: {selected_dev}, Status: {status}")  # Debugging
 
             # ✅ Send request to external API
             response = requests.post("https://appliapay.com/changeStatus", json={
@@ -630,7 +641,6 @@ def status_dev(request):
             })
 
             response_data = response.json()  # Parse response
-            print(f"Response: { response.status_code }")
 
             if response.status_code == 200:
                 # ✅ Extract updated values from API response
@@ -1087,6 +1097,8 @@ def device_data_page(request, deviceID):
     usr = request.user.username
     if usr == 'John-Maina':
         dat = fetch_data("commandScode")
+    elif usr == 'Mec':
+        dat = fetch_data("commandMec")
     elif usr == 'Welight':
         dat = fetch_data("commandWelight")
     elif usr in ['Sayona', 'Sayona-Guest']:
@@ -1312,22 +1324,17 @@ def fetch_measurement_data(endpoint, q):
 
 ########################################################GENERAL STATS######################
 def get_customer_statistics(x):
-    # Choose the appropriate model based on the user
-    CustomerModel = Customer
-    
-    # Retrieve all customer records
-    all_customers = CustomerModel.objects.all()
-    
-    # Count total customers
-    total_customers = all_customers.count()
-    
+    customer_models = [Customer, TestCustomer, SayonaCustomer, MecCustomer]  # List all models
+    total_customers = 0
+    customers_x_days = 0
+
     # Calculate the date range for x days ago
     x_days_ago = now() - timedelta(days=x)
-    
-    # Count customers added x days ago or later
-    customers_x_days = all_customers.filter(date__gte=x_days_ago).count()
-    
-    # Return the data
+
+    for CustomerModel in customer_models:
+        total_customers += CustomerModel.objects.count()
+        customers_x_days += CustomerModel.objects.filter(date__gte=x_days_ago).count()
+
     return {
         "total_customers": total_customers,
         "customer_last_x_days": customers_x_days,
@@ -1362,7 +1369,7 @@ def calculate_rar(sales_data):
 @cache_page(60 * 60)
 def summary(request):
     customerSummary = get_customer_statistics(30)
-    orgs = ['Scode', 'Welight', 'GIZ', 'Sayona']
+    orgs = ['Scode', 'Welight', 'GIZ', 'Sayona', 'Mec']
     revenue_orgs = ['Powerpay Africa', 'Scode']
     revenue_accounts = ['319403', '4121691_scode']
     total_collected = 0

@@ -72,14 +72,14 @@
             ><i class="fa fa-shopping-cart" aria-hidden="true" style="margin-right:5px;"></i> Sales</a>
             <div class="sales-dropdown-content">
                 <a href="{% url 'sales_list' %}">All Sales</a>
-                {% if user.first_name != 'Welight' and user.first_name != 'Sayona' and user.first_name != 'Sayona-Guest'%}
+                {% if user.first_name != 'Welight' and user.first_name != 'Sayona' and user.first_name != 'Sayona-Guest' and user.first_name != 'Mec'%}
                 <a href="{% url 'paygo_sales' %}">PayGo Sales(Metered)</a>
                 <a href="{% url 'paygo_sales_non_metered' %}">PayGo Sales(Non-Metered)</a>
                 {% endif %}
             </div>
         </div>
         {% endif %}
-        {% if user.first_name != 'Welight' and user.first_name != 'Jimmy' and user.first_name != 'Sayona' and user.first_name != 'Sayona-Guest' %}
+        {% if user.first_name != 'Welight' and user.first_name != 'Jimmy' and user.first_name != 'Sayona' and user.first_name != 'Sayona-Guest' and user.first_name != 'Mec' %}
         <a href="{% url 'transactions_page' %}" class="{% if request.resolver_match.url_name == 'transactions_page' or request.resolver_match.url_name == 'payment_prompt' or request.resolver_match.url_name == 'payment_waiting' or request.resolver_match.url_name == 'payment_confirmation' or request.resolver_match.url_name == 'payment_confirmation_status' or request.resolver_match.url_name == 'payment_confirmation_page' %}active-link{% endif %}"><i class="fa fa-exchange" aria-hidden="true" style="margin-right:5px;"></i> Transactions</a>
         {% endif %}
         {% if user.first_name == 'Sophia' or user.first_name == 'Jeff'%}
