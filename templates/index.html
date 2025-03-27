@@ -45,7 +45,7 @@
         <button class="tablinks" onclick="openTab(event, 'energy-summary')" id="defaultOpen">Energy Summary <i class="fa fa-bolt" aria-hidden="true" style="margin-left:5px;"></i></button>
         <button class="tablinks" onclick="openTab(event, 'cooking-summary')">Cooking Summary <i class="fa fa-cutlery" aria-hidden="true" style="margin-left:5px;"></i></button>
         <button class="tablinks" onclick="openTab(event, 'emissions-summary')">Emissions Summary <i class="fa fa-industry" aria-hidden="true" style="margin-left:5px;"></i></button>
-        {% if user.first_name != 'Jimmy' and user.first_name != 'Mec' %}
+        {% if user.first_name != 'Jimmy' %}
         <button class="tablinks" onclick="openTab(event, 'customer-summary')">Customer Summary <i class="fa fa-users" aria-hidden="true" style="margin-left:5px;"></i></button>
         {% endif %}
     </div>

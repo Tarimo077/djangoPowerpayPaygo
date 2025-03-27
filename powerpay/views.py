@@ -198,7 +198,7 @@ def landingpage(request):
         endpoint_mapping = {
             'John-Maina': "allDeviceDataScodeDjango",
             'Welight': "allDeviceDataWelightDjango",
-            'GIZ': "allDeviceDataGIZ",
+            'GIZ': "allDeviceDataGIZDjango",
             'Sayona': "allDeviceDataSayonaDjango",
             'Sayona-Guest': "allDeviceDataSayonaDjango",
             'Mec': "allDeviceDataMecDjango"
