@@ -46,6 +46,13 @@ def fetch_data_index(endpoint, range):
     response.raise_for_status()
     return response.json()
 
+
+def fetch_data_devs(endpoint, devs, range):
+    """Fetch data from the API."""
+    response = requests.get(f"{BASE_URL}{endpoint}?range={range}&devs={devs}", auth=AUTH)
+    response.raise_for_status()
+    return response.json()
+
 def fetch_data_accounts(endpoint, acc):
     response = requests.get(BASE_URL + endpoint+"?account="+str(acc), auth=AUTH)
     response.raise_for_status()
@@ -502,6 +509,78 @@ def plotAllDevData(data):
     
     return fig_html
 
+@login_required
+def mec_downloads(request):
+    usr = request.user.username
+    if usr == 'John-Maina':
+        data = fetch_data("commandScode")
+    elif usr == 'Mec':
+        data = fetch_data("commandMec")
+    elif usr == 'Welight':
+        data = fetch_data("commandWelight")
+    elif usr == 'GIZ':
+        data = fetch_data("commandGIZ")
+    elif usr in ['Sayona', 'Sayona-Guest']:
+        data = fetch_data("commandSayona")
+    else:
+        data = fetch_data("command")
+
+    data = pd.DataFrame(data)
+    if not data.empty:
+        # Sorting and handling different naming conventions
+        def sort_key(x):
+            if x == 'OfficeFridge1':
+                return (4, float('inf'))  # Always last
+            elif x.startswith('JD-29ED'):
+                return (0, int(x.split('JD-29ED')[-1]))  # Sorted first
+            elif x.isdigit():  # Pure numeric device IDs
+                return (1, int(x))  # Sorted second
+            elif x.startswith('device'):
+                return (2, int(x.split('device')[-1]))  # Sorted third
+            else:
+                return (3, float('inf') - 1)  # Other strings sorted fourth
+
+        data['sort_key'] = data['deviceID'].apply(sort_key)
+        data = data.sort_values(by='sort_key')
+    # Convert the DataFrame to a list of dictionaries
+    devices_list = data.to_dict(orient='records')
+    device_list = [device['deviceID'] for device in devices_list]
+    context = {
+        "dev_List": device_list
+    }
+    return render(request, "customerDeviceDownloads.html", context)
+
+@login_required
+def export_mec_downloads(request):
+    if request.method == "POST":
+        selected_range = request.POST.get('timerange1', '9999999')
+        selected_devices = request.POST.getlist('devices')
+        data = fetch_data_devs("mecdownloads", selected_devices, selected_range)
+        df = pd.DataFrame(data)
+        # Create a HttpResponse with content_type as ms-excel
+        response = HttpResponse(content_type='application/vnd.ms-excel')
+        # Specify the file name
+        response['Content-Disposition'] = 'attachment; filename="merged_customer_device_data.xlsx"'
+        # Use pandas to save the dataframe as an excel file in the response
+        df.to_excel(response, index=False, engine='openpyxl')
+        return response
+    
+@login_required
+def mec_single_download(request):
+    if request.method == "POST":
+        selected_range = request.POST.get('timerange', '9999999')
+        device = request.POST.get('device')
+        selected_devices = []
+        selected_devices.append(device)
+        data = fetch_data_devs("mecdownloads", selected_devices, selected_range)
+        df = pd.DataFrame(data)
+        # Create a HttpResponse with content_type as ms-excel
+        response = HttpResponse(content_type='application/vnd.ms-excel')
+        # Specify the file name
+        response['Content-Disposition'] = 'attachment; filename="merged_customer_device_data.xlsx"'
+        # Use pandas to save the dataframe as an excel file in the response
+        df.to_excel(response, index=False, engine='openpyxl')
+        return response
 
 @login_required
 def devices_page(request):

@@ -1,0 +1,120 @@
+{% extends "layout.html"%}
+
+{% block title %}Powerpay Africa: MEC Downloads{% endblock %}
+
+{% block content %}
+    <div class="tabs">
+        <button class="tablinks" onclick="openTab(event, 'single')" id="defaultOpen">Single Device</button>
+        <button class="tablinks" onclick="openTab(event, 'multiple')">Multiple Devices</button>
+    </div>
+    <h2 style="margin-left:5px;">MEC Downloads</h2>
+    <!-- SINGLE DEVICE DIV-->
+    <div id="single" class="tabcontent">
+        <form style="display:flex; align-items:center; justify-content:center;" method="POST" action="{% url 'export_mec_downloads_single' %}" id="formid">
+            {% csrf_token %}
+            <div>
+        <div style="padding: 10px; margin-bottom:10px;">
+            <label>Choose Device: </label>
+            <select name="device" id="deviceDropdown" class="dropdown">
+                {% for dev in dev_List %}
+                    <option value="{{ dev }}" {% if dev == deviceID %}selected{% endif %}><strong>{{ dev }}</strong></option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div style="padding: 10px; margin-bottom:10px">
+            <label>Choose time range: </label>
+            <select name="timerange" id="rangeDropdown" class="dropdown">
+                <option value="9999999" {% if selected_range == '9999999' %}selected{% endif %}>All Time</option>
+                <option value="5" {% if selected_range == '5' %}selected{% endif %}>5 min</option>
+                <option value="30" {% if selected_range == '30' %}selected{% endif %}>30 min</option>
+                <option value="60" {% if selected_range == '60' %}selected{% endif %}>1 hr</option>
+                <option value="180" {% if selected_range == '180' %}selected{% endif %}>3 hrs</option>
+                <option value="720" {% if selected_range == '720' %}selected{% endif %}>12 hrs</option>
+                <option value="1440" {% if selected_range == '1440' %}selected{% endif %}>24 hrs</option>
+                <option value="4320" {% if selected_range == '4320' %}selected{% endif %}>3 days</option>
+                <option value="10080" {% if selected_range == '10080' %}selected{% endif %}>7 days</option>
+                <option value="20160" {% if selected_range == '20160' %}selected{% endif %}>2 weeks</option>
+                <option value="43200" {% if selected_range == '43200' %}selected{% endif %}>1 month</option>
+                <option value="129600" {% if selected_range == '129600' %}selected{% endif %}>3 months</option>
+                <option value="259200" {% if selected_range == '259200' %}selected{% endif %}>6 months</option>
+                <option value="525600" {% if selected_range == '525600' %}selected{% endif %}>1 year</option>
+                <option value="1576800" {% if selected_range == '1576800' %}selected{% endif %}>3 years</option>
+            </select>
+        </div>
+        <div style="text-align:center;margin-top:20px;">
+            <button type="submit">Download Selected</button>
+        </div>
+    </div>
+    </form>
+
+    </div>
+
+    <!-- MULTIPLE DEVICES DIV-->
+    <form method="POST" action="{% url 'export_mec_downloads' %}">
+        {% csrf_token %}
+    <div id="multiple" class="tabcontent">
+        <div style="padding: 10px; margin-bottom:10px">
+            <label>Choose time range: </label>
+            <select name="timerange1" id="rangeDropdown1" class="dropdown">
+                <option value="9999999" {% if selected_range == '9999999' %}selected{% endif %}>All Time</option>
+                <option value="5" {% if selected_range == '5' %}selected{% endif %}>5 min</option>
+                <option value="30" {% if selected_range == '30' %}selected{% endif %}>30 min</option>
+                <option value="60" {% if selected_range == '60' %}selected{% endif %}>1 hr</option>
+                <option value="180" {% if selected_range == '180' %}selected{% endif %}>3 hrs</option>
+                <option value="720" {% if selected_range == '720' %}selected{% endif %}>12 hrs</option>
+                <option value="1440" {% if selected_range == '1440' %}selected{% endif %}>24 hrs</option>
+                <option value="4320" {% if selected_range == '4320' %}selected{% endif %}>3 days</option>
+                <option value="10080" {% if selected_range == '10080' %}selected{% endif %}>7 days</option>
+                <option value="20160" {% if selected_range == '20160' %}selected{% endif %}>2 weeks</option>
+                <option value="43200" {% if selected_range == '43200' %}selected{% endif %}>1 month</option>
+                <option value="129600" {% if selected_range == '129600' %}selected{% endif %}>3 months</option>
+                <option value="259200" {% if selected_range == '259200' %}selected{% endif %}>6 months</option>
+                <option value="525600" {% if selected_range == '525600' %}selected{% endif %}>1 year</option>
+                <option value="1576800" {% if selected_range == '1576800' %}selected{% endif %}>3 years</option>
+            </select>
+        </div>
+            
+            <button type="button" onclick="toggleCheckboxes(this)" id="toggleBtn">Select All</button>
+        
+            <div class="device-checkbox-grid">
+                {% for dev in dev_List %}
+                    <label>
+                        <input type="checkbox" name="devices" value="{{ dev }}"> {{ dev }}
+                    </label>
+                {% endfor %}
+            </div>
+            <div style="text-align:center;margin-top:20px;">
+            <button type="submit">Download Selected</button>
+            </div>
+        </form>
+        
+
+    </div>
+
+    <script>
+        // Set default tab open
+        document.getElementById("defaultOpen").click();
+        // JavaScript for tab functionality
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        function toggleCheckboxes(button) {
+            const checkboxes = document.querySelectorAll('.device-checkbox-grid input[type="checkbox"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        
+            checkboxes.forEach(cb => cb.checked = !allChecked);
+            button.textContent = allChecked ? 'Select All' : 'Deselect All';
+        }
+    </script>
+{% endblock %}

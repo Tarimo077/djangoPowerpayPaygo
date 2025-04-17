@@ -57,6 +57,9 @@ urlpatterns = [
     path('export_bulk_device_data/', views.export_bulk_device_data, name='export_bulk_device_data'),
     path('profile/', views.profile_view, name='profile'),
     path('profile/edit/', views.edit_profile, name="edit_profile"),
+    path('mec_downloads/', views.mec_downloads, name='mec_downloads'),
+    path('export_mec_downloads/', views.export_mec_downloads, name='export_mec_downloads'),
+    path('export_single_mec_download/', views.mec_single_download, name='export_mec_downloads_single'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
