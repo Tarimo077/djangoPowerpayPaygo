@@ -82,8 +82,10 @@
         {% if user.first_name != 'Welight' and user.first_name != 'Jimmy' and user.first_name != 'Sayona' and user.first_name != 'Sayona-Guest' and user.first_name != 'Mec' %}
         <a href="{% url 'transactions_page' %}" class="{% if request.resolver_match.url_name == 'transactions_page' or request.resolver_match.url_name == 'payment_prompt' or request.resolver_match.url_name == 'payment_waiting' or request.resolver_match.url_name == 'payment_confirmation' or request.resolver_match.url_name == 'payment_confirmation_status' or request.resolver_match.url_name == 'payment_confirmation_page' %}active-link{% endif %}"><i class="fa fa-exchange" aria-hidden="true" style="margin-right:5px;"></i> Transactions</a>
         {% endif %}
+        {% if user.first_name == 'Mec' or user.first_name == 'Jeff' or user.first_name == 'Geoffrey'%}
+        <a href="{% url 'mec_downloads' %}" class="{% if request.resolver_match.url_name == 'mec_downloads' %}active-link{% endif %}"><i class="fa fa-download" aria-hidden="true" style="margin-right:5px;"></i> MEC Downloads</a>
+        {% endif %}
         {% if user.first_name == 'Sophia' or user.first_name == 'Jeff'%}
-            <a href="{% url 'export_meter_data' %}" class="{% if request.resolver_match.url_name == 'export_meter_data' %}active-link{% endif %}"><i class="fa fa-download" aria-hidden="true" style="margin-right:5px;"></i> Migaa Meter Data </a>
             <a href="{% url 'export_ml_data' %}" class="{% if request.resolver_match.url_name == 'export_ml_data' %}active-link{% endif %}"><i class="fa fa-download" aria-hidden="true" style="margin-right:5px;"></i> ML Downloads</a>
         {% endif %}
         <h5 class="sticky"><i class="fa fa-copyright" aria-hidden="true" style="margin-right:5px;"></i> 2023 Powerpay Africa. All Rights Reserved </h5>
