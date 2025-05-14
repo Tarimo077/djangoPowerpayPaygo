@@ -257,11 +257,13 @@ def landingpage(request):
         title="Weekly Energy Consumption",
         xaxis_title="",
         yaxis_title="Energy (kWh)",
+        autosize=True,
         xaxis=dict(type='date'),
         title_x=0.5,
         paper_bgcolor='rgba(0,0,0,0)',  # Transparent background
         plot_bgcolor='rgba(0,0,0,0)',
-        margin=dict(l=10, r=10, t=50, b=10),  # Reduce margins for better fit
+        margin_autoexpand=False,
+        #margin=dict(l=10, r=10, t=50, b=10),  # Reduce margins for better fit
     )
     context = {
         'kwh': kwh,
