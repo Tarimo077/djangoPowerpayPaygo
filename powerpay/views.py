@@ -41,7 +41,6 @@ def fetch_data(endpoint):
     return response.json()
 
 def fetch_data_index(endpoint, range):
-    print(BASE_URL + endpoint+"?range="+str(range))
     response = requests.get(BASE_URL + endpoint+"?range="+str(range), auth=AUTH)
     response.raise_for_status()
     return response.json()
@@ -90,7 +89,6 @@ def login_page(request):
 
             # If T&C not accepted, show popup (but don't log in yet)
             if not user_profile.tnc_flag:
-                print(username)
                 return render(request, 'partials/tnc_popup.html', {'username': username, 'p': password})
 
             # Log in and redirect
@@ -110,8 +108,6 @@ def accept_tnc(request):
             data = json.loads(request.body)  # Parse JSON body
             username = data.get('username')
             password = data.get('p')
-
-            print("Received Username:", username)
 
             user = authenticate(username=username, password=password)
             if user:
@@ -173,7 +169,7 @@ def landingpage(request):
         devs = fetch_data("commandScode")
         CustomerModel = Customer
         SaleModel = Sale
-    if usr == 'Mec':
+    elif usr == 'Mec':
         devs = fetch_data("commandMec")
         CustomerModel = MecCustomer
         SaleModel = MecSale
@@ -194,6 +190,7 @@ def landingpage(request):
         CustomerModel = Customer
         SaleModel = Sale
 
+
     devs = pd.DataFrame(devs)
     active_count = devs[devs['active'] == True].shape[0]
     inactive_count = devs[devs['active'] == False].shape[0]
@@ -211,7 +208,6 @@ def landingpage(request):
             'Mec': "allDeviceDataMecDjango"
         }
         endpoint = endpoint_mapping.get(usr, "allDeviceDataDjango")
-        print(endpoint)
 
         try:
             data = fetch_data_index(endpoint, 9999999)
@@ -257,13 +253,11 @@ def landingpage(request):
         title="Weekly Energy Consumption",
         xaxis_title="",
         yaxis_title="Energy (kWh)",
-        autosize=True,
         xaxis=dict(type='date'),
         title_x=0.5,
         paper_bgcolor='rgba(0,0,0,0)',  # Transparent background
         plot_bgcolor='rgba(0,0,0,0)',
-        margin_autoexpand=False,
-        #margin=dict(l=10, r=10, t=50, b=10),  # Reduce margins for better fit
+        margin=dict(l=10, r=10, t=50, b=10),  # Reduce margins for better fit
     )
     context = {
         'kwh': kwh,
@@ -555,18 +549,20 @@ def mec_downloads(request):
 @login_required
 def export_mec_downloads(request):
     if request.method == "POST":
-        selected_range = request.POST.get('timerange1', '9999999')
+        selected_range = request.GET.get('timerange1', '9999999')
         selected_devices = request.POST.getlist('devices')
         data = fetch_data_devs("mecdownloads", selected_devices, selected_range)
         df = pd.DataFrame(data)
         # Create a HttpResponse with content_type as ms-excel
         response = HttpResponse(content_type='application/vnd.ms-excel')
-        # Specify the file name
-        response['Content-Disposition'] = 'attachment; filename="merged_customer_device_data.xlsx"'
-        # Use pandas to save the dataframe as an excel file in the response
-        df.to_excel(response, index=False, engine='openpyxl')
-        return response
     
+    # Specify the file name
+        response['Content-Disposition'] = 'attachment; filename="transactions.xlsx"'
+    # Use pandas to save the dataframe as an excel file in the response
+    df.to_excel(response, index=False, engine='openpyxl')
+
+    return response
+
 @login_required
 def mec_single_download(request):
     if request.method == "POST":
@@ -665,8 +661,6 @@ def change_device_status(request):
             selected_dev = request.POST.get("selectedDev")
             status = request.POST.get("status") == "true"  # Convert string "true"/"false" to boolean
 
-            print(f"Device: {selected_dev}, Status: {status}")  # Debugging
-
             # ✅ Send request to external API
             response = requests.post("https://appliapay.com/changeStatus", json={
                 "selectedDev": selected_dev,
@@ -674,7 +668,6 @@ def change_device_status(request):
             })
 
             response_data = response.json()  # Parse response
-            print(f"Response: { response.status_code }")
 
             if response.status_code == 200:
                 # ✅ Extract updated values from API response
@@ -1068,7 +1061,6 @@ def payment_confirmation(request):
                 "transaction_date": transaction_date,
                 "phone_number": phone_number
             })
-            print('Updated payment status:', payment_status)
 
             return JsonResponse({"status": status, "message": message})
         except json.JSONDecodeError:
@@ -1097,7 +1089,6 @@ def payment_confirmation_status(request):
     global payment_status  # Use the global variable
     if request.method == 'GET':
         ref = request.GET.get('ref')
-        print('Retrieved payment_status:', payment_status)
         status = payment_status.get('status')
         if status != 'pending':
             message = payment_status.get('message')
@@ -1239,7 +1230,6 @@ def add_device(request):
             devs = fetch_data("command")
             for devEntry in devs:
                 if devEntry['deviceID'] == device_name:
-                    print(device_name + " already exists")
                     return JsonResponse({
                         "exists": True,
                         "device": device_name
