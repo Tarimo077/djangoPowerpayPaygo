@@ -330,7 +330,7 @@ body {
     width: 80%; /* Match sidebar link width */
     text-align: center;
     align-items: center;
-    padding: 12px 15px;
+    padding: 10;
 }
 
 /* Main Sales Link */
@@ -338,7 +338,7 @@ body {
     display: flex;
     align-items: center;
     width: 80%; /* Full width within dropdown */
-    padding: 12px 15px;
+    padding: 10;
     color: #fff;
     text-decoration: none;
     background-color: transparent; /* No background by default */

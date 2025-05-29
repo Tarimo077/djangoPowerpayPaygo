@@ -1,0 +1,14 @@
+{% extends 'layout.html'%}
+
+{% block title %} Powerpay Africa: Add New Warehouse{% endblock %}
+
+{% block content %}
+<div class="container">
+        <h2>Add New Warehouse</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Add Warehouse</button>
+        </form>
+</div>
+{% endblock %}

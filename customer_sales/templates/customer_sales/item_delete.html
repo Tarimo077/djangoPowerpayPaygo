@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+
+{% block title %}Powerpay Africa: Delete Item{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Delete Item</h2>
+    <p>Are you sure you want to delete item {{ item.name }} ?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a href="{% url 'customers_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

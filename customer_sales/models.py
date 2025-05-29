@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.timezone import now
 
 
 class userProfile(models.Model):
@@ -14,6 +15,50 @@ class userProfile(models.Model):
         return str(self.user)
     class Meta:
         db_table = 'customer_sales_userProfile'
+
+####################################FOR INVENTORY SYSTEM#######################
+
+class Warehouse(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    location = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+    class Meta:
+        db_table = 'warehouses'
+    
+class InventoryItem(models.Model):
+    name = models.CharField(max_length=100)
+    serial_number = models.CharField(max_length=100, unique=True)
+    product_type = models.CharField(max_length=100)
+    date_added = models.DateField(auto_now_add=True)
+    current_warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='inventory_items')
+
+    def __str__(self):
+        return f"{self.name} ({self.serial_number})"
+    class Meta:
+        db_table = 'inventory_items'
+
+    def days_in_current_warehouse(self):
+        last_movement = self.movements.last()
+        if last_movement:
+            return (now() - last_movement.date_moved).days
+        return (now() - self.date_added).days
+    
+class InventoryMovement(models.Model):
+    item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, related_name='movements')
+    from_warehouse = models.ForeignKey(Warehouse, on_delete=models.SET_NULL, null=True,blank=True, related_name='moved_from')
+    to_warehouse = models.ForeignKey(Warehouse, on_delete=models.SET_NULL, null=True, related_name='moved_to')
+    moved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    date_moved = models.DateTimeField(auto_now_add=True)
+    note = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.item.serial_number} → {self.to_warehouse.name} by {self.moved_by} on {self.date_moved}"
+    class Meta:
+        db_table = 'inventory_movements'
+        ordering = ['-date_moved']
+
 
 ########################POWERPAY INTERNAL MODELS###################
 class InternalCustomer(models.Model):
@@ -123,6 +168,7 @@ class InternalSale(models.Model):
 ################################################END OF INTERNAL MODELS################################
 
 
+###############################################SCODE MODELS###########################################
 class Customer(models.Model):
     GENDER_CHOICES = [
         ('M', 'Male'),
@@ -224,6 +270,8 @@ class Sale(models.Model):
 
     class Meta:
         db_table = 'customer_sales_sale'  # Default table for regular users
+
+######################################################END OF SCODE MODELS####################################################
 
 
 ########################################################### FOR WELIGHT INSTANCE #############################################

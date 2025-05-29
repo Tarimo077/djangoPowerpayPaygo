@@ -1,12 +1,36 @@
 # forms.py
 from django import forms
-from .models import InternalCustomer, InternalSale, Customer, Sale, TestCustomer, TestSale, SayonaCustomer, SayonaSale, userProfile, MecCustomer, MecSale
+from .models import InternalCustomer, InternalSale, Customer, Sale, TestCustomer, TestSale, SayonaCustomer, SayonaSale, userProfile, MecCustomer, MecSale, Warehouse, InventoryItem
 
 
 class userProfileForm(forms.ModelForm):
     class Meta:
         model = userProfile
         fields = ['org_name', 'org_address', 'org_phone_number', 'org_email']
+
+class WarehouseForm(forms.ModelForm):
+    class Meta:
+        model = Warehouse
+        fields = '__all__'
+
+class InventoryItemForm(forms.ModelForm):
+    class Meta:
+        model = InventoryItem
+        fields = '__all__'
+
+class MoveInventoryForm(forms.Form):
+    new_warehouse = forms.ModelChoiceField(queryset=Warehouse.objects.all(), label="Move to Warehouse")
+    note = forms.CharField(required=False, widget=forms.Textarea, label="Note")
+
+    def __init__(self, *args, **kwargs):
+        self.current_warehouse = kwargs.pop('current_warehouse', None)
+        super(MoveInventoryForm, self).__init__(*args, **kwargs)
+
+    def clean_new_warehouse(self):
+        new_warehouse = self.cleaned_data['new_warehouse']
+        if new_warehouse == self.current_warehouse:
+            raise forms.ValidationError("New warehouse must be different from the current warehouse.")
+        return new_warehouse
 
 class InternalCustomerForm(forms.ModelForm):
     class Meta:

@@ -1,8 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.core.paginator import Paginator
-from .models import Customer, Sale, TestCustomer, TestSale, SayonaCustomer, SayonaSale, MecCustomer, MecSale
-from .forms import CustomerForm, SaleForm, TestCustomerForm, TestSaleForm, SayonaCustomerForm, SayonaSaleForm, MecCustomerForm, MecSaleForm
+from .models import Customer, Sale, TestCustomer, TestSale, SayonaCustomer, SayonaSale, MecCustomer, MecSale, Warehouse, InventoryItem, InventoryMovement
+from .forms import CustomerForm, SaleForm, TestCustomerForm, TestSaleForm, SayonaCustomerForm, SayonaSaleForm, MecCustomerForm, MecSaleForm, WarehouseForm, InventoryItemForm, MoveInventoryForm
 from datetime import timedelta
 import requests
 from requests.auth import HTTPBasicAuth
@@ -35,6 +35,191 @@ TYPE_OF_USE_MAP = {
 }
 
 
+###Inventory function###################
+def warehouse_list(request):
+    query = request.GET.get('q')
+    if query:
+        warehouses = Warehouse.objects.filter(name__icontains=query)
+    else:    
+        warehouses = Warehouse.objects.all()
+    paginator = Paginator(warehouses, 10)
+    page = request.GET.get('page')
+    warehouses = paginator.get_page(page)
+
+    return render(request, 'customer_sales/warehouse_list.html', {'warehouses': warehouses, 'query': query})
+
+def add_warehouse(request):
+    user = request.user
+    if request.method == 'POST':
+        form = WarehouseForm(request.POST)
+        # Validate the form and save if valid
+        if form.is_valid():
+            warehouse = form.save()  # Save and get the new customer instance
+            send_notification(user, "Warehouse Added", f"{warehouse.name} added")  # Send notification
+            return redirect('warehouse_list')
+    else:
+        form = WarehouseForm()
+        return render(request, 'customer_sales/add_warehouse.html', {'form': form})
+    
+def warehouse_edit(request, pk):
+    user = request.user
+
+    # Retrieve the customer instance based on the selected model
+    warehouse = get_object_or_404(Warehouse, pk=pk)
+
+    if request.method == 'POST':
+        # Use the correct form for the POST request with the warehouse instance
+        form = WarehouseForm(request.POST, instance=warehouse)
+        if form.is_valid():
+            form.save()
+            send_notification(user, "Warehouse Edited", f"{warehouse.name} warehouse details changed")
+            return redirect('warehouse_detail', pk=warehouse.pk)
+    else:
+        # Use the correct form for the GET request to prefill the customer data
+        form = WarehouseForm(instance=warehouse)
+
+    return render(request, 'customer_sales/warehouse_edit.html', {'form': form})
+
+
+def warehouse_detail(request, pk):
+    #user = request.user
+    warehouse = get_object_or_404(Warehouse, pk=pk)
+    items = InventoryItem.objects.filter(current_warehouse=warehouse)
+    unique_products = items.values('product_type').distinct().count()
+    item_count = items.count()
+    paginator = Paginator(items, 10)
+    page = request.GET.get('page')
+    items = paginator.get_page(page)
+    context = {
+        'warehouse': warehouse,
+        'items': items,
+        'item_count': item_count,
+        'unique_products': unique_products
+    }
+
+    return render(request, 'customer_sales/warehouse_detail.html', context)  
+
+def warehouse_delete(request, pk):
+    user = request.user
+    warehouse = get_object_or_404(Warehouse, pk=pk)
+    if request.method == 'POST':
+        warehouse.delete()
+        send_notification(user, "Warehouse Deleted", f"{warehouse.name} warehouse deleted")
+        return redirect('warehouse_list')
+    return render(request, 'customer_sales/warehouse_delete.html', {'warehouse': warehouse})
+
+#############ITEMS#########################
+def item_list(request):
+    query = request.GET.get('q')
+    if query:
+        items = InventoryItem.objects.filter(name__icontains=query)
+    else:    
+        items = InventoryItem.objects.all()
+    print(items)
+    paginator = Paginator(items, 10)
+    page = request.GET.get('page')
+    items = paginator.get_page(page)
+
+    return render(request, 'customer_sales/item_list.html', {'items': items, 'query': query})
+
+def add_item(request):
+    user = request.user
+    if request.method == 'POST':
+        form = InventoryItemForm(request.POST)
+        if form.is_valid():
+            item = form.save()  # Save the item
+            # Create initial movement record
+            InventoryMovement.objects.create(
+                item=item,
+                to_warehouse=item.current_warehouse,
+                moved_by=user,
+                note="Initial entry"
+            )
+            send_notification(user, "Item Added", f"{item.name} added")  # Send notification
+            return redirect('item_list')
+    else:
+        form = InventoryItemForm()  # Instantiate form for GET request
+
+    return render(request, 'customer_sales/add_item.html', {'form': form})
+
+def item_edit(request, pk):
+    user = request.user
+    item = get_object_or_404(InventoryItem, pk=pk)
+    old_warehouse = item.current_warehouse
+    if request.method == 'POST':
+        form = InventoryItemForm(request.POST, instance=item)
+        if form.is_valid():
+            updated_item = form.save(commit=False)  # Don't save to DB yet
+            if updated_item.current_warehouse != old_warehouse:
+                # Warehouse changed – log the movement
+                InventoryMovement.objects.create(
+                    item=item,
+                    from_warehouse=old_warehouse,
+                    to_warehouse=updated_item.current_warehouse,
+                    moved_by=user,
+                )
+                send_notification(user, "Item Moved", f"{item.name} moved from {old_warehouse} to {updated_item.current_warehouse}")
+
+            updated_item.save()  # Save updated item after checking movement
+            send_notification(user, "Item Edited", f"{item.name} item details changed")
+
+            return redirect('item_detail', pk=item.pk)
+    else:
+        form = InventoryItemForm(instance=item)
+
+    return render(request, 'customer_sales/item_edit.html', {'form': form})
+
+
+def item_detail(request, pk):
+    #user = request.user
+    item = get_object_or_404(InventoryItem, pk=pk)
+    item_movements = InventoryMovement.objects.filter(item=item).order_by('-date_moved')
+    context = {
+        'item': item,
+        'item_movements': item_movements
+    }
+
+    return render(request, 'customer_sales/item_detail.html', context)  
+
+def item_delete(request, pk):
+    user = request.user
+    item = get_object_or_404(InventoryItem, pk=pk)
+    if request.method == 'POST':
+        item.delete()
+        send_notification(user, "Item Deleted", f"{item.name} item deleted")
+        return redirect('item_list')
+    return render(request, 'customer_sales/item_delete.html', {'item': item})
+
+
+def move_inventory_item(request, item_id):
+    item = get_object_or_404(InventoryItem, id=item_id)
+    user = request.user
+    if request.method == 'POST':
+        form = MoveInventoryForm(request.POST, current_warehouse=item.current_warehouse)
+        if form.is_valid():
+            new_warehouse = form.cleaned_data['new_warehouse']
+            note = form.cleaned_data['note']
+            from_wh = item.current_warehouse
+            InventoryMovement.objects.create(
+                item=item,
+                from_warehouse=item.current_warehouse,
+                to_warehouse=new_warehouse,
+                moved_by=request.user,
+                note=note,
+            )
+
+            item.current_warehouse = new_warehouse
+            item.save()
+            send_notification(user, "Item Moved", f"{item.name}({item.serial_number}) has been moved from {from_wh} warehouse to {new_warehouse} warehouse")
+            return redirect('item_detail', pk=item.id)
+    else:
+        form = MoveInventoryForm(current_warehouse=item.current_warehouse)
+
+    return render(request, 'customer_sales/move_item.html', {
+        'form': form,
+        'item': item,
+    })
+ 
 
 # Existing customer views...
 def customers_list(request):

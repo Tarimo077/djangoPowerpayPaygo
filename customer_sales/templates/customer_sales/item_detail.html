@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+
+{% block title %}Powerpay Africa: Item Details{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Item Details</h2>
+    <p><strong>Item Name:</strong> {{ item.name }}</p>
+    <p><strong>Item Product Type:</strong> {{ item.product_type }}</p>
+    <p><strong>Item Serial Number:</strong> {{ item.serial_number }}</p>
+    <p><strong>Warehouse:</strong> {{ item.current_warehouse.name }}</p>
+    <p><strong>Date Added:</strong> {{ item.date_added|date:"d M Y " }}</p>
+    <h3>Movement History</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th class="table_headers">Date</th>
+                <th class="table_headers">From</th>
+                <th class="table_headers">To</th>
+                <th class="table_headers">Moved By</th>
+                <th class="table_headers">Note</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for move in item_movements %}
+            <tr>
+                <td class="table_content">{{ move.date_moved }}</td>
+                <td class="table_content">{{ move.from_warehouse.name }}</td>
+                <td class="table_content">{{ move.to_warehouse.name }}</td>
+                <td class="table_content">{{ move.moved_by.get_full_name|default:move.moved_by.username }}</td>
+                <td class="table_content">{{ move.note }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+            <td colspan="5">No movements found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

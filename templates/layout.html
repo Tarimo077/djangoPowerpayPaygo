@@ -79,6 +79,16 @@
             </div>
         </div>
         {% endif %}
+        {% if user.first_name == 'Geoffrey' or user.first_name == 'Jeff'%}
+        <div class="sales-dropdown">
+            <a href="{% url 'warehouse_list' %}" class="{% if request.resolver_match.url_name == 'warehouse_list' or request.resolver_match.url_name == 'warehouse_add' or request.resolver_match.url_name == 'warehouse_edit' or request.resolver_match.url_name == 'warehouse_detail' or request.resolver_match.url_name == 'warehouse_delete' or request.resolver_match.url_name == 'item_list' or request.resolver_match.url_name == 'item_add' or request.resolver_match.url_name == 'item_edit' or request.resolver_match.url_name == 'item_detail' or request.resolver_match.url_name == 'item_delete' %}active-link{% endif %}"
+            ><i class="fa fa-tasks" aria-hidden="true" style="margin-right:5px;"></i> Inventory</a>
+            <div class="sales-dropdown-content">
+                <a href="{% url 'warehouse_list' %}">Warehouses</a>
+                <a href="{% url 'item_list' %}">Items</a>
+            </div>
+        </div>
+        {% endif %}
         {% if user.first_name != 'Welight' and user.first_name != 'Jimmy' and user.first_name != 'Sayona' and user.first_name != 'Sayona-Guest' and user.first_name != 'Mec' %}
         <a href="{% url 'transactions_page' %}" class="{% if request.resolver_match.url_name == 'transactions_page' or request.resolver_match.url_name == 'payment_prompt' or request.resolver_match.url_name == 'payment_waiting' or request.resolver_match.url_name == 'payment_confirmation' or request.resolver_match.url_name == 'payment_confirmation_status' or request.resolver_match.url_name == 'payment_confirmation_page' %}active-link{% endif %}"><i class="fa fa-exchange" aria-hidden="true" style="margin-right:5px;"></i> Transactions</a>
         {% endif %}

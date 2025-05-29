@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block title %} Powerpay Africa: Warehouses {% endblock %}
+
+{% block content %}
+
+<div class='container'>
+    <h2><i class="fa fa-building" aria-hidden="true" style='color:#0ead00'></i> Warehouses</h2>
+    <div class="search-container">
+        <form method="get" action="{% url 'warehouse_list' %}">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search by name">
+            <button type="submit">Search</button>
+            <a href="{% url 'warehouse_list' %}" class="clear-search">Clear</a>
+        </form>
+    </div>
+    <div style="margin-bottom:20px">
+    <form method="get" action="{% url 'warehouse_add' %}">
+        <button type="submit" class="device_data_btn">Add New Warehouse</button>
+    </form>
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th class="table_headers">Name</th>
+                <th class="table_headers">Location</th>
+                <th class="table_headers">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for warehouse in warehouses %}
+            <tr>
+                <td class="table_content">{{ warehouse.name }}</td>
+                <td class="table_content">{{ warehouse.location }}</td>
+                <td class="table_content">
+                    <a href="{% url 'warehouse_detail' warehouse.pk %}">🕵️‍♀️ Details</a> |
+                    <a href="{% url 'warehouse_edit' warehouse.pk %}">📝 Edit</a> |
+                    <a href="{% url 'warehouse_delete' warehouse.pk %}">❌ Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="pagination">
+        <span class="step-links">
+            {% if warehouses.has_previous %}
+                <a href="?page=1{% if query %}&q={{ query }}{% endif %}">&laquo; first</a>
+                <a href="?page={{ warehouses.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ warehouses.number }} of {{ warehouses.paginator.num_pages }}.
+            </span>
+
+            {% if warehouses.has_next %}
+                <a href="?page={{ warehouses.next_page_number }}{% if query %}&q={{ query }}{% endif %}">next</a>
+                <a href="?page={{ warehouses.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+
+</div>
+
+{% endblock %}

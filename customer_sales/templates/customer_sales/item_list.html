@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+
+{% block title %} Powerpay Africa: Items {% endblock %}
+
+{% block content %}
+
+<div class='container'>
+    <h2><i class="fa fa-tags" aria-hidden="true" style='color:#0ead00'></i> Items</h2>
+    <div class="search-container">
+        <form method="get" action="{% url 'item_list' %}">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search by name">
+            <button type="submit">Search</button>
+            <a href="{% url 'item_list' %}" class="clear-search">Clear</a>
+        </form>
+    </div>
+    <div style="margin-bottom:20px">
+    <form method="get" action="{% url 'item_add' %}">
+        <button type="submit" class="device_data_btn">Add New Item</button>
+    </form>
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th class="table_headers">Name</th>
+                <th class="table_headers">Product Type</th>
+                <th class="table_headers">Product Serial Number</th>
+                <th class="table_headers">Date Added</th>
+                <th class="table_headers">Warehouse</th>
+                <th class="table_headers">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td class="table_content">{{ item.name }}</td>
+                <td class="table_content">{{ item.product_type }}</td>
+                <td class="table_content">{{ item.serial_number }}</td>
+                <td class="table_content">{{ item.date_added|date:"d M Y" }}</td>
+                <td class="table_content">{{ item.current_warehouse.name }}</td>
+                <td class="table_content">
+                    <a href="{% url 'item_detail' item.pk %}">🕵️‍♀️ Details</a> |
+                    <a href="{% url 'item_edit' item.pk %}">📝 Edit</a> |
+                    <a href="{% url 'item_delete' item.pk %}">❌ Delete</a> |
+                    <a href="{% url 'move_inventory_item' item.pk %}">🔄️ Move Item</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="pagination">
+        <span class="step-links">
+            {% if items.has_previous %}
+                <a href="?page=1{% if query %}&q={{ query }}{% endif %}">&laquo; first</a>
+                <a href="?page={{ items.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ items.number }} of {{ items.paginator.num_pages }}.
+            </span>
+
+            {% if items.has_next %}
+                <a href="?page={{ items.next_page_number }}{% if query %}&q={{ query }}{% endif %}">next</a>
+                <a href="?page={{ items.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+
+</div>
+
+{% endblock %}

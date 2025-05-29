@@ -1,10 +1,22 @@
 # admin.py
 from django.contrib import admin
-from .models import InternalCustomer, InternalSale, Customer, Sale, TestCustomer, TestSale, userProfile, SayonaCustomer, SayonaSale
+from .models import InternalCustomer, InternalSale, Customer, Sale, TestCustomer, TestSale, userProfile, SayonaCustomer, SayonaSale, Warehouse, InventoryItem, InventoryMovement
 
 @admin.register(userProfile)
 class userProfileAdmin(admin.ModelAdmin):
     list_display = ('tnc_flag', 'org_name')
+
+@admin.register(Warehouse)
+class WarehouseAdmin(admin.ModelAdmin):
+    list_display = ('name', 'location')
+
+@admin.register(InventoryItem)
+class InventoryItemAdmin(admin.ModelAdmin):
+    list_display = ('name', 'serial_number', 'product_type', 'date_added', 'current_warehouse')
+
+@admin.register(InventoryMovement)
+class InventoryMovementAdmin(admin.ModelAdmin):
+    list_display = ('item', 'from_warehouse', 'to_warehouse', 'date_moved', 'moved_by', 'note')
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
