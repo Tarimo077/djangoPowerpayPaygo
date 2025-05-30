@@ -81,7 +81,7 @@
         {% endif %}
         {% if user.first_name == 'Geoffrey' or user.first_name == 'Jeff'%}
         <div class="sales-dropdown">
-            <a href="{% url 'warehouse_list' %}" class="{% if request.resolver_match.url_name == 'warehouse_list' or request.resolver_match.url_name == 'warehouse_add' or request.resolver_match.url_name == 'warehouse_edit' or request.resolver_match.url_name == 'warehouse_detail' or request.resolver_match.url_name == 'warehouse_delete' or request.resolver_match.url_name == 'item_list' or request.resolver_match.url_name == 'item_add' or request.resolver_match.url_name == 'item_edit' or request.resolver_match.url_name == 'item_detail' or request.resolver_match.url_name == 'item_delete' %}active-link{% endif %}"
+            <a href="{% url 'warehouse_list' %}" class="{% if request.resolver_match.url_name == 'warehouse_list' or request.resolver_match.url_name == 'warehouse_add' or request.resolver_match.url_name == 'warehouse_edit' or request.resolver_match.url_name == 'warehouse_detail' or request.resolver_match.url_name == 'warehouse_delete' or request.resolver_match.url_name == 'item_list' or request.resolver_match.url_name == 'item_add' or request.resolver_match.url_name == 'item_edit' or request.resolver_match.url_name == 'item_detail' or request.resolver_match.url_name == 'item_delete' or request.resolver_match.url_name == 'move_inventory_item' or request.resolver_match.url_name == 'bulk_move_items' %}active-link{% endif %}"
             ><i class="fa fa-tasks" aria-hidden="true" style="margin-right:5px;"></i> Inventory</a>
             <div class="sales-dropdown-content">
                 <a href="{% url 'warehouse_list' %}">Warehouses</a>

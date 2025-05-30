@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block title %} Powerpay Africa: Move Bulk Items {% endblock %}
+
+{% block content %}
+
+<h2>Bulk Move Items</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Move Items</button>
+</form>
+
+{% endblock %}

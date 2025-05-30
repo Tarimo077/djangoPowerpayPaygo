@@ -32,6 +32,34 @@ class MoveInventoryForm(forms.Form):
             raise forms.ValidationError("New warehouse must be different from the current warehouse.")
         return new_warehouse
 
+class BulkMoveForm(forms.Form):
+    items = forms.ModelMultipleChoiceField(
+        queryset=InventoryItem.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=True,
+        label="Select items to move"
+    )
+    new_warehouse = forms.ModelChoiceField(
+        queryset=Warehouse.objects.all(),
+        required=True,
+        label="Move to warehouse"
+    )
+    note = forms.CharField(required=False, widget=forms.Textarea, label="Note")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        items = cleaned_data.get('items')
+        new_warehouse = cleaned_data.get('new_warehouse')
+
+        if items and new_warehouse:
+            same_warehouse_items = [item for item in items if item.current_warehouse == new_warehouse]
+            if same_warehouse_items:
+                item_list = ", ".join([f"{item.name}({item.serial_number})" for item in same_warehouse_items])
+                raise forms.ValidationError(
+                    f"The following items are already in {new_warehouse.name} and cannot be moved there again: {item_list}"
+                )
+        return cleaned_data
+
 class InternalCustomerForm(forms.ModelForm):
     class Meta:
         model = InternalCustomer

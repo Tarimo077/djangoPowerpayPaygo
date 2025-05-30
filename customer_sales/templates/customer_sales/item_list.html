@@ -13,9 +13,14 @@
             <a href="{% url 'item_list' %}" class="clear-search">Clear</a>
         </form>
     </div>
-    <div style="margin-bottom:20px">
+    <div style="margin-bottom:20px; float:left">
     <form method="get" action="{% url 'item_add' %}">
         <button type="submit" class="device_data_btn">Add New Item</button>
+    </form>
+    </div>
+     <div style="margin-bottom:20px; float:right">
+    <form method="get" action="{% url 'bulk_move_items' %}">
+        <button type="submit" class="device_data_btn">Move Bulk Items</button>
     </form>
     </div>
     <table class="table">

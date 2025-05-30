@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.core.paginator import Paginator
 from .models import Customer, Sale, TestCustomer, TestSale, SayonaCustomer, SayonaSale, MecCustomer, MecSale, Warehouse, InventoryItem, InventoryMovement
-from .forms import CustomerForm, SaleForm, TestCustomerForm, TestSaleForm, SayonaCustomerForm, SayonaSaleForm, MecCustomerForm, MecSaleForm, WarehouseForm, InventoryItemForm, MoveInventoryForm
+from .forms import CustomerForm, SaleForm, TestCustomerForm, TestSaleForm, SayonaCustomerForm, SayonaSaleForm, MecCustomerForm, MecSaleForm, WarehouseForm, InventoryItemForm, MoveInventoryForm, BulkMoveForm
 from datetime import timedelta
 import requests
 from requests.auth import HTTPBasicAuth
@@ -219,6 +219,34 @@ def move_inventory_item(request, item_id):
         'form': form,
         'item': item,
     })
+
+def bulk_move_items(request):
+    user = request.user
+
+    if request.method == 'POST':
+        form = BulkMoveForm(request.POST)
+        if form.is_valid():
+            items = form.cleaned_data['items']
+            new_warehouse = form.cleaned_data['new_warehouse']
+            note = form.cleaned_data['note']
+            for item in items:
+                from_wh = item.current_warehouse
+                if item.current_warehouse != new_warehouse:
+                    InventoryMovement.objects.create(
+                        item=item,
+                        from_warehouse=item.current_warehouse,
+                        to_warehouse=new_warehouse,
+                        moved_by=user,
+                        note=note,
+                    )
+                    item.current_warehouse = new_warehouse
+                    item.save()
+                    send_notification(user, "Item Moved", f"{item.name}({item.serial_number}) has been moved from {from_wh} warehouse to {new_warehouse} warehouse")
+            return redirect('item_list')  # or wherever you want
+    else:
+        form = BulkMoveForm()
+
+    return render(request, 'customer_sales/bulk_move.html', {'form': form})
  
 
 # Existing customer views...
