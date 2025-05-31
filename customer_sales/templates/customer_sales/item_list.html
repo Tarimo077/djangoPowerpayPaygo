@@ -1,11 +1,15 @@
 {% extends "layout.html" %}
-
+{% load humanize %}
 {% block title %} Powerpay Africa: Items {% endblock %}
 
 {% block content %}
 
 <div class='container'>
     <h2><i class="fa fa-tags" aria-hidden="true" style='color:#0ead00'></i> Items</h2>
+    <div class="data-labels">
+        <label class="labelArea"><i class="fa fa-tags" aria-hidden="true"></i>&emsp;Total Items:<br>{{ item_count|intcomma }} </label>
+        <label class="labelArea"><i class="fa fa-tag" aria-hidden="true"></i>&emsp;Total Distinct Items:<br>{{ distinct_item_count|intcomma }} </label>
+</div>
     <div class="search-container">
         <form method="get" action="{% url 'item_list' %}">
             <input type="text" name="q" value="{{ query }}" placeholder="Search by name">

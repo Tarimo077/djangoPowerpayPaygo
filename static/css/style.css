@@ -271,31 +271,28 @@ body {
     border-bottom: 1px solid #eee;
     position: relative; /* Ensure `::before` positions correctly */
     padding: 20px;
-    display: flex;
-    font-size: 14px;
+    font-size: 12px;
 
 }
-.notification-dropdown ul li::before {
+
+.notification-item::before,
+.notification-item::after {
     content: "";
     position: absolute;
-    left: 0; /* Align it to the left edge */
-    top: 50%; 
-    transform: translateY(-50%); /* Center vertically */
-    width: 5px; /* Thickness of the bar */
-    height: 80%; /* Adjust height */
-    background-color: #0ead00; /* Green color */
-    border-radius: 2px; /* Rounded edges */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 5px;
+    height: 80%;
+    background-color: #0ead00;
+    border-radius: 2px;
 }
-.notification-dropdown ul li::after {
-    content: "";
-    position: absolute;
-    right: 0; /* Align it to the left edge */
-    top: 50%; 
-    transform: translateY(-50%); /* Center vertically */
-    width: 5px; /* Thickness of the bar */
-    height: 80%; /* Adjust height */
-    background-color: #0ead00; /* Green color */
-    border-radius: 2px; /* Rounded edges */
+
+.notification-item::before {
+    left: 0;
+}
+
+.notification-item::after {
+    right: 0;
 }
 
 .notification-dropdown ul li:last-child {
@@ -307,6 +304,37 @@ body {
     cursor: pointer;
 }
 
+.notification-item {
+    padding: 10px;
+    margin: 10px;
+    /*border: 2px solid #28a745;  green bars */
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+.notif-content {
+    display: flex;
+    justify-content: space-between;
+    /*align-items: center;*/
+    gap: 10px;
+}
+
+.notif-content span {
+    flex-grow: 1;
+    font-size: 12px;
+    color: #0ead00;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    color: #dc3545;
+    cursor: pointer;
+    padding: 0 8px;
+}
+
+/*
 .close-btn {
     background: none;
     border: none;
@@ -314,7 +342,7 @@ body {
     font-size: 16px;
     cursor: pointer;
     margin-left: 10px;
-}
+} */
 
 .close-btn:hover {
     color: darkred;

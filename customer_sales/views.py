@@ -11,6 +11,7 @@ from django.http import HttpResponse
 from datetime import datetime
 from collections import Counter
 from powerpay.notifications import send_notification
+from django.db.models import Q
 
 # Constants
 BASE_URL = "https://appliapay.com/"
@@ -112,15 +113,26 @@ def warehouse_delete(request, pk):
 def item_list(request):
     query = request.GET.get('q')
     if query:
-        items = InventoryItem.objects.filter(name__icontains=query)
+        items = InventoryItem.objects.filter(
+            Q(name__icontains=query) | Q(serial_number__icontains=query)
+        )
     else:    
         items = InventoryItem.objects.all()
-    print(items)
+
+    unique_products = items.values('product_type').distinct().count()
+    item_count = items.count()
     paginator = Paginator(items, 10)
     page = request.GET.get('page')
     items = paginator.get_page(page)
 
-    return render(request, 'customer_sales/item_list.html', {'items': items, 'query': query})
+    context = {
+        'items': items,
+        'query': query,
+        'item_count': item_count,
+        'distinct_item_count': unique_products
+    }
+
+    return render(request, 'customer_sales/item_list.html', context)
 
 def add_item(request):
     user = request.user

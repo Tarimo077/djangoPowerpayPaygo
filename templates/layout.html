@@ -35,6 +35,7 @@
             <!-- Notification Dropdown -->
             <div id="notification-dropdown" class="notification-dropdown">
                 <div class="notification-header">Notifications</div>
+                <button id="clear-all-btn" style="margin: 10px; padding: 10px; cursor: pointer; color: #fff; font-size: 10px; background-color: #0ead00; border-radius: 5px; border: none;">Clear All</button>
                 <ul id="notification-list"></ul>
             </div>
         </div>
@@ -282,31 +283,54 @@
         // Function to render notifications from stored data
         function renderNotifications() {
             notificationList.innerHTML = ""; // Clear list before reloading
-    
+
             storedNotifications.forEach((notif, index) => {
+                // Convert timestamp to GMT+03:00
+                const date = new Date(notif.timestamp);
+                const gmt3Time = new Date(date.getTime() + 3 * 60 * 60 * 1000); // add 3 hours
+                const formattedTime = gmt3Time.toISOString().replace("T", " ").slice(0, 19);
+
                 const li = document.createElement("li");
+                li.className = "notification-item";
                 li.innerHTML = `
-                    <span><strong>${notif.title}:</strong> ${notif.message} at ${notif.timestamp}</span>
-                    <button class="close-btn" data-index="${index}">&times;</button>
+                    <div class="notif-content">
+                        <span><strong>${notif.title}:</strong> ${notif.message} at ${formattedTime}</span>
+                        <button class="close-btn" data-index="${index}">&times;</button>
+                    </div>
                 `;
                 notificationList.insertBefore(li, notificationList.firstChild);
             });
-    
-            // Attach event listeners to close buttons
+
+            // Attach close handlers
             document.querySelectorAll(".close-btn").forEach((btn) => {
                 btn.addEventListener("click", function () {
                     const index = this.getAttribute("data-index");
                     removeNotification(index);
                 });
             });
-    
-            // Hide badge if no notifications remain
+
+            // Update badge visibility
             if (storedNotifications.length === 0) {
                 hasUnread = false;
                 sessionStorage.setItem("hasUnread", "false");
                 updateNotificationUI();
             }
         }
+        
+        function clearAllNotifications() {
+            storedNotifications = [];
+            sessionStorage.setItem("notifications", JSON.stringify([]));
+            hasUnread = false;
+            sessionStorage.setItem("hasUnread", "false");
+            updateNotificationUI();
+            renderNotifications();
+        }
+
+        // Attach event listener after DOM content loads
+        document.getElementById("clear-all-btn").addEventListener("click", function () {
+            clearAllNotifications();
+        });
+
     
         // Load stored notifications on page reload
         renderNotifications();
