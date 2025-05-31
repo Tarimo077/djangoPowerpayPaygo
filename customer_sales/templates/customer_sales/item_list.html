@@ -35,6 +35,7 @@
                 <th class="table_headers">Product Serial Number</th>
                 <th class="table_headers">Date Added</th>
                 <th class="table_headers">Warehouse</th>
+                <th class="table_headers">Days in Warehouse</th>
                 <th class="table_headers">Actions</th>
             </tr>
         </thead>
@@ -46,6 +47,7 @@
                 <td class="table_content">{{ item.serial_number }}</td>
                 <td class="table_content">{{ item.date_added|date:"d M Y" }}</td>
                 <td class="table_content">{{ item.current_warehouse.name }}</td>
+                <td class="table_content">{{ item.days_in_current_warehouse }} days</td>
                 <td class="table_content">
                     <a href="{% url 'item_detail' item.pk %}">🕵️‍♀️ Details</a> |
                     <a href="{% url 'item_edit' item.pk %}">📝 Edit</a> |

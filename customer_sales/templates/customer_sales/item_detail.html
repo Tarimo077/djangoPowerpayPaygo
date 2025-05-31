@@ -10,6 +10,7 @@
     <p><strong>Item Serial Number:</strong> {{ item.serial_number }}</p>
     <p><strong>Warehouse:</strong> {{ item.current_warehouse.name }}</p>
     <p><strong>Date Added:</strong> {{ item.date_added|date:"d M Y " }}</p>
+    <p><strong>Days in {{ item.current_warehouse.name }} Warehouse:</strong>{{ item.days_in_current_warehouse }} days</p>
     <h3>Movement History</h3>
     <table class="table">
         <thead>
@@ -17,6 +18,7 @@
                 <th class="table_headers">Date</th>
                 <th class="table_headers">From</th>
                 <th class="table_headers">To</th>
+                <th class="table_headers">Duration at From</th>
                 <th class="table_headers">Moved By</th>
                 <th class="table_headers">Note</th>
             </tr>
@@ -27,12 +29,19 @@
                 <td class="table_content">{{ move.date_moved }}</td>
                 <td class="table_content">{{ move.from_warehouse.name }}</td>
                 <td class="table_content">{{ move.to_warehouse.name }}</td>
+                <td class="table_content">
+                    {% if move.from_warehouse %}
+                        {{ move.duration_at_previous_warehouse.days }} days
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
                 <td class="table_content">{{ move.moved_by.get_full_name|default:move.moved_by.username }}</td>
                 <td class="table_content">{{ move.note }}</td>
             </tr>
             {% empty %}
             <tr>
-            <td colspan="5">No movements found.</td>
+                <td colspan="6">No movements found.</td>
             </tr>
             {% endfor %}
         </tbody>

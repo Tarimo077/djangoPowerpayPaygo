@@ -3,15 +3,15 @@ from django.urls import reverse
 from django.core.paginator import Paginator
 from .models import Customer, Sale, TestCustomer, TestSale, SayonaCustomer, SayonaSale, MecCustomer, MecSale, Warehouse, InventoryItem, InventoryMovement
 from .forms import CustomerForm, SaleForm, TestCustomerForm, TestSaleForm, SayonaCustomerForm, SayonaSaleForm, MecCustomerForm, MecSaleForm, WarehouseForm, InventoryItemForm, MoveInventoryForm, BulkMoveForm
-from datetime import timedelta
 import requests
 from requests.auth import HTTPBasicAuth
 import pandas as pd
 from django.http import HttpResponse
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import Counter
 from powerpay.notifications import send_notification
 from django.db.models import Q
+from django.utils.timezone import make_aware, is_naive, datetime
 
 # Constants
 BASE_URL = "https://appliapay.com/"
@@ -183,14 +183,26 @@ def item_edit(request, pk):
 
 
 def item_detail(request, pk):
-    #user = request.user
     item = get_object_or_404(InventoryItem, pk=pk)
-    item_movements = InventoryMovement.objects.filter(item=item).order_by('-date_moved')
+    item_movements = InventoryMovement.objects.filter(item=item).order_by('date_moved')  # oldest first
+
+    movement_list = []
+
+    # Convert date_added (a date object) to a timezone-aware datetime
+    previous_date = datetime.combine(item.date_added, datetime.min.time())
+    if is_naive(previous_date):
+        previous_date = make_aware(previous_date)
+
+    for move in item_movements:
+        duration = move.date_moved - previous_date
+        move.duration_at_previous_warehouse = duration
+        previous_date = move.date_moved
+        movement_list.append(move)
+
     context = {
         'item': item,
-        'item_movements': item_movements
+        'item_movements': movement_list[::-1],  # newest first
     }
-
     return render(request, 'customer_sales/item_detail.html', context)  
 
 def item_delete(request, pk):

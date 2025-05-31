@@ -38,12 +38,14 @@ class InventoryItem(models.Model):
         return f"{self.name} ({self.serial_number})"
     class Meta:
         db_table = 'inventory_items'
-
+    @property
     def days_in_current_warehouse(self):
-        last_movement = self.movements.last()
-        if last_movement:
-            return (now() - last_movement.date_moved).days
-        return (now() - self.date_added).days
+        # Get the most recent movement *into* the current warehouse
+        last_movement_to_current = self.movements.filter(to_warehouse=self.current_warehouse).order_by('-date_moved').first()
+        
+        if last_movement_to_current:
+            return (now() - last_movement_to_current.date_moved).days
+        return (now() - self.date_added).days  # Fallback for items never moved
     
 class InventoryMovement(models.Model):
     item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, related_name='movements')
