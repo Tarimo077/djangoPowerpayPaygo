@@ -10,7 +10,7 @@
     <p><strong>Item Serial Number:</strong> {{ item.serial_number }}</p>
     <p><strong>Warehouse:</strong> {{ item.current_warehouse.name }}</p>
     <p><strong>Date Added:</strong> {{ item.date_added|date:"d M Y " }}</p>
-    <p><strong>Days in {{ item.current_warehouse.name }} Warehouse:</strong>{{ item.days_in_current_warehouse }} days</p>
+    <p><strong>Days in {{ item.current_warehouse.name }} Warehouse:</strong>{{ item.days_in_current_warehouse }} {% if item.days_in_current_warehouse == 1 %} day {% else %} days {% endif %}</p>
     <h3>Movement History</h3>
     <table class="table">
         <thead>
@@ -31,7 +31,7 @@
                 <td class="table_content">{{ move.to_warehouse.name }}</td>
                 <td class="table_content">
                     {% if move.from_warehouse %}
-                        {{ move.duration_at_previous_warehouse.days }} days
+                        {{ move.duration_at_previous_warehouse.days }} {% if move.duration_at_previous_warehouse.days == 1 %} day {% else %} days {% endif %}
                     {% else %}
                         N/A
                     {% endif %}

@@ -28,7 +28,7 @@
                 <td class="table_content">{{ item.product_type }}</td>
                 <td class="table_content">{{ item.serial_number }}</td>
                 <td class="table_content">{{ item.date_added|date:"d M Y " }}</td>
-                <td class="table_content">{{ item.days_in_current_warehouse }} days</td>
+                <td class="table_content">{{ item.days_in_current_warehouse }} {% if item.days_in_current_warehouse == 1 %} day {% else %} days {% endif %}</td>
                 <td class="table_content">
                     <a href="{% url 'item_detail' item.pk %}">🕵️‍♀️ Details</a> |
                     <a href="{% url 'item_edit' item.pk %}">📝 Edit</a> |

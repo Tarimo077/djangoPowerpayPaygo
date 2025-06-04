@@ -23,6 +23,7 @@
             <tr>
                 <th class="table_headers">Name</th>
                 <th class="table_headers">Location</th>
+                <th class="table_headers">Item Count</th>
                 <th class="table_headers">Actions</th>
             </tr>
         </thead>
@@ -31,6 +32,7 @@
             <tr>
                 <td class="table_content">{{ warehouse.name }}</td>
                 <td class="table_content">{{ warehouse.location }}</td>
+                <td class="table_content">{{ warehouse.item_count }}</td>
                 <td class="table_content">
                     <a href="{% url 'warehouse_detail' warehouse.pk %}">🕵️‍♀️ Details</a> |
                     <a href="{% url 'warehouse_edit' warehouse.pk %}">📝 Edit</a> |

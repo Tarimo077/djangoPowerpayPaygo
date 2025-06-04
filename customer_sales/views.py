@@ -10,7 +10,7 @@ from django.http import HttpResponse
 from datetime import datetime, timedelta
 from collections import Counter
 from powerpay.notifications import send_notification
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.utils.timezone import make_aware, is_naive, datetime
 
 # Constants
@@ -39,15 +39,23 @@ TYPE_OF_USE_MAP = {
 ###Inventory function###################
 def warehouse_list(request):
     query = request.GET.get('q')
+    
     if query:
         warehouses = Warehouse.objects.filter(name__icontains=query)
-    else:    
+    else:
         warehouses = Warehouse.objects.all()
+
+    # Annotate each warehouse with item count
+    warehouses = warehouses.annotate(item_count=Count('inventory_items'))
+
     paginator = Paginator(warehouses, 10)
     page = request.GET.get('page')
     warehouses = paginator.get_page(page)
 
-    return render(request, 'customer_sales/warehouse_list.html', {'warehouses': warehouses, 'query': query})
+    return render(request, 'customer_sales/warehouse_list.html', {
+        'warehouses': warehouses,
+        'query': query,
+    })
 
 def add_warehouse(request):
     user = request.user
