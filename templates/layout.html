@@ -24,7 +24,7 @@
 </head>
 <body>
     <div class="greeting-bar" id="greeting-bar">
-        <div id="greeting-text" style="margin-right:5px; color: #fff" > </div>
+        <div id="greeting-text" style="margin-right:5px; color: #0ead00" > </div>
         <!-- Notification Button -->
         <div class="notification-container">
             <button id="notification-button" class="notification-btn">
@@ -39,7 +39,7 @@
                 <ul id="notification-list"></ul>
             </div>
         </div>
-        <div style="color:#fff;margin-right:5px;"> | </div>
+        <div style="color:#0ead00;margin-right:10px;"> | </div>
         <div class="user-menu">
             <button id="user-button">
                 <i class="fa fa-user"></i>
@@ -190,7 +190,7 @@
                 const username = "{{ user.first_name }}";
                 const time = formatTime(now);
                 // Insert animated hand icon
-                document.getElementById('greeting-text').innerHTML = `<span class="wave-hand"><i class="fa fa-hand-paper" aria-hidden="true"></i></span> ${greeting}, ${username} |`;
+                document.getElementById('greeting-text').innerHTML = `<span class="wave-hand"><i class="fa fa-hand-paper" aria-hidden="true"></i></span>&nbsp; ${greeting}, ${username} &nbsp; &nbsp;|`;
                 document.getElementById('time-div').innerHTML = `<i class="fa fa-clock" aria-hidden="true" style="margin-right:10px;"></i> ${time}  `;
             }
 

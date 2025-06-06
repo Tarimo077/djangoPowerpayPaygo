@@ -117,8 +117,8 @@ body {
 }
 /* Fix the greeting bar */
 .greeting-bar {
-    background-color: #0ead00;
-    color: #fff;
+    background-color: #f9f9f9;
+    color: #0ead00;
     padding: 5px;
     text-align: right;
     position: fixed;
@@ -126,7 +126,7 @@ body {
     right: 0;
     left: 0;
     z-index: 1000;
-    font-size: 16px;
+    font-size: 18px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -144,8 +144,8 @@ body {
     height: 30px;
     border-radius: 50%;
     border: none;
-    background-color: #fff; /* White for contrast */
-    color: #0ead00; /* Green icon */
+    background-color: #0ead00; /* White for contrast */
+    color: #fff; /* Green icon */
     font-size: 16px;
     cursor: pointer;
     display: flex;
@@ -190,7 +190,7 @@ body {
 .dropdown-divider {
     margin: 10px 10px; /* Adds space from both ends */
     border: none;
-    border-top: 2px solid #ccc; /* Light grey divider */
+    border-top: 2px solid #fff; /* Light grey divider */
 }
 
 .wave-hand {
@@ -219,13 +219,13 @@ body {
     border: none;
     cursor: pointer;
     font-size: 20px;
-    color: white;
+    color: #0ead00;
     position: relative;
 }
 
 .badge {
     background-color: red;
-    color: white;
+    color: #0ead00;
     border-radius: 50%;
     width: 10px;
     height: 10px;
@@ -664,19 +664,23 @@ form button:hover {
 }
 
 .chart-container {
-    width: 50%;
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid #0ead00; 
+    border: 2px solid #0ead00;
     border-radius: 10px;
+    overflow-x: auto; /* Prevent clipping */
+    padding: 10px;
+    min-width: 0; /* Prevents overflow in flex container */
 }
 
 .dashboard-container {
     display: flex;
     align-items: stretch; /* Makes both elements equal height */
     gap: 20px;
-    height:50%;
+    /*height:50%;*/
+    flex-wrap: wrap;
 }
 
 .data-label {
@@ -704,8 +708,13 @@ form button:hover {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 15px;
-    width: 50%;
+    /*width: 50%;*/
+    flex: 1;
     justify-content: center;
+}
+
+.data-cards, .chart-container {
+    flex: 1;
 }
 
 .device-card {
