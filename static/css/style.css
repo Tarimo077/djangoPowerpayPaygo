@@ -130,6 +130,7 @@ body {
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    box-shadow: 0 1px 5px #0ead00; /* Adds bottom shadow */
 }
 
 /* Ensure the user button is perfectly round */
@@ -211,7 +212,7 @@ body {
 .notification-container {
     position: relative;
     display: inline-block;
-    margin-right: 15px;
+    margin-right: 10px;
 }
 
 .notification-btn {
