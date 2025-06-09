@@ -726,6 +726,58 @@ def paygo_sales_non_metered(request):
         'total_count': total_sales
     }
     return render(request, 'customer_sales/paygo_sales_non_metered.html', context)
+###############################DOWNLOAD INVENTORY DATA#####################################################
+def export_warehouse_items(request, pk):
+    warehouse = get_object_or_404(Warehouse, pk=pk)
+    items = InventoryItem.objects.filter(current_warehouse=warehouse)
+
+    # Serialize data into a list of dictionaries
+    data = []
+    for item in items:
+        data.append({
+            'Name': item.name,
+            'Serial Number': item.serial_number,
+            'Product Type': item.product_type,
+            'Date Added': item.date_added,
+            'Current Warehouse': item.current_warehouse.name,
+            'Days in Current Warehouse': item.days_in_current_warehouse,
+        })
+
+    # Create a DataFrame from the data
+    df = pd.DataFrame(data)
+
+    fileName = f"{warehouse.name}_warehouse_data.xlsx"
+    response = HttpResponse(content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = f'attachment; filename="{fileName}"'
+    df.to_excel(response, index=False, engine='openpyxl')
+
+    return response
+
+def export_items(request):
+    items = InventoryItem.objects.all()
+
+    # Serialize data into a list of dictionaries
+    data = []
+    for item in items:
+        data.append({
+            'Name': item.name,
+            'Serial Number': item.serial_number,
+            'Product Type': item.product_type,
+            'Date Added': item.date_added,
+            'Current Warehouse': item.current_warehouse.name,
+            'Days in Current Warehouse': item.days_in_current_warehouse,
+        })
+
+    # Create a DataFrame from the data
+    df = pd.DataFrame(data)
+
+    fileName = f"inventory_list.xlsx"
+    response = HttpResponse(content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = f'attachment; filename="{fileName}"'
+    df.to_excel(response, index=False, engine='openpyxl')
+
+    return response
+
 
 ###############################DOWNLOAD CUSTOMER DATA#######################################################
 def export_customer_data(request):

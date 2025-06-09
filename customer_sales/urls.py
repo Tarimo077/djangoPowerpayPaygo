@@ -32,5 +32,7 @@ urlpatterns = [
     path('export/sales/', views.export_sales_data, name='export_sales'),
     path('export/paygoScode/', views.export_paygo_data, name='export_paygoscode'),
     path('export/paygoScodeNonmetered/', views.export_paygoNonmetered_data, name='export_paygoscodenonmetered'),
+    path('export/warehouse/<int:pk>/items/', views.export_warehouse_items, name='export_warehouse_items'),
+    path('export/items/', views.export_items, name='export_items'),
 ]
 

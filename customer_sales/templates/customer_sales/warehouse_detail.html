@@ -9,6 +9,9 @@
     <p><strong>Warehouse Location:</strong> {{ warehouse.location }}</p>
     <p><strong>Distinct Items:</strong> {{ unique_products }}</p>
     <p><strong>Total Items:</strong> {{ item_count }}</p>
+    <div style="margin-bottom:20px; float:right;">
+        <a href="{% url 'export_warehouse_items' warehouse.pk %}" class="add-device-btn">Export Warehouse Data</a>
+    </div>
     <h3>Items</h3>
     <table class="table">
         <thead>
@@ -57,4 +60,17 @@
         </span>
     </div>
 </div>
+<style>
+    .add-device-btn {
+        text-decoration: none;
+        padding: 10px;
+        border-radius: 10px;
+        background-color: #0ead00;
+        color: #fff;
+        text-align: center;
+    }
+    .add-device-btn:hover {
+        background-color: #e68a00; 
+    }
+</style>
 {% endblock %}

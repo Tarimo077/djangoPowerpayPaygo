@@ -18,6 +18,9 @@
         <button type="submit" class="device_data_btn">Add New Warehouse</button>
     </form>
     </div>
+     <div style="float:right; margin-bottom:20px;">
+        <a href="{% url 'export_items' %}" class="add-device-btn">Export Inventory List</a>
+    </div>
     <table class="table">
         <thead>
             <tr>
@@ -61,5 +64,17 @@
     </div>
 
 </div>
-
+<style>
+    .add-device-btn {
+        text-decoration: none;
+        padding: 10px;
+        border-radius: 10px;
+        background-color: #0ead00;
+        color: #fff;
+        text-align: center;
+    }
+    .add-device-btn:hover {
+        background-color: #e68a00; 
+    }
+</style>
 {% endblock %}
