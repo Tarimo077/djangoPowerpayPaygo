@@ -159,19 +159,31 @@ body {
 .user-dropdown {
     display: none;
     position: absolute;
-    top: 50px; /* Moves dropdown below button */
+    top: 30px; /* Moves dropdown below button */
     right: 0;
-    background-color: #f9f9f9;
+    background-color: white;
     min-width: 200px;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     z-index: 1001;
     border-radius: 5px;
-    overflow: hidden;
     align-items: center;
     text-align: center;
-    gap: 20px;;
+    gap: 20px;
 }
 
+.user-dropdown::before {
+    content: '';
+    position: absolute; /* This makes the arrow position relative to its parent (.notification-dropdown) */
+    top: -5px; /* Adjust this value to control how far the arrow points up */
+    right: 5px; /* Adjust this value to position the arrow horizontally */
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent; /* Half the width of the arrow base */
+    border-right: 10px solid transparent; /* Half the width of the arrow base */
+    border-bottom: 10px solid white; /* The color of the arrow, matches background */
+    filter: drop-shadow(0 -2px 1px rgba(0, 0, 0, 0.05)); /* Simulates the shadow */
+    z-index: 1001;
+}
 /* Style dropdown links */
 .user-dropdown a {
     display: block;
@@ -240,14 +252,28 @@ body {
 .notification-dropdown {
     display: none;
     position: absolute;
-    right: 0;
-    top: 10;
+    right: -10px;
+    top: 30px;
     background: white;
     width: 400px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     border-radius: 5px;
     padding: 10px;
-    z-index: 1000;
+    z-index: 1001;
+}
+
+.notification-dropdown::before {
+    content: '';
+    position: absolute; /* This makes the arrow position relative to its parent (.notification-dropdown) */
+    top: -10px; /* Adjust this value to control how far the arrow points up */
+    right: 15px; /* Adjust this value to position the arrow horizontally */
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent; /* Half the width of the arrow base */
+    border-right: 10px solid transparent; /* Half the width of the arrow base */
+    border-bottom: 10px solid white; /* The color of the arrow, matches background */
+    filter: drop-shadow(0 -2px 1px rgba(0, 0, 0, 0.05)); /* Simulates the shadow */
+    z-index: 1001;
 }
 
 .notification-header {
@@ -271,52 +297,89 @@ body {
     color: #0ead00;
     border-bottom: 1px solid #eee;
     position: relative; /* Ensure `::before` positions correctly */
-    padding: 20px;
+    padding: 10px;
     font-size: 12px;
 
 }
 
-.notification-item::before,
-.notification-item::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 5px;
-    height: 80%;
-    background-color: #0ead00;
-    border-radius: 2px;
-}
-
-.notification-item::before {
-    left: 0;
-}
-
-.notification-item::after {
-    right: 0;
-}
-
-.notification-dropdown ul li:last-child {
-    border-bottom: none;
-}
-
-.notification-dropdown ul li:hover {
-    background: #f5f5f5;
-    cursor: pointer;
-}
-
 .notification-item {
-    padding: 10px;
-    margin: 10px;
-    /*border: 2px solid #28a745;  green bars */
-    border-radius: 8px;
-    background-color: #fff;
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
 }
 
+.notif-wrapper {
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 8px;
+  flex-grow: 1;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  border-left: 5px solid #0ead00;
+  border-right: 5px solid #0ead00;
+}
+
+.notif-title {
+    font-size: 16px;
+    color: #0ead00;
+    margin-bottom: 10px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.notif-message-text {
+  text-align: center;
+  color: #333;
+  font-size: 14px;
+}
+
+.notif-time {
+  text-align: right;
+  font-size: 12px;
+  color: #888;
+  margin-top: 10px;
+}
+
+@keyframes slideFadeOut {
+    0% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+.slide-fade-out {
+    animation: slideFadeOut 0.5s ease-out forwards;
+}
+
+
+.close-btn {
+    border: none;
+    background: transparent;
+    color: #dc3545;
+    font-size: 16px;
+    margin-top: 30px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.close-btn i {
+    pointer-events: none;
+}
+
+/* Optional: Hover effect */
+.close-btn:hover {
+    color: darkred;
+}
+
+/*
 .notif-content {
     display: flex;
     justify-content: space-between;
-    /*align-items: center;*/
     gap: 10px;
 }
 
@@ -335,21 +398,11 @@ body {
     padding: 0 8px;
 }
 
-/*
-.close-btn {
-    background: none;
-    border: none;
-    color: red;
-    font-size: 16px;
-    cursor: pointer;
-    margin-left: 10px;
-} */
-
 .close-btn:hover {
     color: darkred;
 }
 
-
+*/
 
 /* New dropdown class */
 /* Sales Dropdown */

@@ -33,9 +33,9 @@
             </button>
 
             <!-- Notification Dropdown -->
-            <div id="notification-dropdown" class="notification-dropdown">
+            <div id="notification-dropdown" class="notification-dropdown" onclick="event.stopPropagation()">
                 <div class="notification-header">Notifications</div>
-                <button id="clear-all-btn" style="margin: 10px; padding: 10px; cursor: pointer; color: #fff; font-size: 10px; background-color: #0ead00; border-radius: 5px; border: none;">Clear All</button>
+                <button id="clear-all-btn" style="margin: 10px; padding: 10px; cursor: pointer; color: #fff; font-size: 12px; background-color: #0ead00; border-radius: 5px; border: none;">Clear All</button>
                 <ul id="notification-list"></ul>
             </div>
         </div>
@@ -274,12 +274,22 @@
         }
     
         // Function to remove a notification
-        function removeNotification(index) {
-            storedNotifications.splice(index, 1); // Remove from array
-            sessionStorage.setItem("notifications", JSON.stringify(storedNotifications)); // Update session storage
-            renderNotifications(); // Re-render notifications
-        }
-    
+        window.removeNotification = function (button) {
+            console.log("button: ", button)
+            const li = button.closest("li"); // this is addressed below
+            const index = button.getAttribute("data-index");
+
+            if (li) {
+                li.classList.add("slide-fade-out");
+
+                setTimeout(() => {
+                    storedNotifications.splice(index, 1);
+                    sessionStorage.setItem("notifications", JSON.stringify(storedNotifications));
+                    renderNotifications();
+                }, 500);
+            }
+        };
+
         // Function to render notifications from stored data
         function renderNotifications() {
             notificationList.innerHTML = ""; // Clear list before reloading
@@ -288,26 +298,48 @@
                 // Convert timestamp to GMT+03:00
                 const date = new Date(notif.timestamp);
                 const gmt3Time = new Date(date.getTime() + 3 * 60 * 60 * 1000); // add 3 hours
-                const formattedTime = gmt3Time.toISOString().replace("T", " ").slice(0, 19);
+                var formattedTime = gmt3Time.toISOString().replace("T", " ").slice(0, 19);
+                const dateObj = new Date(formattedTime.replace(" ", "T"));
+
+                const day = dateObj.getDate().toString().padStart(2, '0');
+                const month = dateObj.toLocaleString('en-US', { month: 'long' });
+                const year = dateObj.getFullYear();
+
+                let hours = dateObj.getHours();
+                const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12 || 12; // Convert to 12-hour format
+
+                const formatted = `${day} ${month} ${year} ${hours}:${minutes} ${ampm}`;
 
                 const li = document.createElement("li");
-                li.className = "notification-item";
+                //li.className = "notification-item";
                 li.innerHTML = `
-                    <div class="notif-content">
-                        <span><strong>${notif.title}:</strong> ${notif.message} at ${formattedTime}</span>
-                        <button class="close-btn" data-index="${index}">&times;</button>
+                    <div class="notification-item">
+                        <div class="notif-wrapper">
+                            <div class="notif-content">
+                                <div class="notif-title"><strong>${notif.title}</strong></div>
+                                <div class="notif-message-text">${notif.message}</div>
+                                <div class="notif-time">${formatted}</div>
+                            </div>
+                        </div>
+                        <button class="close-btn" data-index="${index}" onclick="removeNotification(this)">
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+                        </button>
                     </div>
                 `;
+
+
                 notificationList.insertBefore(li, notificationList.firstChild);
             });
 
             // Attach close handlers
-            document.querySelectorAll(".close-btn").forEach((btn) => {
-                btn.addEventListener("click", function () {
-                    const index = this.getAttribute("data-index");
-                    removeNotification(index);
-                });
-            });
+            //document.querySelectorAll(".close-btn").forEach((btn) => {
+                //btn.addEventListener("click", function () {
+                    //const index = this.getAttribute("data-index");
+                    //removeNotification(btn);
+                //});
+            //});
 
             // Update badge visibility
             if (storedNotifications.length === 0) {
@@ -318,12 +350,33 @@
         }
         
         function clearAllNotifications() {
-            storedNotifications = [];
-            sessionStorage.setItem("notifications", JSON.stringify([]));
-            hasUnread = false;
-            sessionStorage.setItem("hasUnread", "false");
-            updateNotificationUI();
-            renderNotifications();
+            // Get all the notification list items
+            const notificationListItems = document.querySelectorAll(".notification-list li");
+
+            if (notificationListItems.length > 0) {
+                // Apply the slide-fade-out animation to each notification
+                notificationListItems.forEach((li) => {
+                    li.classList.add("slide-fade-out");
+                });
+
+                // After the animation duration, clear the data and update the UI
+                setTimeout(() => {
+                    storedNotifications = [];
+                    sessionStorage.setItem("notifications", JSON.stringify([]));
+                    hasUnread = false;
+                    sessionStorage.setItem("hasUnread", "false");
+                    updateNotificationUI();
+                    renderNotifications(); // This will re-render an empty list
+                }, 500); // 500ms matches the animation duration in removeNotification
+            } else {
+                // If there are no notifications, just clear the data immediately
+                storedNotifications = [];
+                sessionStorage.setItem("notifications", JSON.stringify([]));
+                hasUnread = false;
+                sessionStorage.setItem("hasUnread", "false");
+                updateNotificationUI();
+                renderNotifications();
+            }
         }
 
         // Attach event listener after DOM content loads
@@ -366,13 +419,15 @@
                 updateNotificationUI();
             }
         });
-    
-        // Hide dropdown when clicking outside
         document.addEventListener("click", function (event) {
-            if (!notificationButton.contains(event.target)) {
-                notificationDropdown.style.display = "none";
+            const dropdown = document.getElementById("notification-dropdown");
+            const button = document.getElementById("notification-button");
+
+            if (!dropdown.contains(event.target) && !button.contains(event.target)) {
+                dropdown.style.display = "none";
             }
         });
+
     });    
 </script>
     
