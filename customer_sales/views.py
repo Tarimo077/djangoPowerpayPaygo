@@ -178,10 +178,10 @@ def item_edit(request, pk):
                     to_warehouse=updated_item.current_warehouse,
                     moved_by=user,
                 )
-                send_notification(user, "Item Moved", f"{item.name} moved from {old_warehouse} to {updated_item.current_warehouse}")
+                send_notification(user, "Item Moved", f"{item.name}({item.serial_number}) moved from {old_warehouse} to {updated_item.current_warehouse}")
 
             updated_item.save()  # Save updated item after checking movement
-            send_notification(user, "Item Edited", f"{item.name} item details changed")
+            send_notification(user, "Item Edited", f"{item.name}({item.serial_number}) details changed")
 
             return redirect('item_detail', pk=item.pk)
     else:
@@ -218,7 +218,7 @@ def item_delete(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
     if request.method == 'POST':
         item.delete()
-        send_notification(user, "Item Deleted", f"{item.name} item deleted")
+        send_notification(user, "Item Deleted", f"{item.name}({item.serial_number}) item deleted")
         return redirect('item_list')
     return render(request, 'customer_sales/item_delete.html', {'item': item})
 
