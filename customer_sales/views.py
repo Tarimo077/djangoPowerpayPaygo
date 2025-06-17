@@ -155,7 +155,7 @@ def add_item(request):
                 moved_by=user,
                 note="Initial entry"
             )
-            send_notification(user, "Item Added", f"{item.name} added")  # Send notification
+            send_notification(user, "Item Added", f"{item.name}({item.serial_number}) added")  # Send notification
             return redirect('item_list')
     else:
         form = InventoryItemForm()  # Instantiate form for GET request
