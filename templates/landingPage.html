@@ -74,13 +74,14 @@
 
     </div>
     
-    <div style='display:flex; gap:10px;margin-top:20px;'>
-        <table class="table" style='width:50%;'>
+    <div style='display:flex; gap:10px;margin-top:20px; justify-content:space-between; align-items:center;'>
+        <table class="table" style='width:49.5%;'>
             <caption><h3>Top Devices by Cooking Time</h3></caption>
             <thead>
                 <tr>
                     <th class="table_headers">Device ID</th>
                     <th class="table_headers">Cooking Time</th>
+                    <th class="table_headers">Device Data</th>
                     
                 </tr>
             </thead>
@@ -89,16 +90,22 @@
                 <tr>
                     <td class="table_content">{{ k }}</td>
                     <td class="table_content">{{ v|floatformat:1|intcomma }}  hours</td>
+                    <td class="table_content">
+                        <form method="get" action="{% url 'device_data_page' deviceID=k %}">
+                            <button type="submit" class="device_data_btn"> {{ k }} data</button>
+                        </form>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-        <table class="table" style='width:50%;'>
+        <table class="table" style='width:49.5%;'>
             <caption><h3>Bottom Devices by Cooking Time</h3></caption>
             <thead>
                 <tr>
                     <th class="table_headers">Device ID</th>
                     <th class="table_headers">Cooking Time</th>
+                    <th class="table_headers">Device Data</th>
                     
                 </tr>
             </thead>
@@ -107,6 +114,11 @@
                 <tr>
                     <td class="table_content">{{ k }}</td>
                     <td class="table_content">{{ v|floatformat:1|intcomma }}  hours</td>
+                    <td class="table_content">
+                        <form method="get" action="{% url 'device_data_page' deviceID=k %}">
+                            <button type="submit" class="device_data_btn"> {{ k }} data</button>
+                        </form>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

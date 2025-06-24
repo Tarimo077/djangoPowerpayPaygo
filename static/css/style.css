@@ -729,7 +729,7 @@ form button:hover {
     border: 2px solid #0ead00;
     border-radius: 10px;
     overflow-x: auto; /* Prevent clipping */
-    padding: 10px;
+    padding: 5px;
     min-width: 0; /* Prevents overflow in flex container */
 }
 
