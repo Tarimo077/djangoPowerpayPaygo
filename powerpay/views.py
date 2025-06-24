@@ -220,11 +220,85 @@ def landingpage(request):
 
         runtime = data['runtime']
         top_devices = sorted(runtime.items(), key=lambda x: x[1], reverse=True)[:3]
+        bottom_devices = sorted(runtime.items(), key=lambda x: x[1])[:3]
         sumRuntime = sum(runtime.values())
         totalKwh = data['totalkwh']
-        return sumRuntime, totalKwh, data['rawData'], top_devices
+        return sumRuntime, totalKwh, data['rawData'], top_devices, bottom_devices
     
-    runtime, kwh, rawData, top_devices = fetch_and_process_data()
+    runtime, kwh, rawData, top_devices, bottom_devices = fetch_and_process_data()
+    # ---- 1.  Get your data (already queried) ----
+    customers_all = pd.DataFrame(CustomerModel.objects.all().values())
+    sales_all     = pd.DataFrame(SaleModel.objects.all().values())
+
+    # ---- 2.  Ensure date columns are datetime ----
+    customers_all['date'] = pd.to_datetime(customers_all['date'])
+    sales_all['date']     = pd.to_datetime(sales_all['date'])
+
+    # ---- 3.  Add a "week-start" column (Monday 00:00) ----
+    customers_all['week'] = customers_all['date'].dt.to_period('W').apply(lambda r: r.start_time)
+    sales_all['week']     = sales_all['date'].dt.to_period('W').apply(lambda r: r.start_time)
+
+    # --- 4. Tally counts ---------------------------------------------------
+    weekly_customers = (
+        customers_all.groupby('week')
+        .size()
+        .rename('new_customers')
+        .sort_index()
+    )
+
+    weekly_sales = (
+        sales_all.groupby('week')
+        .size()
+        .rename('sales')
+        .sort_index()
+    )
+
+    fig_customers = go.Figure()
+    fig_customers.add_trace(go.Scatter(
+        x=weekly_customers.index,
+        y=weekly_customers.values,
+        fill='tozeroy',  # Fill area below line
+        mode='lines', 
+        line=dict(color='#0ead00'),
+        fillcolor='#d0ffcc',
+        line_shape='spline',
+        hovertemplate='Week Start: %{x|%Y-%m-%d}<br>Customers: %{y} customers'
+    ))
+    fig_customers.update_layout(
+        title="Weekly Customer Uptake",
+        xaxis_title="Date",
+        yaxis_title="Customers",
+        xaxis=dict(type='date'),
+        title_x=0.5,
+        paper_bgcolor='rgba(0,0,0,0)',  # Transparent background
+        plot_bgcolor='rgba(0,0,0,0)',
+        margin=dict(l=10, r=10, t=50, b=10),  # Reduce margins for better fit
+    )
+
+    fig_sales = go.Figure()
+    fig_sales.add_trace(go.Scatter(
+        x=weekly_sales.index,
+        y=weekly_sales.values,
+        fill='tozeroy',  # Fill area below line
+        mode='lines', 
+        line=dict(color='#0ead00'),
+        fillcolor='#d0ffcc',
+        line_shape='spline',
+        hovertemplate='Week Start: %{x|%Y-%m-%d}<br>Customers: %{y} sales'
+    ))
+    fig_sales.update_layout(
+        title="Weekly Sale Uptake",
+        xaxis_title="Date",
+        yaxis_title="Sales",
+        xaxis=dict(type='date'),
+        title_x=0.5,
+        paper_bgcolor='rgba(0,0,0,0)',  # Transparent background
+        plot_bgcolor='rgba(0,0,0,0)',
+        margin=dict(l=10, r=10, t=50, b=10),  # Reduce margins for better fit
+    )
+    
+
+
     df = pd.DataFrame(rawData)
     df['txtime'] = pd.to_datetime(df['txtime'], format='%Y%m%d%H%M%S')
     df = df[df['kwh'] >= 0]
@@ -251,7 +325,7 @@ def landingpage(request):
 
     fig.update_layout(
         title="Weekly Energy Consumption",
-        xaxis_title="",
+        xaxis_title="Date",
         yaxis_title="Energy (kWh)",
         xaxis=dict(type='date'),
         title_x=0.5,
@@ -268,7 +342,10 @@ def landingpage(request):
         'emissions' : kwh * 0.28 * 0.4999,
         'cost' : kwh * 23.0,
         'energy_chart': pio.to_html(fig, full_html=False),
+        'customer_chart': pio.to_html(fig_customers, full_html=False),
+        'sales_chart': pio.to_html(fig_sales, full_html=False),
         'top_devices': top_devices,
+        'bottom_devices': bottom_devices,
         'total_sales': total_sales,
         'total_customers': total_customers
     }

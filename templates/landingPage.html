@@ -38,6 +38,16 @@
                 <p>Total Emissions:</p>
                 <h3>{{ emissions|floatformat:2|intcomma }} kg CO₂</h3>
             </div>
+            <div class="data-label">
+                <i class="fa fa-users" aria-hidden="true"></i>
+                <p>Total Customers:</p>
+                <h3>{{ total_customers|intcomma }}</h3>
+            </div>
+            <div class="data-label">
+                <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+                <p>Total Sales:</p>
+                <h3>{{ total_sales|intcomma }}</h3>
+            </div>
         </div>
         <div class="chart-container">
             {{ energy_chart|safe }}
@@ -53,7 +63,18 @@
             <p>Inactive: <span>{{ inactive_devs|intcomma }}</span></p>
         </div>
     </div>
-    <div style='display:flex; gap:10px;margin-top:10px;'>
+
+    <div class="dashboard-container" style="margin-top:20px; padding:3px;">
+        <div class="chart-container">
+            {{ customer_chart|safe }}
+        </div>
+        <div class="chart-container">
+            {{ sales_chart|safe }}
+        </div>
+
+    </div>
+    
+    <div style='display:flex; gap:10px;margin-top:20px;'>
         <table class="table" style='width:50%;'>
             <caption><h3>Top Devices by Cooking Time</h3></caption>
             <thead>
@@ -72,10 +93,24 @@
                 {% endfor %}
             </tbody>
         </table>
-        <div class="data-labels" style='width:50%; margin-top:27px;'>
-            <label class="labelArea"><br><i class="fa fa-users" aria-hidden="true">&emsp;</i> <br>Total Customers:<br>{{ total_customers|intcomma }}</label>
-            <label class="labelArea"><br><i class="fa fa-shopping-cart" aria-hidden="true">&emsp;</i><br>Total Sales:<br>{{ total_sales|intcomma }}</label>
-        </div>
+        <table class="table" style='width:50%;'>
+            <caption><h3>Bottom Devices by Cooking Time</h3></caption>
+            <thead>
+                <tr>
+                    <th class="table_headers">Device ID</th>
+                    <th class="table_headers">Cooking Time</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                {% for k,v in bottom_devices %}
+                <tr>
+                    <td class="table_content">{{ k }}</td>
+                    <td class="table_content">{{ v|floatformat:1|intcomma }}  hours</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
