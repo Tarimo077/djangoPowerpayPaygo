@@ -3,8 +3,10 @@
 
     <td class="table_content">
         {% if row.active %}
+        <span class="dot" style="background-color: green; margin-right:10px;"></span>
             ON
         {% else %}
+        <span class="dot" style="background-color: red; margin-right:10px;"></span>
             OFF
         {% endif %}
     </td>

@@ -408,6 +408,14 @@ body {
     color: darkred;
 }
 
+.dot {
+        height: 20px;
+        width: 20px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+}
+
 /* New dropdown class */
 /* Sales Dropdown */
 .sales-dropdown {
