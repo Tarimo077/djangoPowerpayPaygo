@@ -11,6 +11,7 @@ urlpatterns = [
     path('live/<str:deviceID>/', views.live_page, name='live_page'),
     path('customer_sales/', include('customer_sales.urls'), name="customers"),
     path('', views.landingpage, name='landing_page'),
+    path("chart/<slug:chart_slug>/", views.chart_toggle, name="chart_toggle"),
     path('analysis/', views.homepage, name='home_page'),
     path('terms_of_service/', views.terms_of_service, name='terms_of_service'),
     path('accept_tnc/', views.accept_tnc, name='accept_tnc'),

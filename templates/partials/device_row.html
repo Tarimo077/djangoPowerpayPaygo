@@ -22,7 +22,7 @@
                 hx-post="{% url 'change_device_status' %}"
                 hx-trigger="change"
                 hx-target="#device-{{ row.deviceID }}"
-                hx-swap="outerHTML"
+                hx-swap="outerHTML transition:true"
                 hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
                 hx-vals='{"selectedDev": "{{ row.deviceID }}", "status": "{{ row.active|yesno:"false,true" }}"}'>
 

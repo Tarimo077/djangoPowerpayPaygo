@@ -159,6 +159,10 @@ def get_user_cache_key(user, range_value):
 def get_user_cache_key_landing_page(user):
     return f"landingpage_data_{user}"
 
+def get_cache_key_chart_data(user, df_type):
+    """Generate a cache key based on username and range."""
+    return f"chart_{user}_{df_type}"
+
 def fetch_chart_data(usr):
         endpoint_mapping = {
             'John-Maina': "allDeviceDataScodeDjango",
@@ -179,9 +183,202 @@ def fetch_chart_data(usr):
         if not data or (data.get('totalkwh') == 0 and data.get('runtime') == 0 and not data.get('rawData')):
             return None
 
-        return data['rawData']
+        return pd.DataFrame(data['rawData'])
 
-#def plot_line(request, df, x_title, y_title, chart_title):
+def plot_line(df, x_col, y_col, y_label, chart_title, unit=""):
+    df = df.copy()                                 # keep caller untouched
+    df["week_end"] = df[x_col] + timedelta(days=6)
+
+    fig = go.Figure()
+    if y_label == 'kwh':
+        fig.add_trace(
+            go.Scatter(
+                x=df[x_col],
+                y=df[y_col],
+                mode="lines",
+                fill="tozeroy",
+                line=dict(color="#0ead00"),
+                fillcolor="#d0ffcc",
+                line_shape="spline",
+                customdata=df[["week_end", x_col]],
+                hovertemplate=(
+                    "Period: From %{customdata[1]|%Y-%m-%d}"
+                    " to %{customdata[0]|%Y-%m-%d}<br>"
+                    f"{y_label}: %{{y:.2f}} {unit}<extra></extra>"
+                ),
+            )
+        )
+    else:
+        fig.add_trace(
+            go.Scatter(
+                x=df[x_col],
+                y=df[y_col],
+                mode="lines",
+                fill="tozeroy",
+                line=dict(color="#0ead00"),
+                fillcolor="#d0ffcc",
+                line_shape="spline",
+                customdata=df[["week_end", x_col]],
+                hovertemplate=(
+                    "Period: From %{customdata[1]|%Y-%m-%d}"
+                    " to %{customdata[0]|%Y-%m-%d}<br>"
+                    f"{y_label}: %{{y:.0f}} {unit}<extra></extra>"
+                ),
+            )
+        )
+
+    fig.update_layout(
+        title=chart_title,
+        xaxis_title="Week",
+        yaxis_title=y_label,
+        xaxis=dict(type="date"),
+        title_x=0.5,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=10, r=10, t=50, b=10),
+    )
+
+    return pio.to_html(fig, full_html=False)
+
+
+def plot_bar(df, x_col, y_col, y_label, chart_title, unit=""):
+    df = df.copy()
+    df["week_end"] = df[x_col] + timedelta(days=6)
+
+    fig = go.Figure()
+    if y_label == 'kwh':
+        fig.add_trace(
+            go.Bar(
+                x=df[x_col],
+                y=df[y_col],
+                marker_color="#0ead00",
+                customdata=df[["week_end", x_col]],
+                hovertemplate=(
+                    "Period: From %{customdata[1]|%Y-%m-%d}"
+                    " to %{customdata[0]|%Y-%m-%d}<br>"
+                    f"{y_label}: %{{y:.2f}} {unit}<extra></extra>"
+                ),
+            )
+        )
+    else:
+        fig.add_trace(
+            go.Bar(
+                x=df[x_col],
+                y=df[y_col],
+                marker_color="#0ead00",
+                customdata=df[["week_end", x_col]],
+                hovertemplate=(
+                    "Period: From %{customdata[1]|%Y-%m-%d}"
+                    " to %{customdata[0]|%Y-%m-%d}<br>"
+                    f"{y_label}: %{{y:.0f}} {unit}<extra></extra>"
+                ),
+            )
+        )
+
+    fig.update_layout(
+        title=chart_title,
+        xaxis_title="Week",
+        yaxis_title=y_label,
+        xaxis=dict(type="date"),
+        title_x=0.5,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=10, r=10, t=50, b=10),
+    )
+
+    return pio.to_html(fig, full_html=False)
+
+def pick_models(user):
+    """Return (CustomerModel, SaleModel) based on the username."""
+    return {
+        'John-Maina':    (Customer,      Sale),
+        'Mec':           (MecCustomer,   MecSale),
+        'Welight':       (TestCustomer,  TestSale),
+        'GIZ':           (TestCustomer,  TestSale),
+        'Sayona':        (SayonaCustomer, SayonaSale),
+        'Sayona-Guest':  (SayonaCustomer, SayonaSale),
+    }.get(user, (Customer, Sale))
+
+
+def weekly_counts(df, date_col="date"):
+    """Return a DataFrame with 'week' (Monday start) and 'count'."""
+    if df.empty:
+        return pd.DataFrame(columns=["week", "count"])
+    out = (
+        df.assign(week=pd.to_datetime(df[date_col]).dt.to_period("W").apply(lambda p: p.start_time))
+          .groupby("week")
+          .size()
+          .rename("count")
+          .sort_index()
+          .reset_index()
+    )
+    return out
+
+
+def chart_toggle(request, chart_slug):
+    # ── 1.  pick the right tables ───────────────────────────────────────────
+    CustomerModel, SaleModel = pick_models(request.user.username)
+    # pick the right series
+    if chart_slug == "customer":
+        cache_key = get_cache_key_chart_data(request.user.username, "customer")
+        cached_page = cache.get(cache_key)
+        if cached_page is not None:
+            df_old = cached_page
+            df = df_old.reset_index()
+            df.columns = ["week", "count"]
+        else:    
+            customers_df = pd.DataFrame(list(CustomerModel.objects.values("date")))
+            weekly_customers = weekly_counts(customers_df)
+            df = weekly_customers          # columns: week, count
+            cache.set(cache_key, df, timeout=60*60) 
+        y_label = "Customers"
+        title  = "Weekly Customer Uptake"
+    elif chart_slug == "sales":
+        cache_key = get_cache_key_chart_data(request.user.username, "sale")
+        cached_page = cache.get(cache_key)
+        if cached_page is not None:
+            df_old = cached_page
+            df = df_old.reset_index()
+            df.columns = ["week", "count"]  
+        else: 
+            sales_df  = pd.DataFrame(list(SaleModel.objects.values("date")))
+            weekly_sales  = weekly_counts(sales_df)
+            df = weekly_sales
+            cache.set(cache_key, df, timeout=60*60)             
+        y_label = "Sales"
+        title   = "Weekly Sales Uptake"
+    elif chart_slug == "energy":
+        cache_key = get_cache_key_chart_data(request.user.username, "energy")
+        cached_page = cache.get(cache_key)
+        if cached_page is not None:
+            df = cached_page  
+        else: 
+            dfE = fetch_chart_data(request.user.username)
+            dfE['txtime'] = pd.to_datetime(dfE['txtime'], format='%Y%m%d%H%M%S')
+            dfE = dfE[dfE['kwh'] >= 0]
+            # Group by week
+            dfE['week'] = dfE['txtime'].dt.to_period('W').apply(lambda r: r.start_time)  # Get start of each week
+            df_weekly = dfE.groupby('week')['kwh'].sum().reset_index()
+            # Convert 'week' column back to datetime for plotting
+            df_weekly['week'] = pd.to_datetime(df_weekly['week'])
+            df_weekly['count'] = df_weekly['kwh']
+            df = df_weekly
+            cache.set(cache_key, df, timeout=60*60) 
+        y_label = "kwh"
+        title = "Weekly Energy Consumption"
+
+    chart_type = request.GET.get("type", "line")
+
+    if chart_type == "bar":
+        chart_html = plot_bar(df, "week", "count", y_label, title, y_label)
+    else:
+        chart_html = plot_line(df, "week", "count", y_label, title,y_label)
+
+
+    # ── 4.  return the fragment HTMX swaps in ───────────────────────────────
+    return render(request, "partials/chart.html",  # keep one path
+                  {"chart_html": chart_html})
+
 
 @login_required
 def landingpage(request):
@@ -261,25 +458,27 @@ def landingpage(request):
 
     # ---- 2.  Ensure date columns are datetime ----
     customers_all['date'] = pd.to_datetime(customers_all['date'])
-    sales_all['date']     = pd.to_datetime(sales_all['date'])
+    sales_all['date'] = pd.to_datetime(sales_all['date'])
 
     # ---- 3.  Add a "week-start" column (Monday 00:00) ----
     customers_all['week'] = customers_all['date'].dt.to_period('W').apply(lambda r: r.start_time)
-    sales_all['week']     = sales_all['date'].dt.to_period('W').apply(lambda r: r.start_time)
+    sales_all['week'] = sales_all['date'].dt.to_period('W').apply(lambda r: r.start_time)
 
     # --- 4. Tally counts ---------------------------------------------------
     weekly_customers = (
-        customers_all.groupby('week')
-        .size()
-        .rename('new_customers')
-        .sort_index()
+        customers_all
+            .groupby("week")
+            .size()                # Series of counts
+            .rename("count")      # optional—but nice for debugging
+            .sort_index()
     )
 
     weekly_sales = (
-        sales_all.groupby('week')
-        .size()
-        .rename('sales')
-        .sort_index()
+        sales_all
+            .groupby("week")
+            .size()
+            .rename("count")
+            .sort_index()
     )
 
     fig_customers = go.Figure()
@@ -298,7 +497,7 @@ def landingpage(request):
         xaxis_title="Date",
         yaxis_title="Customers",
         xaxis=dict(type='date'),
-        title_x=0.5,
+        title_x=0.2,
         paper_bgcolor='rgba(0,0,0,0)',  # Transparent background
         plot_bgcolor='rgba(0,0,0,0)',
         margin=dict(l=10, r=10, t=50, b=10),  # Reduce margins for better fit
@@ -337,6 +536,7 @@ def landingpage(request):
 
     # Convert 'week' column back to datetime for plotting
     df_weekly['week'] = pd.to_datetime(df_weekly['week'])
+    df_weekly['count'] = df_weekly['kwh']
 
     # Create filled line plot
     fig = go.Figure()
@@ -380,6 +580,12 @@ def landingpage(request):
     }
     # Cache the entire page context for 1 hour
     response = render(request, 'landingPage.html', context)
+    cache_key_sale = get_cache_key_chart_data(usr, "sale")
+    cache_key_customer = get_cache_key_chart_data(usr, "customer")
+    cache_key_energy = get_cache_key_chart_data(usr, "energy")
+    cache.set(cache_key_energy, df_weekly, timeout=60*60)
+    cache.set(cache_key_sale, weekly_sales, timeout=60*60)
+    cache.set(cache_key_customer, weekly_customers, timeout=60*60)
     cache.set(cache_key, response, timeout=60*60)  # Cache the full response
 
     return response

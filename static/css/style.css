@@ -14,6 +14,21 @@ body {
     overflow: hidden; /* Prevent body from having a scrollbar */
 }
 
+/* Tell the browser to animate page-internal changes */
+@view-transition { navigation: auto; }
+
+/* Key-frames */
+@keyframes fadeInSlide  { from {opacity:0; transform:translateX(90px)} }
+@keyframes fadeOutSlide { to   {opacity:0; transform:translateX(-90px)} }
+
+/* HTMX assigns view-transition-name:hx-view-transition */
+::view-transition-new(hx-view-transition) {
+    animation: fadeInSlide 350ms cubic-bezier(.4,0,.2,1);
+}
+::view-transition-old(hx-view-transition) {
+    animation: fadeOutSlide 180ms cubic-bezier(.4,0,1,1) forwards;
+}
+
 .active-link {
     background-color: #fff; /* Keep the highlight */
     padding: 12px 15px;
@@ -116,6 +131,23 @@ body {
     0% { transform: translate(-50%, -50%) rotate(0deg); }
     100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
+
+.spnr {
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:40px; 
+    height:40px;
+    margin:-20px 0 0 -20px;
+    border:4px solid rgba(0,0,0,.15);
+    border-top-color:#0ead00;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+    display:none;
+    z-index:30;            /* 🔹 keep on top of the chart canvas */
+}
+.spnr.htmx-request { display:block; }
+
 /* Fix the greeting bar */
 .greeting-bar {
     background-color: #f9f9f9;
@@ -729,17 +761,60 @@ form button:hover {
     border-radius: 10px;
 }
 
+/* keep your existing .chart-container rules … */
 .chart-container {
     flex: 1;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;      /* stack controls + chart vertically */
+    align-items: stretch;
+    position: relative;          /* so spinner/controls can be absolute */
     border: 2px solid #0ead00;
     border-radius: 10px;
-    overflow-x: auto; /* Prevent clipping */
+    overflow: hidden;            /* hide spinner edges */
     padding: 5px;
-    min-width: 0; /* Prevents overflow in flex container */
+    min-width: 0;
 }
+
+/* buttons block */
+.chart-controls {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 10;
+}
+
+/* base button look */
+.chart-btn {
+    padding: 5px;
+    font-size: 16px;
+    border: none;
+    background: #acacac;
+    color: #fff;
+    cursor: pointer;
+    outline: none;
+    transition: background 0.5s;
+    width: 30px;
+}
+
+/* rounded corners */
+.chart-btn.left  { border-top-left-radius: 10px; border-bottom-left-radius: 10px; margin-right: none; }
+.chart-btn.right { border-top-right-radius: 10px; border-bottom-right-radius: 10px; margin-left: none; }
+
+/* fuse the middle border */
+.chart-btn.left  { border-right: none; }
+.chart-btn.right  { border-left: none; }
+/* active (selected) state */
+.chart-btn.active,
+.chart-btn:hover {
+    background: #0ead00;
+    color: #fff;
+}
+
+/* keep the hover highlight even while HTMX is loading */
+.chart-controls .htmx-request.chart-btn.active {
+    opacity: 0.6;
+}
+
 
 .dashboard-container {
     display: flex;

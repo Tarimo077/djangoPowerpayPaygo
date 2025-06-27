@@ -49,10 +49,39 @@
                 <h3>{{ total_sales|intcomma }}</h3>
             </div>
         </div>
-        <div class="chart-container">
-            {{ energy_chart|safe }}
+
+        <div class="chart-container" id="energy-chart">
+
+            <div class="chart-controls" hx-on="click: toggleActive(event)">
+                <!-- Bar button — left rounded -->
+                <button class="chart-btn left{% if request.GET.type|default:'line' == 'line' %} active{% endif %}"
+                        hx-get="{% url 'chart_toggle' 'energy' %}?type=line"
+                        hx-target="#energy-body"
+                        hx-swap="innerHTML transition:true"
+                        hx-indicator="#energy-spinner"
+                        title="Show line chart">
+                    <i class="fa fa-area-chart" aria-hidden="true"></i>
+                </button>
+
+                <!-- Line button — right rounded -->
+                <button class="chart-btn right{% if request.GET.type == 'bar' %} active{% endif %}"
+                        hx-get="{% url 'chart_toggle' 'energy' %}?type=bar"
+                        hx-target="#energy-body"
+                        hx-swap="innerHTML transition:true"
+                        hx-indicator="#energy-spinner"
+                        title="Show bar chart">
+                    <i class="fa fa-bar-chart fa-rotate-270" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <div id="energy-spinner" class="spnr htmx-indicator" aria-label="Loading…"></div>
+
+            <div id="energy-body">
+                {{ energy_chart|safe }}
+            </div>
         </div>
     </div>
+
     <div class="device-card">
         <h3><i class="fa fa-cogs" aria-hidden="true">&emsp;</i> Devices</h3>
         <div class="device-stats">
@@ -64,15 +93,75 @@
         </div>
     </div>
 
-    <div class="dashboard-container" style="margin-top:20px; padding:3px;">
-        <div class="chart-container">
-            {{ customer_chart|safe }}
+    <div class="dashboard-container" style="margin-top:20px;padding:3px;">
+
+    <!-- ─────────────── Customer chart ─────────────── -->
+        <div class="chart-container" id="customer-chart">
+
+        <!-- buttons sit in the top-right corner of this box -->
+            <div class="chart-controls" hx-on="click: toggleActive(event)">
+                <button class="chart-btn left{% if request.GET.type|default:'line' == 'line' %} active{% endif %}"
+                    hx-get="{% url 'chart_toggle' 'customer' %}?type=line"
+                    hx-target="#customer-body"
+                    hx-swap="innerHTML transition:true"
+                    hx-indicator="#customer-spinner"
+                    title="Show line chart">
+                    <i class="fa fa-area-chart" aria-hidden="true"></i>
+                </button>
+
+                <button class="chart-btn right{% if request.GET.type == 'bar' %} active{% endif %}"
+                    hx-get="{% url 'chart_toggle' 'customer' %}?type=bar"
+                    hx-target="#customer-body"
+                    hx-swap="innerHTML transition:true"
+                    hx-indicator="#customer-spinner"
+                    title="Show bar chart">
+                    <i class="fa fa-bar-chart fa-rotate-270" aria-hidden="true"></i>
+                </button>
+            </div>
+
+        <!-- the spinner lives inside the same box -->
+            <div id="customer-spinner" class="spnr htmx-indicator" aria-label="Loading…"></div>
+
+        <!-- chart markup is swapped in/out here -->
+            <div id="customer-body">
+                {{ customer_chart|safe }}
+            </div>
         </div>
-        <div class="chart-container">
-            {{ sales_chart|safe }}
+
+    <!-- ─────────────── Sales chart ─────────────── -->
+        <div class="chart-container" id="sales-chart">
+
+            <div class="chart-controls" hx-on="click: toggleActive(event)">
+                <!-- Bar button — left rounded -->
+                <button class="chart-btn left{% if request.GET.type|default:'line' == 'line' %} active{% endif %}"
+                        hx-get="{% url 'chart_toggle' 'sales' %}?type=line"
+                        hx-target="#sales-body"
+                        hx-swap="innerHTML transition:true"
+                        hx-indicator="#sales-spinner"
+                        title="Show line chart">
+                    <i class="fa fa-area-chart" aria-hidden="true"></i>
+                </button>
+
+                <!-- Line button — right rounded -->
+                <button class="chart-btn right{% if request.GET.type == 'bar' %} active{% endif %}"
+                        hx-get="{% url 'chart_toggle' 'sales' %}?type=bar"
+                        hx-target="#sales-body"
+                        hx-swap="innerHTML transition:true"
+                        hx-indicator="#sales-spinner"
+                        title="Show bar chart">
+                    <i class="fa fa-bar-chart fa-rotate-270" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <div id="sales-spinner" class="spnr htmx-indicator" aria-label="Loading…"></div>
+
+            <div id="sales-body">
+                {{ sales_chart|safe }}
+            </div>
         </div>
 
     </div>
+
     
     <div style='display:flex; gap:10px;margin-top:20px; justify-content:space-between; align-items:center;'>
         <table class="table" style='width:49.5%;'>
@@ -176,4 +265,15 @@
             });
         }
     </script>
+<script>
+function toggleActive(e) {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+
+    btn.parentElement.querySelectorAll('button').forEach(b => {
+        b.classList.toggle('active', b === btn);
+    });
+}
+</script>
+
 {% endblock %}
