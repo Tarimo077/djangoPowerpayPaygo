@@ -12,6 +12,7 @@ from collections import Counter
 from powerpay.notifications import send_notification
 from django.db.models import Q, Count
 from django.utils.timezone import make_aware, is_naive, datetime
+from django.contrib.auth.decorators import login_required
 
 # Constants
 BASE_URL = "https://appliapay.com/"
@@ -37,6 +38,7 @@ TYPE_OF_USE_MAP = {
 
 
 ###Inventory function###################
+@login_required
 def warehouse_list(request):
     query = request.GET.get('q')
     
@@ -57,6 +59,7 @@ def warehouse_list(request):
         'query': query,
     })
 
+@login_required
 def add_warehouse(request):
     user = request.user
     if request.method == 'POST':
@@ -69,7 +72,8 @@ def add_warehouse(request):
     else:
         form = WarehouseForm()
         return render(request, 'customer_sales/add_warehouse.html', {'form': form})
-    
+
+@login_required    
 def warehouse_edit(request, pk):
     user = request.user
 
@@ -89,7 +93,7 @@ def warehouse_edit(request, pk):
 
     return render(request, 'customer_sales/warehouse_edit.html', {'form': form})
 
-
+@login_required
 def warehouse_detail(request, pk):
     #user = request.user
     warehouse = get_object_or_404(Warehouse, pk=pk)
@@ -108,6 +112,7 @@ def warehouse_detail(request, pk):
 
     return render(request, 'customer_sales/warehouse_detail.html', context)  
 
+@login_required
 def warehouse_delete(request, pk):
     user = request.user
     warehouse = get_object_or_404(Warehouse, pk=pk)
@@ -118,6 +123,7 @@ def warehouse_delete(request, pk):
     return render(request, 'customer_sales/warehouse_delete.html', {'warehouse': warehouse})
 
 #############ITEMS#########################
+@login_required
 def item_list(request):
     query = request.GET.get('q')
     if query:
@@ -142,6 +148,7 @@ def item_list(request):
 
     return render(request, 'customer_sales/item_list.html', context)
 
+@login_required
 def add_item(request):
     user = request.user
     if request.method == 'POST':
@@ -162,6 +169,7 @@ def add_item(request):
 
     return render(request, 'customer_sales/add_item.html', {'form': form})
 
+@login_required
 def item_edit(request, pk):
     user = request.user
     item = get_object_or_404(InventoryItem, pk=pk)
@@ -189,7 +197,7 @@ def item_edit(request, pk):
 
     return render(request, 'customer_sales/item_edit.html', {'form': form})
 
-
+@login_required
 def item_detail(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
     item_movements = InventoryMovement.objects.filter(item=item).order_by('date_moved')  # oldest first
@@ -213,6 +221,7 @@ def item_detail(request, pk):
     }
     return render(request, 'customer_sales/item_detail.html', context)  
 
+@login_required
 def item_delete(request, pk):
     user = request.user
     item = get_object_or_404(InventoryItem, pk=pk)
@@ -222,7 +231,7 @@ def item_delete(request, pk):
         return redirect('item_list')
     return render(request, 'customer_sales/item_delete.html', {'item': item})
 
-
+@login_required
 def move_inventory_item(request, item_id):
     item = get_object_or_404(InventoryItem, id=item_id)
     user = request.user
@@ -252,6 +261,7 @@ def move_inventory_item(request, item_id):
         'item': item,
     })
 
+@login_required
 def bulk_move_items(request):
     user = request.user
 
@@ -282,6 +292,7 @@ def bulk_move_items(request):
  
 
 # Existing customer views...
+@login_required
 def customers_list(request):
     query = request.GET.get('q')
     user = request.user
@@ -307,7 +318,7 @@ def customers_list(request):
     
     return render(request, 'customer_sales/customers_list.html', {'customers': customers, 'query': query})
 
-
+@login_required
 def customer_detail(request, pk): 
     user = request.user
     
@@ -348,7 +359,7 @@ def customer_detail(request, pk):
         'registration_time': registration_time
     })
 
-
+@login_required
 def customer_edit(request, pk):
     user = request.user
 
@@ -382,7 +393,7 @@ def customer_edit(request, pk):
 
     return render(request, 'customer_sales/customer_edit.html', {'form': form})
 
-
+@login_required
 def customer_delete(request, pk):
     user = request.user
     # Choose the model based on user
@@ -401,6 +412,7 @@ def customer_delete(request, pk):
         return redirect('customers_list')
     return render(request, 'customer_sales/customer_delete.html', {'customer': customer})
 
+@login_required
 def add_customer(request):
     user = request.user
 
@@ -437,7 +449,7 @@ def add_customer(request):
     # Render the form in the template
     return render(request, 'customer_sales/add_customer.html', {'form': form})
 
-
+@login_required
 def sale_add(request, customer_id=None):
     user = request.user
 
@@ -473,7 +485,7 @@ def sale_add(request, customer_id=None):
     return render(request, 'customer_sales/sale_add.html', {'form': form, 'customer': customer})
 
 # New sales views...
-
+@login_required
 def sales_list(request):
     query = request.GET.get('q')
     user = request.user
@@ -497,6 +509,7 @@ def sales_list(request):
 
     return render(request, 'customer_sales/sales_list.html', {'sales': page_obj, 'query': query})
 
+@login_required
 def sale_detail(request, pk):
     user = request.user
     # Choose the model based on user
@@ -512,6 +525,7 @@ def sale_detail(request, pk):
     sale = get_object_or_404(SaleModel, pk=pk)
     return render(request, 'customer_sales/sale_detail.html', {'sale': sale})
 
+@login_required
 def sale_edit(request, pk):
     user = request.user
     # Choose the model based on user
@@ -549,6 +563,7 @@ def sale_edit(request, pk):
 
     return render(request, 'customer_sales/sale_form.html', {'form': form})
 
+@login_required
 def sale_delete(request, pk):
     user = request.user
     # Choose the model based on user
@@ -577,7 +592,9 @@ def fetch_data_index(endpoint, id):
     response = requests.get(BASE_URL + endpoint+"?id="+str(id), auth=AUTH)
     response.raise_for_status()
     return response.json()
+
 #######PAYGO
+@login_required
 def paygo_sales(request):
     sort_field = request.GET.get('sort', 'product_serial_number')
     sort_direction = request.GET.get('direction', 'asc')
@@ -643,6 +660,7 @@ def paygo_sales(request):
     }
     return render(request, 'customer_sales/paygo_sales.html', context)
 
+@login_required
 def sale_detail_paygo(request, id):
     sale_data = fetch_data_index('paygoSaleDetail', id)
     sale_data['sale']['release_date'] = datetime.strptime(sale_data['sale']['release_date'], "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -662,7 +680,7 @@ def sale_detail_paygo(request, id):
         'paymentStatus': sale_data['paymentStatus'],
     })
 
-
+@login_required
 def paygo_sales_non_metered(request):
     sort_field = request.GET.get('sort', 'product_serial_number')
     sort_direction = request.GET.get('direction', 'asc')
@@ -727,6 +745,7 @@ def paygo_sales_non_metered(request):
     }
     return render(request, 'customer_sales/paygo_sales_non_metered.html', context)
 ###############################DOWNLOAD INVENTORY DATA#####################################################
+@login_required
 def export_warehouse_items(request, pk):
     warehouse = get_object_or_404(Warehouse, pk=pk)
     items = InventoryItem.objects.filter(current_warehouse=warehouse)
@@ -753,6 +772,7 @@ def export_warehouse_items(request, pk):
 
     return response
 
+@login_required
 def export_items(request):
     items = InventoryItem.objects.all()
 
@@ -780,6 +800,7 @@ def export_items(request):
 
 
 ###############################DOWNLOAD CUSTOMER DATA#######################################################
+@login_required
 def export_customer_data(request):
     user = request.user
     # Choose the model based on user
@@ -812,6 +833,7 @@ def export_customer_data(request):
     return response
 
 ###############################DOWNLOAD SALES DATA#######################################################
+@login_required
 def export_sales_data(request):
     user = request.user
     # Choose the model based on user
@@ -844,6 +866,7 @@ def export_sales_data(request):
     return response
 
 ###############################DOWNLOAD PAYGO DATA(METERED)###############################################################
+@login_required
 def export_paygo_data(request):
     data = fetch_data('paygoScode')
     for obj in data:
@@ -872,6 +895,7 @@ def export_paygo_data(request):
     return response
 
 ####################################DOWNLOAD PAYGO DATA(NON=METERED)##########################################################
+@login_required
 def export_paygoNonmetered_data(request):
     data = fetch_data('paygoScodeNonMetered')
     for obj in data:

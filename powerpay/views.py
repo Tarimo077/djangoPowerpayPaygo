@@ -57,9 +57,11 @@ def fetch_data_accounts(endpoint, acc):
     response.raise_for_status()
     return response.json()
 
+@login_required
 def terms_of_service(request):
     return render(request, 'terms_of_service.html')
 
+@login_required
 @login_required
 def profile_view(request):
     return render(request, 'profile.html')
@@ -102,6 +104,7 @@ def login_page(request):
 
     return render(request, 'login.html')
 
+
 def accept_tnc(request):
     if request.method == 'POST':
         try:
@@ -125,6 +128,7 @@ def accept_tnc(request):
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
+@login_required
 def live_page(request, deviceID):
     usr = request.user.username
     if usr == 'John-Maina':
@@ -155,6 +159,31 @@ def get_user_cache_key(user, range_value):
 def get_user_cache_key_landing_page(user):
     return f"landingpage_data_{user}"
 
+def fetch_chart_data(usr):
+        endpoint_mapping = {
+            'John-Maina': "allDeviceDataScodeDjango",
+            'Welight': "allDeviceDataWelightDjango",
+            'GIZ': "allDeviceDataGIZDjango",
+            'Sayona': "allDeviceDataSayonaDjango",
+            'Sayona-Guest': "allDeviceDataSayonaDjango",
+            'Mec': "allDeviceDataMecDjango"
+        }
+        endpoint = endpoint_mapping.get(usr, "allDeviceDataDjango")
+
+        try:
+            data = fetch_data_index(endpoint, 9999999)
+        except Exception as e:
+            #messages.error(request, f"Error fetching data: {e}")
+            return None
+
+        if not data or (data.get('totalkwh') == 0 and data.get('runtime') == 0 and not data.get('rawData')):
+            return None
+
+        return data['rawData']
+
+#def plot_line(request, df, x_title, y_title, chart_title):
+
+@login_required
 def landingpage(request):
     usr = request.user.username
     # Generate cache key based on user and range
@@ -355,7 +384,7 @@ def landingpage(request):
 
     return response
 
-
+@login_required
 def homepage(request):
     usr = request.user.username
     range_value = request.GET.get('range', 9999999)  # Default range value
@@ -463,7 +492,7 @@ def homepage(request):
 
     return response
 
-
+@login_required
 def linkAllDataAndKwh(request, devData, kwhData):
     user = request.user
     # Choose the model based on user
@@ -730,7 +759,7 @@ def devices_page(request):
     return render(request, 'devices.html', context)
 
 
-
+@login_required
 def change_device_status(request):
     if request.method == "POST":
         try:
@@ -778,6 +807,7 @@ def change_device_status(request):
 
     return JsonResponse({"error": "Invalid request"}, status=400)
 
+@login_required
 def status_dev(request):
     if request.method == "POST":
         try:
@@ -1146,6 +1176,7 @@ def payment_confirmation(request):
         return JsonResponse({"error": "Method not allowed"}, status=405)
 
 # Handle the payment confirmation status check
+@login_required
 def payment_confirmation_page(request):
     global payment_status  # Use the global variable
     
@@ -1177,6 +1208,7 @@ def payment_confirmation_status(request):
 
 
 # Render the payment waiting page
+@login_required
 def payment_waiting(request, ref):
     return render(request, "payment_waiting.html", {"ref": ref})
 
@@ -1336,6 +1368,7 @@ def add_device(request):
     return render(request, 'add_device.html')
 
 #################################DOWNLOAD TRANSACTIONS EXCEL##############################################
+@login_required
 def export_transactions_excel(request, range):
     # Fetch data based on the user
     usr = request.user.username
@@ -1372,6 +1405,7 @@ def export_transactions_excel(request, range):
     return response
 
 ###############################DOWNLOAD DEVICE DATA#######################################################
+@login_required
 def export_device_data(request, device_id, range):
     # Fetch data based on device_id and range_value
     data = fetch_data_with_params("deviceDataDjangoo", device_id, range)
@@ -1403,6 +1437,7 @@ def export_device_data(request, device_id, range):
     return response
 
 #######################BULK METER DATA FOR SAF###################################################
+@login_required
 def export_bulk_device_data(request):
      # Fetch data based on device_id and range_value
     data = fetch_data("bulkDeviceData")
@@ -1424,6 +1459,7 @@ def export_bulk_device_data(request):
     return response
 
 #######################AI MIGAA METER DOWNLOAD####################################################
+@login_required
 def export_meter_data(request):
     data = fetch_data("migaaMeterDownload")
 
@@ -1440,6 +1476,7 @@ def export_meter_data(request):
 
     return response
 
+@login_required
 def export_ml_dataset(request):
     dataset = fetch_data('getMeasurements')
     context = {
@@ -1447,6 +1484,7 @@ def export_ml_dataset(request):
     }
     return render(request, 'ai_data_download.html', context)
 
+@login_required
 def export_ml(request, set):
     data = fetch_measurement_data('getMeasurementData', set)
 
@@ -1464,6 +1502,7 @@ def export_ml(request, set):
 
     return response
 
+@login_required
 def fetch_measurement_data(endpoint, q):
     response = requests.get(BASE_URL + endpoint+"?q="+q, auth=AUTH)
     response.raise_for_status()
@@ -1471,6 +1510,7 @@ def fetch_measurement_data(endpoint, q):
 
 
 ########################################################GENERAL STATS######################
+
 def get_customer_statistics(x):
     customer_models = [Customer, TestCustomer, SayonaCustomer, MecCustomer]  # List all models
     total_customers = 0
@@ -1515,6 +1555,7 @@ def calculate_rar(sales_data):
     return rar
 
 @cache_page(60 * 60)
+@login_required
 def summary(request):
     customerSummary = get_customer_statistics(30)
     orgs = ['Scode', 'Welight', 'GIZ', 'Sayona', 'Mec']
