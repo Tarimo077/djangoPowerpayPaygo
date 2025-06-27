@@ -2,26 +2,45 @@
 {% load static %}
 <html lang="en">
 <head>
+    {# ---------------------------------------------------------------
+       Add <meta name="robots"> to every view except the public login.
+       --------------------------------------------------------------- #}
+
+    {# 1.  Resolve the login path dynamically so you never hard-code it  #}
+    {% url 'login' as login_url %}
+
+    {# 2.  Strip any trailing slash so "/login" and "/login/" are both covered #}
+    {% with cur=request.path|slice:":-1" if request.path.endswith('/') else request.path %}
+
+        {% if cur != login_url|slice:":-1" if login_url.endswith('/') else login_url %}
+            <meta name="robots" content="noindex, nofollow">
+        {% endif %}
+
+    {% endwith %}
+
+    {# --------------------------- everything else you already had --------------------------- #}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>
-        {% block title %}
-            Powerpay Africa
-        {% endblock %}
-    </title>
-    <!-- Include jQuery -->
+    <title>{% block title %}Powerpay Africa{% endblock %}</title>
+
+    <!-- vendor assets -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <!-- Include jQuery UI (Datepicker) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+    <link  rel="stylesheet"
+           href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-    <!-- Optional: Customize Datepicker theme -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/base/jquery-ui.min.css">
-    <link rel="icon" href="{% static 'css/favicon.ico' %}">
+    <link  rel="stylesheet"
+           href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/base/jquery-ui.min.css">
+
+    <!-- your assets -->
+    <link rel="icon"       href="{% static 'css/favicon.ico' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap"
+          rel="stylesheet">
     <script src="{% static 'js/htmx.min.js' %}" defer></script>
 </head>
+
 <body>
     <div class="greeting-bar" id="greeting-bar">
         <!-- <div id="greeting-text" style="margin-right:5px; color: #0ead00" > </div>
