@@ -2,23 +2,9 @@
 {% load static %}
 <html lang="en">
 <head>
-    {# ---------------------------------------------------------------
-       Add <meta name="robots"> to every view except the public login.
-       --------------------------------------------------------------- #}
-
-    {# 1.  Resolve the login path dynamically so you never hard-code it  #}
-    {% url 'login' as login_url %}
-
-    {# 2.  Strip any trailing slash so "/login" and "/login/" are both covered #}
-    {% with cur=request.path|slice:":-1" if request.path.endswith('/') else request.path %}
-
-        {% if cur != login_url|slice:":-1" if login_url.endswith('/') else login_url %}
-            <meta name="robots" content="noindex, nofollow">
-        {% endif %}
-
-    {% endwith %}
-
-    {# --------------------------- everything else you already had --------------------------- #}
+    {% if request.path != '/login/' %}
+    <meta name="robots" content="noindex, nofollow">
+    {% endif %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Powerpay Africa{% endblock %}</title>
